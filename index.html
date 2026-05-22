@@ -3,103 +3,180 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Barcode Check Station</title>
+<title>2de Kansje — Grading Station</title>
+<link rel="icon" type="image/png" href="NRlogo.png">
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@500;600;700;800&display=swap" rel="stylesheet">
 <style>
+:root{
+  --g1:#92D050;--g2:#70AD47;--red:#B71C1C;--red2:#B71C1C;
+  --dark:#1C2A1A;--dark2:#243320;
+}
 *{margin:0;padding:0;box-sizing:border-box}
-body{font-family:'Segoe UI',Arial,sans-serif;min-height:100vh;display:flex;align-items:center;justify-content:center;overflow:hidden}
-#overlay{position:fixed;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;transition:background .25s;background:#1a1a2e}
-#overlay.green{background:#00c853}
-#overlay.red{background:#d50000}
-#scanner-box{position:relative;z-index:10;display:flex;flex-direction:column;align-items:center;gap:16px;width:100%;padding:24px;max-height:100vh;overflow-y:auto}
-#station-label{font-size:14px;font-weight:600;letter-spacing:3px;text-transform:uppercase;color:rgba(255,255,255,.5)}
-#supplier-bar{font-size:15px;font-weight:700;color:white;background:rgba(0,0,0,.3);padding:8px 18px;border-radius:10px;display:flex;align-items:center;gap:12px}
-#supplier-bar span{opacity:.7;font-weight:400}
-#change-sup-btn{padding:5px 12px;border:1px solid rgba(255,255,255,.4);border-radius:8px;background:transparent;color:white;font-size:12px;cursor:pointer}
-#change-sup-btn:hover{background:rgba(255,255,255,.15)}
-#barcode-input{width:min(520px,90vw);height:60px;font-size:26px;font-weight:700;text-align:center;letter-spacing:4px;border:4px solid rgba(255,255,255,.3);border-radius:16px;background:rgba(255,255,255,.12);color:white;outline:none;caret-color:white}
-#barcode-input::placeholder{color:rgba(255,255,255,.35);font-size:16px;font-weight:400;letter-spacing:1px}
-#barcode-input:focus{border-color:rgba(255,255,255,.7);background:rgba(255,255,255,.18)}
-#feedback{text-align:center;width:min(800px,94vw);display:flex;flex-direction:column;align-items:center;gap:12px}
-#feedback-title{font-size:clamp(28px,5vw,60px);font-weight:900;color:white;line-height:1.1;text-shadow:0 4px 20px rgba(0,0,0,.3);display:none}
-#feedback-subtitle{font-size:clamp(15px,2.4vw,24px);font-weight:600;color:rgba(255,255,255,.93);line-height:1.55;display:none;white-space:pre-line}
-#green-msg{font-size:clamp(20px,3.5vw,40px);font-weight:800;color:white;display:none;text-align:center}
-#scan-hint{font-size:13px;color:rgba(255,255,255,.38);letter-spacing:1px}
-#barcode-display{font-size:12px;letter-spacing:3px;color:rgba(255,255,255,.4);display:none}
+body{font-family:'Montserrat','Segoe UI',Arial,sans-serif;min-height:100vh;display:flex;align-items:center;justify-content:center;overflow:hidden}
 
-/* CSV loading screen */
-#csv-loading{position:fixed;inset:0;background:#1a1a2e;display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:999999;gap:16px}
-#csv-loading p{color:white;font-size:16px;font-weight:600;letter-spacing:1px}
-#csv-loading .spinner{width:40px;height:40px;border:4px solid rgba(255,255,255,.2);border-top-color:white;border-radius:50%;animation:spin .8s linear infinite}
-#csv-status{color:rgba(255,255,255,.6);font-size:13px}
-#csv-retry-btn{padding:10px 24px;background:#00c853;color:white;border:none;border-radius:10px;font-size:15px;font-weight:800;cursor:pointer;display:none}
+/* ── Overlay states ── */
+#overlay{position:fixed;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;transition:background .3s;background:var(--dark)}
+#overlay.green{background:var(--g2)}
+#overlay.red{background:var(--red2)}
+
+/* Subtle circle decoration (brand reference) */
+#overlay::before{content:'';position:fixed;width:600px;height:600px;border-radius:50%;border:2px solid rgba(255,255,255,.06);top:-150px;right:-150px;pointer-events:none}
+#overlay::after{content:'';position:fixed;width:300px;height:300px;border-radius:50%;border:2px solid rgba(255,255,255,.05);bottom:-80px;left:-80px;pointer-events:none}
+
+#scanner-box{position:relative;z-index:10;display:flex;flex-direction:column;align-items:center;gap:18px;width:100%;padding:28px;max-height:100vh;overflow-y:auto}
+
+/* ── Station label ── */
+#station-label{font-size:11px;font-weight:700;letter-spacing:4px;text-transform:uppercase;color:rgba(255,255,255,.4);display:flex;align-items:center;gap:8px}
+#station-label::before{content:'';width:8px;height:8px;border-radius:50%;background:var(--g1);display:inline-block}
+
+/* ── Supplier bar ── */
+#supplier-bar{font-size:14px;font-weight:700;color:white;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.15);padding:8px 16px;border-radius:50px;display:flex;align-items:center;gap:12px}
+#supplier-bar span{opacity:.6;font-weight:500;font-size:13px}
+#change-sup-btn{padding:4px 12px;border:1px solid rgba(255,255,255,.3);border-radius:50px;background:transparent;color:rgba(255,255,255,.8);font-size:11px;font-weight:700;cursor:pointer;font-family:inherit;letter-spacing:.5px}
+#change-sup-btn:hover{background:rgba(255,255,255,.12);color:white}
+
+/* ── Barcode input ── */
+#barcode-input{width:min(520px,90vw);height:62px;font-size:26px;font-weight:800;text-align:center;letter-spacing:5px;border:3px solid rgba(255,255,255,.2);border-radius:16px;background:rgba(255,255,255,.08);color:white;outline:none;caret-color:var(--g1);font-family:inherit;transition:border-color .2s,background .2s}
+#barcode-input::placeholder{color:rgba(255,255,255,.3);font-size:15px;font-weight:500;letter-spacing:1px}
+#barcode-input:focus{border-color:var(--g1);background:rgba(255,255,255,.12)}
+
+/* ── Feedback ── */
+#feedback{text-align:center;width:min(820px,94vw);display:flex;flex-direction:column;align-items:center;gap:12px}
+#feedback-title{font-size:clamp(22px,4vw,48px);font-weight:800;color:white;line-height:1.15;display:none;letter-spacing:.5px}
+#feedback-subtitle{font-size:clamp(14px,2.2vw,22px);font-weight:600;color:rgba(255,255,255,.9);line-height:1.6;display:none;white-space:pre-line;max-width:700px}
+#green-msg{font-size:clamp(18px,3vw,36px);font-weight:800;color:white;display:none;text-align:center}
+#scan-hint{font-size:12px;color:rgba(255,255,255,.3);letter-spacing:1.5px;font-weight:500}
+#barcode-display{font-size:11px;letter-spacing:3px;color:rgba(255,255,255,.3);display:none;font-weight:600}
+
+/* ── CSV loading screen ── */
+#csv-loading{position:fixed;inset:0;background:var(--dark);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:999999;gap:18px}
+#csv-loading p{color:white;font-size:15px;font-weight:700;letter-spacing:1px;font-family:'Montserrat',sans-serif}
+#csv-loading .spinner{width:44px;height:44px;border:3px solid rgba(255,255,255,.15);border-top-color:var(--g1);border-radius:50%;animation:spin .75s linear infinite}
+#csv-status{color:rgba(255,255,255,.5);font-size:12px;font-weight:500}
+#csv-retry-btn{padding:11px 28px;background:var(--g1);color:var(--dark);border:none;border-radius:50px;font-size:14px;font-weight:800;cursor:pointer;display:none;font-family:inherit}
+#csv-retry-btn:hover{background:var(--g2);color:white}
+.loading-logo{width:90px;height:90px;border-radius:50%;overflow:hidden;margin-bottom:4px;border:3px solid var(--g2)}
+.loading-logo img{width:100%;height:100%;object-fit:cover}
 @keyframes spin{to{transform:rotate(360deg)}}
 
-/* Grade panel */
-#grade-panel{display:none;flex-direction:column;align-items:center;gap:10px;width:min(560px,92vw)}
-#grade-row{display:flex;gap:10px;flex-wrap:wrap;justify-content:center}
-.g-btn{padding:14px 10px;border:3px solid rgba(255,255,255,.45);border-radius:14px;background:rgba(255,255,255,.13);color:white;font-size:18px;font-weight:800;cursor:pointer;min-width:110px;display:flex;flex-direction:column;align-items:center;gap:3px;transition:background .15s}
-.g-btn .sc{font-size:11px;opacity:.65;font-weight:600}
-.g-btn:hover{background:rgba(255,255,255,.28);border-color:white}
+/* ── Grade panel ── */
+#grade-panel{display:none;flex-direction:column;align-items:center;gap:12px;width:min(580px,92vw)}
+#grade-row{display:flex;gap:8px;flex-wrap:wrap;justify-content:center}
 
-/* Escape/back button */
-#escape-btn{padding:10px 20px;border:2px solid rgba(255,255,255,.35);border-radius:12px;background:rgba(0,0,0,.25);color:rgba(255,255,255,.75);font-size:14px;font-weight:700;cursor:pointer;letter-spacing:1px;transition:all .15s;margin-top:4px}
-#escape-btn:hover{background:rgba(0,0,0,.45);border-color:rgba(255,255,255,.6);color:white}
+.g-btn{padding:14px 12px;border:2px solid rgba(255,255,255,.25);border-radius:14px;background:rgba(255,255,255,.08);color:white;font-size:16px;font-weight:800;cursor:pointer;min-width:106px;display:flex;flex-direction:column;align-items:center;gap:4px;transition:all .15s;font-family:inherit}
+.g-btn .sc{font-size:10px;opacity:.5;font-weight:700;letter-spacing:1px}
+.g-btn:hover{background:rgba(255,255,255,.18);border-color:rgba(255,255,255,.6);transform:translateY(-1px)}
 
-/* Sub panel */
-#sub-panel{display:none;flex-direction:column;align-items:center;gap:10px;width:min(500px,92vw)}
-#sub-question{font-size:16px;font-weight:700;color:white;text-align:center}
+/* Grade button colours on hover for quick visual feedback */
+.g-btn[data-g="A"]:hover{background:rgba(146,208,80,.25);border-color:var(--g1)}
+.g-btn[data-g="B"]:hover{background:rgba(56,139,221,.2);border-color:#378ADD}
+.g-btn[data-g="C"]:hover{background:rgba(239,159,39,.2);border-color:#EF9F27}
+.g-btn[data-g="D-rep"]:hover{background:rgba(232,76,61,.2);border-color:var(--red)}
+.g-btn[data-g="D-def"]:hover{background:rgba(204,56,69,.25);border-color:var(--red2)}
+
+/* ── Escape/back button ── */
+#escape-btn,#escape-btn-sub{padding:9px 20px;border:1px solid rgba(255,255,255,.2);border-radius:50px;background:transparent;color:rgba(255,255,255,.55);font-size:12px;font-weight:700;cursor:pointer;letter-spacing:1px;transition:all .15s;font-family:inherit}
+#escape-btn:hover,#escape-btn-sub:hover{background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.4);color:white}
+#escape-btn-sub{margin-top:2px}
+
+/* ── Sub panel ── */
+#sub-panel{display:none;flex-direction:column;align-items:center;gap:12px;width:min(500px,92vw)}
+#sub-question{font-size:15px;font-weight:700;color:white;text-align:center;letter-spacing:.3px}
 #sub-row{display:flex;gap:10px;flex-wrap:wrap;justify-content:center}
-.s-btn{padding:13px 16px;border:3px solid rgba(255,255,255,.45);border-radius:14px;background:rgba(255,255,255,.13);color:white;font-size:16px;font-weight:800;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:3px;transition:background .15s;min-width:120px}
-.s-btn .sc{font-size:11px;opacity:.65}
-.s-btn:hover{background:rgba(255,255,255,.28);border-color:white}
-#custom-input-wrap{display:none;flex-direction:column;align-items:center;gap:8px;width:100%}
-#custom-input{width:100%;padding:12px 16px;font-size:16px;border-radius:12px;border:none;outline:none;font-weight:600}
-#custom-confirm{padding:10px 24px;background:#00c853;color:white;border:none;border-radius:10px;font-size:15px;font-weight:800;cursor:pointer}
+.s-btn{padding:13px 18px;border:2px solid rgba(255,255,255,.25);border-radius:14px;background:rgba(255,255,255,.08);color:white;font-size:15px;font-weight:800;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:4px;transition:all .15s;min-width:130px;font-family:inherit}
+.s-btn .sc{font-size:10px;opacity:.5;font-weight:700}
+.s-btn:hover{background:rgba(255,255,255,.18);border-color:rgba(255,255,255,.6);transform:translateY(-1px)}
+#custom-input-wrap{display:none;flex-direction:column;align-items:center;gap:10px;width:100%}
+#custom-input{width:100%;padding:13px 18px;font-size:15px;border-radius:12px;border:2px solid var(--g1);outline:none;font-weight:600;font-family:inherit;color:var(--dark)}
+#custom-confirm{padding:11px 28px;background:var(--g1);color:var(--dark);border:none;border-radius:50px;font-size:14px;font-weight:800;cursor:pointer;font-family:inherit;letter-spacing:.5px}
+#custom-confirm:hover{background:var(--g2);color:white}
 
-/* Escape in sub panel */
-#escape-btn-sub{padding:8px 18px;border:2px solid rgba(255,255,255,.35);border-radius:12px;background:rgba(0,0,0,.25);color:rgba(255,255,255,.75);font-size:13px;font-weight:700;cursor:pointer;letter-spacing:1px;transition:all .15s;margin-top:2px}
-#escape-btn-sub:hover{background:rgba(0,0,0,.45);border-color:rgba(255,255,255,.6);color:white}
+/* ── Sync indicator ── */
+#sync-indicator{position:fixed;top:16px;left:50%;transform:translateX(-50%);color:white;font-size:11px;font-weight:800;padding:6px 16px;border-radius:50px;z-index:9999;display:none;letter-spacing:1px;font-family:inherit}
+#sync-indicator.syncing{display:block;background:rgba(239,159,39,.85)}
+#sync-indicator.ok{display:block;background:rgba(112,173,71,.9)}
+#sync-indicator.err{display:block;background:rgba(204,56,69,.9)}
 
-/* Sync indicator */
-#sync-indicator{position:fixed;top:16px;left:50%;transform:translateX(-50%);background:rgba(0,0,0,.5);color:white;font-size:12px;font-weight:700;padding:6px 14px;border-radius:20px;z-index:9999;display:none;letter-spacing:1px}
-#sync-indicator.syncing{display:block;background:rgba(255,165,0,.7)}
-#sync-indicator.ok{display:block;background:rgba(0,200,83,.7)}
-#sync-indicator.err{display:block;background:rgba(213,0,0,.7)}
+/* ── Data badge ── */
+#data-badge{position:fixed;bottom:106px;right:16px;background:rgba(146,208,80,.15);border:1px solid rgba(146,208,80,.4);color:rgba(255,255,255,.8);font-size:11px;font-weight:700;padding:9px 16px;border-radius:50px;z-index:9999;cursor:pointer;font-family:inherit}
+#data-badge:hover{background:rgba(146,208,80,.25);color:white}
 
-/* Data badge */
-#data-badge{position:fixed;bottom:148px;right:16px;background:rgba(0,150,255,.7);color:white;font-size:11px;font-weight:800;padding:5px 10px;border-radius:8px;z-index:9999;cursor:pointer}
-#data-badge:hover{background:rgba(0,150,255,.9)}
+/* ── Counter ── */
+#scan-counter{position:fixed;top:16px;right:16px;color:white;font-size:13px;font-weight:800;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.15);padding:7px 14px;border-radius:50px;z-index:9999;letter-spacing:.5px}
 
-/* Counter */
-#scan-counter{position:fixed;top:16px;right:16px;color:white;font-size:16px;font-weight:700;background:rgba(0,0,0,.35);padding:8px 14px;border-radius:12px;z-index:9999}
-.ctrl-btn{position:fixed;right:16px;padding:11px 16px;border:none;border-radius:12px;font-weight:700;cursor:pointer;z-index:9999;font-size:14px}
-#reset-btn{bottom:60px;background:#ff3b3b;color:white}
-#close-btn{bottom:16px;background:#333;color:white}
-#lang-ind{position:fixed;top:16px;left:16px;color:white;font-size:13px;font-weight:700;background:rgba(0,0,0,.35);padding:7px 12px;border-radius:10px;z-index:9999}
+/* ── Control buttons ── */
+.ctrl-btn{position:fixed;right:16px;padding:9px 16px;border:none;border-radius:50px;font-weight:800;cursor:pointer;z-index:9999;font-size:12px;letter-spacing:.5px;font-family:inherit}
+#reset-btn{bottom:60px;background:rgba(232,76,61,.15);color:rgba(255,255,255,.7);border:1px solid rgba(232,76,61,.35)}
+#reset-btn:hover{background:var(--red);color:white}
+#close-btn{bottom:16px;background:rgba(255,255,255,.06);color:rgba(255,255,255,.5);border:1px solid rgba(255,255,255,.12)}
+#close-btn:hover{background:rgba(255,255,255,.12);color:white}
 
-/* MODAL */
-.modal{position:fixed;inset:0;background:rgba(0,0,0,.82);display:flex;align-items:center;justify-content:center;z-index:99999;padding:16px}
-.modal-box{background:#1a1a2e;border:2px solid rgba(255,255,255,.18);border-radius:20px;padding:36px 32px;display:flex;flex-direction:column;gap:14px;align-items:center;width:min(400px,96vw)}
-.modal-box h2{color:white;font-size:20px;font-weight:800;letter-spacing:1px;text-align:center}
-.m-input{width:100%;padding:13px 16px;font-size:18px;border-radius:12px;border:none;outline:none;font-weight:700;text-align:center}
-.m-btn{padding:12px 28px;background:#00c853;color:white;border:none;border-radius:12px;font-size:17px;font-weight:800;cursor:pointer;width:100%}
-.m-btn:hover{background:#00a844}
+/* ── Lang indicator ── */
+#lang-ind{position:fixed;top:16px;left:16px;color:rgba(255,255,255,.7);font-size:11px;font-weight:800;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.15);padding:6px 12px;border-radius:50px;z-index:9999;letter-spacing:1px;cursor:pointer}
+
+/* ── MODAL ── */
+.modal{position:fixed;inset:0;background:rgba(0,0,0,.75);display:flex;align-items:center;justify-content:center;z-index:99999;padding:16px}
+.modal-box{background:var(--dark);border:1px solid rgba(255,255,255,.12);border-radius:20px;padding:36px 32px;display:flex;flex-direction:column;gap:16px;align-items:center;width:min(400px,96vw)}
+.modal-logo{width:70px;height:70px;border-radius:50%;overflow:hidden;border:3px solid var(--g2);margin-bottom:4px}
+.modal-logo img{width:100%;height:100%;object-fit:cover}
+.modal-box h2{color:white;font-size:18px;font-weight:800;letter-spacing:.5px;text-align:center}
+.m-input{width:100%;padding:13px 16px;font-size:17px;border-radius:12px;border:2px solid transparent;outline:none;font-weight:700;text-align:center;font-family:inherit;transition:border-color .2s}
+.m-input:focus{border-color:var(--g1)}
+.m-btn{padding:13px 28px;background:var(--g1);color:var(--dark);border:none;border-radius:50px;font-size:15px;font-weight:800;cursor:pointer;width:100%;font-family:inherit;letter-spacing:.5px;transition:all .15s}
+.m-btn:hover{background:var(--g2);color:white}
+
+/* ── Lang picker ── */
 .lang-grid{display:flex;gap:10px}
-.lp{padding:10px 20px;border:2px solid rgba(255,255,255,.35);border-radius:10px;background:transparent;color:white;font-size:16px;font-weight:700;cursor:pointer}
-.lp.active{background:rgba(255,255,255,.22);border-color:white}
-#sup-search{width:100%;padding:11px 14px;font-size:16px;border-radius:10px;border:none;outline:none;font-weight:600}
-#sup-list{width:100%;max-height:200px;overflow-y:auto;border-radius:10px;background:white;display:none}
-.sup-item{padding:10px 14px;cursor:pointer;font-size:15px;font-weight:600;color:#1a1a2e;border-bottom:1px solid #eee}
-.sup-item:hover{background:#e8f5e9}
+.lp{padding:10px 20px;border:2px solid rgba(255,255,255,.2);border-radius:50px;background:transparent;color:rgba(255,255,255,.7);font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;transition:all .15s}
+.lp:hover{border-color:rgba(255,255,255,.4);color:white}
+.lp.active{background:var(--g1);border-color:var(--g1);color:var(--dark)}
 
-/* offline queue badge */
-#queue-badge{position:fixed;bottom:100px;right:16px;background:rgba(255,165,0,.85);color:white;font-size:12px;font-weight:800;padding:6px 12px;border-radius:10px;z-index:9999;display:none}
+/* ── Supplier search ── */
+#sup-search{width:100%;padding:12px 16px;font-size:15px;border-radius:12px;border:2px solid transparent;outline:none;font-weight:600;font-family:inherit}
+#sup-search:focus{border-color:var(--g1)}
+#sup-list{width:100%;max-height:200px;overflow-y:auto;border-radius:12px;background:white;display:none;margin-top:-6px}
+.sup-item{padding:10px 14px;cursor:pointer;font-size:14px;font-weight:600;color:var(--dark);border-bottom:1px solid #f0f0f0;font-family:inherit}
+.sup-item:hover{background:#EAF3DE;color:var(--dark2)}
+
+/* ── Scan loading spinner ── */
+.scan-spinner{width:48px;height:48px;border:4px solid rgba(255,255,255,.2);border-top-color:white;border-radius:50%;animation:spin .75s linear infinite}
+
+/* ── Mismatch panel ── */
+#overlay.orange{background:#E65100}
+.mm-btn{display:flex;align-items:center;gap:14px;padding:14px 18px;border-radius:14px;border:2px solid rgba(255,255,255,.2);background:rgba(255,255,255,.08);color:white;cursor:pointer;font-family:inherit;text-align:left;transition:all .15s;width:100%}
+.mm-btn:hover{transform:translateY(-1px);background:rgba(255,255,255,.15);border-color:rgba(255,255,255,.4)}
+.mm-btn-green:hover{background:rgba(146,208,80,.2);border-color:var(--g1)}
+.mm-btn-amber:hover{background:rgba(239,159,39,.2);border-color:#EF9F27}
+.mm-btn-blue:hover{background:rgba(56,139,221,.2);border-color:#378ADD}
+.mm-icon{font-size:22px;flex-shrink:0}
+.mm-text{display:flex;flex-direction:column;gap:2px}
+.mm-label{font-size:14px;font-weight:800;letter-spacing:.3px}
+.mm-hint{font-size:11px;color:rgba(255,255,255,.5);font-weight:500}
+
+/* ── Offline queue badge ── */
+#queue-badge{position:fixed;bottom:100px;right:16px;background:rgba(239,159,39,.9);color:white;font-size:11px;font-weight:800;padding:5px 12px;border-radius:50px;z-index:9999;display:none;font-family:inherit}
+
+/* ── Account modal extras ── */
+.acc-list{width:100%;max-height:220px;overflow-y:auto;display:flex;flex-direction:column;gap:6px}
+.acc-item{padding:11px 16px;border-radius:12px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.15);color:white;font-size:14px;font-weight:700;cursor:pointer;text-align:left;font-family:inherit;display:flex;align-items:center;gap:10px;transition:all .15s}
+.acc-item:hover{background:rgba(146,208,80,.2);border-color:var(--g1)}
+.acc-avatar{width:32px;height:32px;border-radius:50%;background:var(--g1);color:var(--dark);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;flex-shrink:0}
+.acc-nieuw{background:transparent;border:1px dashed rgba(255,255,255,.25);color:rgba(255,255,255,.6)}
+.acc-nieuw:hover{background:rgba(255,255,255,.06);border-color:rgba(255,255,255,.4);color:white}
+.pw-hint{font-size:11px;color:rgba(255,255,255,.4);text-align:center;font-weight:500}
+.pw-hint.err{color:#ff6b6b}
+.pw-hint.ok{color:var(--g1)}
+.m-input-pw{width:100%;padding:13px 16px;font-size:17px;border-radius:12px;border:2px solid transparent;outline:none;font-weight:700;text-align:center;font-family:inherit;transition:border-color .2s;letter-spacing:3px}
+.m-input-pw:focus{border-color:var(--g1)}
+.m-input-pw.err{border-color:#ff6b6b}
+.m-input-pw.ok{border-color:var(--g1)}
 </style>
 </head>
 <body>
 
 <!-- CSV Loading Screen -->
 <div id="csv-loading">
+  <div class="loading-logo"><img src="NRlogo.png" alt="2de Kansje logo"/></div>
   <div class="spinner"></div>
   <p id="csv-status">Productdata laden...</p>
   <button id="csv-retry-btn" onclick="loadCSV()">↺ Opnieuw proberen</button>
@@ -108,6 +185,7 @@ body{font-family:'Segoe UI',Arial,sans-serif;min-height:100vh;display:flex;align
 <!-- MODALS -->
 <div class="modal" id="m-lang" style="display:none">
   <div class="modal-box">
+    <div class="modal-logo"><img src="NRlogo.png" alt="2de Kansje logo"/></div>
     <h2>Choose your language / Kies je taal</h2>
     <div class="lang-grid">
       <button class="lp" data-lang="nl">🇳🇱 NL</button>
@@ -118,33 +196,57 @@ body{font-family:'Segoe UI',Arial,sans-serif;min-height:100vh;display:flex;align
   </div>
 </div>
 
-<div class="modal" id="m-name" style="display:none">
+<!-- Account kiezen -->
+<div class="modal" id="m-account" style="display:none">
   <div class="modal-box">
-    <h2 id="mn-title">Wat is je naam?</h2>
-    <input class="m-input" id="name-inp" type="text" autocomplete="off" spellcheck="false"/>
-    <button class="m-btn" id="mn-confirm">Verder →</button>
+    <div class="modal-logo"><img src="NRlogo.png" alt="2de Kansje logo"/></div>
+    <h2 id="mac-title">Kies je account</h2>
+    <div class="acc-list" id="acc-list">
+      <div style="color:rgba(255,255,255,.4);font-size:13px;text-align:center">Laden...</div>
+    </div>
   </div>
 </div>
 
-<div class="modal" id="m-init" style="display:none">
+<!-- Wachtwoord invoeren -->
+<div class="modal" id="m-wachtwoord" style="display:none">
   <div class="modal-box">
-    <h2 id="mi-title">Wat zijn je initialen?</h2>
-    <input class="m-input" id="init-inp" type="text" maxlength="5" autocomplete="off" spellcheck="false"/>
-    <button class="m-btn" id="mi-confirm">Verder →</button>
+    <div class="modal-logo"><img src="NRlogo.png" alt="2de Kansje logo"/></div>
+    <h2 id="mpw-title">Wachtwoord</h2>
+    <div id="mpw-naam" style="color:rgba(255,255,255,.6);font-size:13px;font-weight:600"></div>
+    <input class="m-input-pw" id="pw-inp" type="password" placeholder="••••••" autocomplete="off" spellcheck="false"/>
+    <div class="pw-hint" id="pw-hint">Voer je wachtwoord in</div>
+    <button class="m-btn" id="pw-confirm">Inloggen →</button>
+    <button id="pw-back" style="background:none;border:none;color:rgba(255,255,255,.4);font-size:12px;cursor:pointer;font-family:inherit">← Terug</button>
+  </div>
+</div>
+
+<!-- Nieuw account aanmaken -->
+<div class="modal" id="m-nieuw-acc" style="display:none">
+  <div class="modal-box">
+    <div class="modal-logo"><img src="NRlogo.png" alt="2de Kansje logo"/></div>
+    <h2 id="mna-title">Nieuw account</h2>
+    <input class="m-input" id="na-naam" type="text" placeholder="Volledige naam" autocomplete="off" spellcheck="false"/>
+    <input class="m-input" id="na-init" type="text" maxlength="4" placeholder="Initialen (bv. JD)" autocomplete="off" spellcheck="false" style="text-transform:uppercase"/>
+    <input class="m-input-pw" id="na-pw" type="password" placeholder="Wachtwoord" autocomplete="off" spellcheck="false"/>
+    <input class="m-input-pw" id="na-pw2" type="password" placeholder="Herhaal wachtwoord" autocomplete="off" spellcheck="false"/>
+    <div class="pw-hint" id="na-hint">Min. 6 tekens + minimaal 1 cijfer</div>
+    <button class="m-btn" id="na-confirm">Account aanmaken →</button>
+    <button id="na-back" style="background:none;border:none;color:rgba(255,255,255,.4);font-size:12px;cursor:pointer;font-family:inherit">← Terug</button>
   </div>
 </div>
 
 <div class="modal" id="m-sup" style="display:none">
   <div class="modal-box">
+    <div class="modal-logo"><img src="NRlogo.png" alt="2de Kansje logo"/></div>
     <h2 id="ms-title">Kies leverancier</h2>
     <input id="sup-search" type="text" placeholder="Zoek of typ..." autocomplete="off" spellcheck="false"/>
     <div id="sup-list"></div>
-    <div style="color:rgba(255,255,255,.5);font-size:12px;text-align:center" id="ms-hint">Selecteer een leverancier om door te gaan</div>
+    <div style="color:rgba(255,255,255,.4);font-size:12px;text-align:center;font-weight:500" id="ms-hint">Selecteer een leverancier om door te gaan</div>
   </div>
 </div>
 
 <!-- UI -->
-<div id="lang-ind">NL</div>
+<div id="lang-ind" title="Klik om taal te wijzigen" style="cursor:pointer">🌐 Kies taal</div>
 <div id="scan-counter">Scans: 0</div>
 <div id="sync-indicator">⟳ Syncing...</div>
 <div id="queue-badge">📤 <span id="queue-count">0</span> wachtend</div>
@@ -152,17 +254,48 @@ body{font-family:'Segoe UI',Arial,sans-serif;min-height:100vh;display:flex;align
 
 <div id="overlay">
   <div id="scanner-box">
-    <div id="station-label">● Grading Check Station</div>
+    <img src="NRlogo.png" alt="2de Kansje" id="main-logo" style="width:72px;height:72px;border-radius:50%;border:3px solid var(--g2);object-fit:cover;margin-bottom:4px"/>
+    <div id="station-label">Grading Check Station</div>
     <div id="supplier-bar" style="display:none">
       <span id="ms-label">Leverancier:</span>
       <strong id="cur-supplier"></strong>
       <button id="change-sup-btn">↺ Wissel</button>
     </div>
-    <input id="barcode-input" type="text" placeholder="Scan barcode..." autocomplete="off" autocorrect="off" spellcheck="false"/>
+    <input id="barcode-input" type="text" placeholder="Scan barcode..." autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" data-lpignore="true" data-form-type="other"/>
     <div id="feedback">
       <div id="green-msg"></div>
       <div id="feedback-title"></div>
       <div id="feedback-subtitle"></div>
+    </div>
+
+    <!-- Mismatch panel -->
+    <div id="mismatch-panel" style="display:none;flex-direction:column;align-items:center;gap:14px;width:min(560px,92vw)">
+      <div id="mm-title" style="font-size:clamp(16px,2.5vw,22px);font-weight:800;color:white;text-align:center;line-height:1.4"></div>
+      <div id="mm-sub" style="font-size:13px;color:rgba(255,255,255,.6);text-align:center;font-weight:500"></div>
+      <div style="display:flex;flex-direction:column;gap:10px;width:100%">
+        <button class="mm-btn mm-btn-green" id="mm-klopt">
+          <span class="mm-icon">✅</span>
+          <div class="mm-text">
+            <div class="mm-label" id="mm-klopt-label"></div>
+            <div class="mm-hint" id="mm-klopt-hint"></div>
+          </div>
+        </button>
+        <button class="mm-btn mm-btn-amber" id="mm-wissel-scan">
+          <span class="mm-icon">🔄</span>
+          <div class="mm-text">
+            <div class="mm-label" id="mm-wissel-scan-label"></div>
+            <div class="mm-hint" id="mm-wissel-scan-hint"></div>
+          </div>
+        </button>
+        <button class="mm-btn mm-btn-blue" id="mm-wissel-standaard">
+          <span class="mm-icon">📌</span>
+          <div class="mm-text">
+            <div class="mm-label" id="mm-wissel-std-label"></div>
+            <div class="mm-hint" id="mm-wissel-std-hint"></div>
+          </div>
+        </button>
+      </div>
+      <button id="mm-escape" style="padding:8px 20px;border:1px solid rgba(255,255,255,.2);border-radius:50px;background:transparent;color:rgba(255,255,255,.5);font-size:12px;font-weight:700;cursor:pointer;font-family:inherit">⎋ Annuleren</button>
     </div>
     <div id="grade-panel">
       <div id="grade-row">
@@ -188,147 +321,35 @@ body{font-family:'Segoe UI',Arial,sans-serif;min-height:100vh;display:flex;align
     </div>
     <div id="barcode-display"></div>
     <div id="scan-hint"></div>
+    <!-- Laad spinner tijdens lookup -->
+    <div id="scan-loading" style="display:none;flex-direction:column;align-items:center;gap:12px">
+      <div class="scan-spinner"></div>
+      <div style="color:rgba(255,255,255,.6);font-size:13px;font-weight:700;letter-spacing:1px">Zoeken...</div>
+    </div>
   </div>
 </div>
 
-<audio id="alert-sound" preload="auto"><source src="Gradingsound.mp3" type="audio/mpeg"></audio>
 <button class="ctrl-btn" id="reset-btn">Nieuwe sessie</button>
 <button class="ctrl-btn" id="close-btn">Afsluiten</button>
 
 <script>
 // ═══════════════════════════════════════════════════════════
-// CONFIGURATIE — pas alleen dit aan als je iets wil wijzigen
+// CONFIGURATIE
+// ═══════════════════════════════════════════════════════════
+const FIREBASE_URL = 'https://gradingsitedata-default-rtdb.europe-west1.firebasedatabase.app';
+const SCANS_URL    = 'https://script.google.com/macros/s/AKfycbxub5myYuJOE6jF5LIFRZRmOgY0v0L0dzpAX88MGcw4RqqGalo7i6QnCZoqQDZMu4pq/exec';
 // ═══════════════════════════════════════════════════════════
 
-// Naam van je CSV bestand in dezelfde GitHub repository
-const CSV_FILENAME = 'products.csv';
-
-// Google Sheets Web App URL
-const SHEETS_URL = 'https://script.google.com/macros/s/AKfycbxub5myYuJOE6jF5LIFRZRmOgY0v0L0dzpAX88MGcw4RqqGalo7i6QnCZoqQDZMu4pq/exec';
-
-// Kolom namen die herkend worden als zoeksleutel (hoofdlettergevoelig in CSV header)
-const ID_COLS   = ['Barcode','Productcode','Artikelcode','Productcode leverancier'];
-const TAG_COL   = 'Tags';
-const GRADE_COL = 'Grading';
-
-// ═══════════════════════════════════════════════════════════
-
-// Bepaal de raw GitHub URL automatisch op basis van huidige pagina-URL
-function getCsvUrl() {
-  const loc = window.location.href;
-  // Als het een GitHub Pages URL is, bouw de raw URL op
-  if (loc.includes('github.io')) {
-    const base = loc.split('?')[0].replace(/\/?$/, '/');
-    return base + CSV_FILENAME;
-  }
-  // Lokaal testen
-  return CSV_FILENAME;
+// ── App opstarten ─────────────────────────────────────────
+function initApp() {
+  document.getElementById('csv-loading').style.display = 'none';
+  document.getElementById('data-badge').textContent = '📋 Live data';
+  startApp();
 }
 
-// ── CSV Parser ────────────────────────────────────────────
-// Verwerkt CSV correct inclusief velden met komma's tussen aanhalingstekens
-function parseCSV(text) {
-  const lines = text.replace(/\r\n/g, '\n').replace(/\r/g, '\n').split('\n');
-  if (lines.length < 2) return [];
-
-  // Detecteer scheidingsteken: puntkomma of komma
-  const firstLine = lines[0];
-  const sep = firstLine.includes(';') ? ';' : ',';
-
-  function splitLine(line) {
-    const result = [];
-    let cur = '';
-    let inQuotes = false;
-    for (let i = 0; i < line.length; i++) {
-      const ch = line[i];
-      if (ch === '"') {
-        if (inQuotes && line[i+1] === '"') { cur += '"'; i++; }
-        else inQuotes = !inQuotes;
-      } else if (ch === sep && !inQuotes) {
-        result.push(cur.trim());
-        cur = '';
-      } else {
-        cur += ch;
-      }
-    }
-    result.push(cur.trim());
-    return result;
-  }
-
-  const headers = splitLine(lines[0]).map(h => h.replace(/^\uFEFF/, '').trim());
-  const rows = [];
-
-  for (let i = 1; i < lines.length; i++) {
-    const line = lines[i].trim();
-    if (!line) continue;
-    const vals = splitLine(line);
-    const obj = {};
-    headers.forEach((h, idx) => {
-      obj[h] = vals[idx] !== undefined ? vals[idx] : '';
-    });
-    rows.push(obj);
-  }
-  return rows;
-}
-
-// ── Product data (gevuld vanuit CSV) ─────────────────────
-let productData = [];
-
-async function loadCSV() {
-  const statusEl = document.getElementById('csv-status');
-  const retryBtn = document.getElementById('csv-retry-btn');
-  const spinner  = document.querySelector('#csv-loading .spinner');
-
-  statusEl.textContent = 'Productdata laden...';
-  retryBtn.style.display = 'none';
-  spinner.style.display = 'block';
-
-  try {
-    const url = getCsvUrl();
-    // Voeg timestamp toe zodat browser niet de oude versie cached
-    const res = await fetch(url + '?v=' + Date.now());
-
-    if (!res.ok) throw new Error(`HTTP ${res.status}`);
-
-    const text = await res.text();
-    const parsed = parseCSV(text);
-
-    if (parsed.length === 0) throw new Error('CSV is leeg of onleesbaar');
-
-    productData = parsed;
-    document.getElementById('data-badge').textContent = `📋 ${productData.length} producten`;
-
-    // Verberg laadscherm en start app
-    document.getElementById('csv-loading').style.display = 'none';
-    startApp();
-
-  } catch (err) {
-    spinner.style.display = 'none';
-    statusEl.textContent = `❌ Kan CSV niet laden: ${err.message}`;
-    retryBtn.style.display = 'block';
-    console.error('CSV laad fout:', err);
-  }
-}
-
-// Herlaad data op de achtergrond (zonder laadscherm te tonen)
-async function reloadCSVSilent() {
-  try {
-    const url = getCsvUrl();
-    const res = await fetch(url + '?v=' + Date.now());
-    if (!res.ok) return;
-    const text = await res.text();
-    const parsed = parseCSV(text);
-    if (parsed.length > 0) {
-      productData = parsed;
-      document.getElementById('data-badge').textContent = `📋 ${productData.length} producten`;
-    }
-  } catch(e) { /* stil falen */ }
-}
-
-// Klik op badge herlaadt data
-document.getElementById('data-badge').addEventListener('click', async () => {
-  document.getElementById('data-badge').textContent = '📋 Laden...';
-  await reloadCSVSilent();
+// Klik op badge
+document.getElementById('data-badge').addEventListener('click', ()=>{
+  document.getElementById('data-badge').textContent = '📋 Live data';
 });
 
 // ── Suppliers ─────────────────────────────────────────────
@@ -350,6 +371,7 @@ const T = {
     resetConfirm:"Nieuwe sessie starten?",closeConfirm:"Afsluiten?",
     back:"⎋ Terug",
     syncOk:"✓ Opgeslagen",syncErr:"✗ Fout",syncing:"⟳ Opslaan...",
+    resetBtn:"Nieuwe sessie",closeBtn:"Afsluiten",liveData:"📋 Live data",
   },
   en:{
     nameQ:"What is your name?",namePh:"Enter your name...",
@@ -365,6 +387,7 @@ const T = {
     resetConfirm:"Start new session?",closeConfirm:"Close?",
     back:"⎋ Back",
     syncOk:"✓ Saved",syncErr:"✗ Error",syncing:"⟳ Saving...",
+    resetBtn:"New session",closeBtn:"Close",liveData:"📋 Live data",
   },
   ar:{
     nameQ:"ما اسمك؟",namePh:"أدخل اسمك...",
@@ -380,6 +403,7 @@ const T = {
     resetConfirm:"بدء جلسة جديدة؟",closeConfirm:"إغلاق؟",
     back:"⎋ رجوع",
     syncOk:"✓ تم الحفظ",syncErr:"✗ خطأ",syncing:"⟳ جارٍ الحفظ...",
+    resetBtn:"جلسة جديدة",closeBtn:"إغلاق",liveData:"📋 بيانات مباشرة",
   }
 };
 
@@ -389,12 +413,14 @@ const gradeWords = {A:"Perfect",B:"2dekans",C:"Cleaning","D-rep":"Repair","D-def
 let activeLang   = localStorage.getItem('activeLang') || '';
 let userName     = localStorage.getItem('userName') || '';
 let userInit     = localStorage.getItem('userInit') || '';
+let userId       = localStorage.getItem('userId') || '';
 let supplier     = localStorage.getItem('supplier') || '';
 let sessionId    = localStorage.getItem('sessionId') || genId();
 let totalScans   = parseInt(localStorage.getItem('totalScans'))||0;
 let offlineQueue = JSON.parse(localStorage.getItem('offlineQueue'))||[];
 let pendingScan  = null;
 let pendingGrade = null;
+let geselecteerdAccount = null; // tijdelijk tijdens login flow
 
 localStorage.setItem('sessionId', sessionId);
 
@@ -403,6 +429,23 @@ function genId(){
   for(let i=0;i<8;i++) id+=Math.floor(Math.random()*10);
   return id;
 }
+
+// ── Nieuwe dag detectie ───────────────────────────────────
+function todayString(){
+  const d = new Date();
+  return `${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`;
+}
+function checkNewDay(){
+  const lastDay = localStorage.getItem('lastDay');
+  const today   = todayString();
+  if(lastDay && lastDay !== today){
+    doReset(false);
+  }
+  localStorage.setItem('lastDay', today);
+}
+// Controleer bij laden én elk uur
+checkNewDay();
+setInterval(checkNewDay, 60 * 60 * 1000);
 
 // ── DOM refs ──────────────────────────────────────────────
 const overlay      = document.getElementById('overlay');
@@ -422,7 +465,6 @@ const custConfirm  = document.getElementById('custom-confirm');
 const supplierBar  = document.getElementById('supplier-bar');
 const curSupEl     = document.getElementById('cur-supplier');
 const langInd      = document.getElementById('lang-ind');
-const sound        = document.getElementById('alert-sound');
 const supSearch    = document.getElementById('sup-search');
 const supList      = document.getElementById('sup-list');
 const syncInd      = document.getElementById('sync-indicator');
@@ -436,14 +478,10 @@ function t(k){ return (T[activeLang||'nl']||T['nl'])[k]||''; }
 // ── i18n apply ────────────────────────────────────────────
 function applyLang(){
   if(!activeLang) activeLang='nl';
-  langInd.textContent = activeLang.toUpperCase();
+  const vlag = activeLang==='nl' ? '🇳🇱' : activeLang==='en' ? '🇬🇧' : activeLang==='ar' ? '🇸🇦' : '';
+  const wijzigTekst = activeLang==='en' ? 'Change language' : activeLang==='ar' ? 'تغيير اللغة' : 'Taal wijzigen';
+  langInd.textContent = vlag ? `${wijzigTekst}  ${vlag}` : '🌐 Kies taal';
   document.querySelectorAll('.lp').forEach(b=>b.classList.toggle('active',b.dataset.lang===activeLang));
-  document.getElementById('mn-title').textContent   = t('nameQ');
-  document.getElementById('name-inp').placeholder   = t('namePh');
-  document.getElementById('mn-confirm').textContent = t('next');
-  document.getElementById('mi-title').textContent   = t('initQ');
-  document.getElementById('init-inp').placeholder   = t('initPh');
-  document.getElementById('mi-confirm').textContent = t('next');
   document.getElementById('ms-title').textContent   = t('supQ');
   supSearch.placeholder = t('supPh');
   document.getElementById('ms-hint').textContent    = t('supHint');
@@ -461,36 +499,37 @@ function applyLang(){
   custConfirm.textContent = t('customOk');
   escapeBtnGrade.textContent = t('back');
   escapeBtnSub.textContent   = t('back');
+  // Knoppen rechtsonder
+  document.getElementById('reset-btn').textContent = t('resetBtn');
+  document.getElementById('close-btn').textContent = t('closeBtn');
+  document.getElementById('data-badge').textContent = t('liveData');
+  // Account modals teksten
+  document.getElementById('mac-title').textContent = activeLang==='ar' ? 'اختر حسابك' : activeLang==='en' ? 'Choose your account' : 'Kies je account';
+  document.getElementById('mpw-title').textContent = activeLang==='ar' ? 'كلمة المرور' : activeLang==='en' ? 'Password' : 'Wachtwoord';
+  document.getElementById('mna-title').textContent = activeLang==='ar' ? 'حساب جديد' : activeLang==='en' ? 'New account' : 'Nieuw account';
 }
 
 // ── Modal flow ────────────────────────────────────────────
-function showModal(id){
-  ['m-lang','m-name','m-init','m-sup'].forEach(m=>
-    document.getElementById(m).style.display = m===id ? 'flex' : 'none'
-  );
-}
-function hideAllModals(){
-  ['m-lang','m-name','m-init','m-sup'].forEach(m=>
-    document.getElementById(m).style.display='none'
-  );
-}
+const ALL_MODALS = ['m-lang','m-account','m-wachtwoord','m-nieuw-acc','m-sup'];
+function showModal(id){ ALL_MODALS.forEach(m=>{ const el=document.getElementById(m); if(el) el.style.display=m===id?'flex':'none'; }); }
+function hideAllModals(){ ALL_MODALS.forEach(m=>{ const el=document.getElementById(m); if(el) el.style.display='none'; }); }
 
 function startApp(){
   if(!activeLang){ showModal('m-lang'); return; }
   applyLang();
-  if(!userName){ showModal('m-name'); document.getElementById('name-inp').focus(); return; }
-  if(!userInit){ showModal('m-init'); document.getElementById('init-inp').focus(); return; }
+  if(!userName || !userId){
+    laadAccountsEnToon();
+    return;
+  }
   if(!supplier){ showModal('m-sup'); renderSupList(''); supSearch.value=''; supSearch.focus(); return; }
   hideAllModals();
   showSupBar();
   updateCounter(false);
   focusInput();
   flushOfflineQueue();
-  // Herlaad CSV elke 5 minuten op de achtergrond
-  setInterval(reloadCSVSilent, 5 * 60 * 1000);
 }
 
-// Lang
+// ── Lang ──────────────────────────────────────────────────
 document.querySelectorAll('.lp').forEach(b=>b.classList.toggle('active',b.dataset.lang==='nl'));
 document.querySelectorAll('.lp').forEach(b=>b.addEventListener('click',()=>{
   activeLang=b.dataset.lang;
@@ -500,29 +539,168 @@ document.getElementById('ml-confirm').addEventListener('click',()=>{
   if(!activeLang) activeLang='nl';
   localStorage.setItem('activeLang',activeLang);
   applyLang();
-  showModal('m-name');
-  document.getElementById('name-inp').focus();
+  if(userName && userId && supplier){ hideAllModals(); showSupBar(); focusInput(); return; }
+  if(userName && userId){ showModal('m-sup'); renderSupList(''); supSearch.value=''; supSearch.focus(); return; }
+  laadAccountsEnToon();
 });
 
-// Name
-document.getElementById('mn-confirm').addEventListener('click',()=>{
-  const v=document.getElementById('name-inp').value.trim();
-  if(!v) return;
-  userName=v; localStorage.setItem('userName',userName);
-  showModal('m-init'); document.getElementById('init-inp').focus();
-});
-document.getElementById('name-inp').addEventListener('keydown',e=>{if(e.key==='Enter') document.getElementById('mn-confirm').click();});
+// ── Accounts laden en tonen ───────────────────────────────
+async function laadAccountsEnToon(){
+  showModal('m-account');
+  const lijst = document.getElementById('acc-list');
+  lijst.innerHTML = '<div style="color:rgba(255,255,255,.4);font-size:13px;text-align:center">Laden...</div>';
 
-// Initials
-document.getElementById('mi-confirm').addEventListener('click',()=>{
-  const v=document.getElementById('init-inp').value.trim().toUpperCase();
-  if(!v) return;
-  userInit=v; localStorage.setItem('userInit',userInit);
-  showModal('m-sup'); renderSupList(''); supSearch.value=''; supSearch.focus();
-});
-document.getElementById('init-inp').addEventListener('keydown',e=>{if(e.key==='Enter') document.getElementById('mi-confirm').click();});
+  try {
+    const res  = await fetch(SCANS_URL + '?actie=accounts');
+    const data = await res.json();
+    lijst.innerHTML = '';
 
-// Supplier
+    if(data.accounts && data.accounts.length > 0){
+      data.accounts.forEach(acc => {
+        const btn = document.createElement('button');
+        btn.className = 'acc-item';
+        btn.innerHTML = `<div class="acc-avatar">${acc.initialen}</div><span>${acc.naam}</span>`;
+        btn.addEventListener('click', () => toonWachtwoordModal(acc));
+        lijst.appendChild(btn);
+      });
+    }
+
+    // Nieuw account knop altijd onderaan
+    const nieuw = document.createElement('button');
+    nieuw.className = 'acc-item acc-nieuw';
+    nieuw.textContent = activeLang==='ar' ? '+ حساب جديد' : activeLang==='en' ? '+ New account' : '+ Nieuw account';
+    nieuw.addEventListener('click', () => showModal('m-nieuw-acc'));
+    lijst.appendChild(nieuw);
+
+  } catch(err) {
+    lijst.innerHTML = '<div style="color:#ff6b6b;font-size:13px;text-align:center">Kan accounts niet laden</div>';
+  }
+}
+
+// ── Wachtwoord modal ──────────────────────────────────────
+function toonWachtwoordModal(acc){
+  geselecteerdAccount = acc;
+  document.getElementById('mpw-naam').textContent = acc.naam;
+  document.getElementById('pw-inp').value = '';
+  document.getElementById('pw-hint').textContent = activeLang==='ar' ? 'أدخل كلمة المرور' : activeLang==='en' ? 'Enter your password' : 'Voer je wachtwoord in';
+  document.getElementById('pw-hint').className = 'pw-hint';
+  document.getElementById('pw-inp').className = 'm-input-pw';
+  showModal('m-wachtwoord');
+  setTimeout(()=>document.getElementById('pw-inp').focus(), 100);
+}
+
+document.getElementById('pw-back').addEventListener('click', ()=>laadAccountsEnToon());
+document.getElementById('pw-inp').addEventListener('keydown', e=>{ if(e.key==='Enter') document.getElementById('pw-confirm').click(); });
+
+document.getElementById('pw-confirm').addEventListener('click', async ()=>{
+  const ww = document.getElementById('pw-inp').value;
+  if(!ww){ document.getElementById('pw-hint').textContent = activeLang==='en'?'Enter password':activeLang==='ar'?'أدخل كلمة المرور':'Wachtwoord verplicht'; return; }
+
+  document.getElementById('pw-confirm').textContent = '...';
+  document.getElementById('pw-confirm').disabled = true;
+
+  try {
+    const url = `${SCANS_URL}?actie=login&id=${encodeURIComponent(geselecteerdAccount.id)}&wachtwoord=${encodeURIComponent(ww)}`;
+    const res  = await fetch(url);
+    const data = await res.json();
+
+    if(data.status === 'ok'){
+      // Ingelogd!
+      userName  = data.naam;
+      userInit  = data.initialen;
+      userId    = data.id;
+      localStorage.setItem('userName', userName);
+      localStorage.setItem('userInit', userInit);
+      localStorage.setItem('userId',   userId);
+      document.getElementById('pw-hint').textContent = '✓';
+      document.getElementById('pw-hint').className   = 'pw-hint ok';
+      document.getElementById('pw-inp').className    = 'm-input-pw ok';
+      setTimeout(()=>{
+        showModal('m-sup'); renderSupList(''); supSearch.value=''; supSearch.focus();
+      }, 400);
+    } else {
+      document.getElementById('pw-hint').textContent = activeLang==='en'?'Incorrect password':activeLang==='ar'?'كلمة المرور غير صحيحة':'Wachtwoord onjuist';
+      document.getElementById('pw-hint').className   = 'pw-hint err';
+      document.getElementById('pw-inp').className    = 'm-input-pw err';
+      document.getElementById('pw-inp').value = '';
+      document.getElementById('pw-inp').focus();
+    }
+  } catch(err){
+    document.getElementById('pw-hint').textContent = 'Verbindingsfout — probeer opnieuw';
+    document.getElementById('pw-hint').className   = 'pw-hint err';
+  }
+
+  document.getElementById('pw-confirm').textContent = 'Inloggen →';
+  document.getElementById('pw-confirm').disabled = false;
+});
+
+// ── Nieuw account aanmaken ────────────────────────────────
+document.getElementById('na-back').addEventListener('click', ()=>laadAccountsEnToon());
+
+document.getElementById('na-pw').addEventListener('input', ()=>{
+  const pw  = document.getElementById('na-pw').value;
+  const hint = document.getElementById('na-hint');
+  if(pw.length === 0){
+    hint.textContent = 'Min. 6 tekens + minimaal 1 cijfer';
+    hint.className   = 'pw-hint';
+  } else if(pw.length < 6){
+    hint.textContent = `Nog ${6-pw.length} tekens nodig`;
+    hint.className   = 'pw-hint err';
+  } else if(!/\d/.test(pw)){
+    hint.textContent = 'Voeg minimaal 1 cijfer toe';
+    hint.className   = 'pw-hint err';
+  } else {
+    hint.textContent = '✓ Sterk genoeg';
+    hint.className   = 'pw-hint ok';
+  }
+});
+
+document.getElementById('na-confirm').addEventListener('click', async ()=>{
+  const naam  = document.getElementById('na-naam').value.trim();
+  const init  = document.getElementById('na-init').value.trim().toUpperCase();
+  const pw    = document.getElementById('na-pw').value;
+  const pw2   = document.getElementById('na-pw2').value;
+  const hint  = document.getElementById('na-hint');
+
+  if(!naam || !init){ hint.textContent='Naam en initialen verplicht'; hint.className='pw-hint err'; return; }
+  if(pw.length < 6){ hint.textContent='Wachtwoord minimaal 6 tekens'; hint.className='pw-hint err'; return; }
+  if(!/\d/.test(pw)){ hint.textContent='Minimaal 1 cijfer verplicht'; hint.className='pw-hint err'; return; }
+  if(pw !== pw2){ hint.textContent='Wachtwoorden komen niet overeen'; hint.className='pw-hint err'; return; }
+
+  document.getElementById('na-confirm').textContent = '...';
+  document.getElementById('na-confirm').disabled = true;
+
+  try {
+    const url  = `${SCANS_URL}?actie=nieuwAccount&naam=${encodeURIComponent(naam)}&initialen=${encodeURIComponent(init)}&wachtwoord=${encodeURIComponent(pw)}`;
+    const res  = await fetch(url);
+    const data = await res.json();
+
+    if(data.status === 'ok'){
+      userName = data.naam;
+      userInit = data.initialen;
+      userId   = data.id;
+      localStorage.setItem('userName', userName);
+      localStorage.setItem('userInit', userInit);
+      localStorage.setItem('userId',   userId);
+      hint.textContent = '✓ Account aangemaakt!';
+      hint.className   = 'pw-hint ok';
+      setTimeout(()=>{
+        showModal('m-sup'); renderSupList(''); supSearch.value=''; supSearch.focus();
+      }, 600);
+    } else {
+      hint.textContent = data.message || 'Fout bij aanmaken';
+      hint.className   = 'pw-hint err';
+    }
+  } catch(err){
+    hint.textContent = 'Verbindingsfout — probeer opnieuw';
+    hint.className   = 'pw-hint err';
+  }
+
+  document.getElementById('na-confirm').textContent = 'Account aanmaken →';
+  document.getElementById('na-confirm').disabled = false;
+});
+
+// ── Supplier ──────────────────────────────────────────────
 function renderSupList(q){
   const fil=suppliers.filter(s=>s.toLowerCase().includes(q.toLowerCase()));
   supList.innerHTML='';
@@ -551,17 +729,32 @@ function showSupBar(){
   supplierBar.style.display='flex';
 }
 
-// ── Product zoeken in CSV data ────────────────────────────
-function findProduct(barcode) {
-  const code = barcode.trim();
-  return productData.find(row => {
-    return ID_COLS.some(col => {
-      const val = row[col];
-      if (!val) return false;
-      // Ondersteunt meerdere barcodes per cel gescheiden door komma of puntkomma
-      return val.split(/[,;]/).map(s=>s.trim()).includes(code);
-    });
-  });
+// ── Product zoeken via Firebase ───────────────────────────
+async function findProduct(barcode, supplier) {
+  try {
+    const key = 'p_' + barcode.trim().replace(/[.#$[\]/]/g, '_');
+    const url = `${FIREBASE_URL}/producten/${key}.json`;
+    const res  = await fetch(url);
+    const data = await res.json();
+
+    if (!data) return null;
+
+    const mismatch = !!(supplier && data.lev &&
+                        supplier.trim() !== data.lev.trim());
+    return {
+      status:              'found',
+      barcode,
+      productcode:         data.pc  || '',
+      leverancier:         data.lev || '',
+      mismatch,
+      leverancier_correct: mismatch ? data.lev : '',
+      tags:                data.tag || '',
+      grading:             data.gr  || ''
+    };
+  } catch(err) {
+    console.error('Firebase fout:', err);
+    return null;
+  }
 }
 
 // ── Grading tekst ophalen per taal ───────────────────────
@@ -584,7 +777,7 @@ function showSync(state, msg){
 async function sendToSheets(row){
   showSync('syncing', t('syncing'));
   try {
-    await fetch(SHEETS_URL,{
+    await fetch(SCANS_URL,{
       method:'POST', mode:'no-cors',
       headers:{'Content-Type':'application/json'},
       body:JSON.stringify(row)
@@ -625,7 +818,7 @@ function nowTime(){
   return `${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}:${String(d.getSeconds()).padStart(2,'0')}`;
 }
 function focusInput(){
-  const anyModal=['m-lang','m-name','m-init','m-sup'].some(id=>document.getElementById(id).style.display!=='none');
+  const anyModal=ALL_MODALS.some(id=>{ const el=document.getElementById(id); return el&&el.style.display!=='none'; });
   if(anyModal||gradePanel.style.display==='flex'||subPanel.style.display==='flex') return;
   bInput.focus();
 }
@@ -654,24 +847,32 @@ escapeBtnSub.addEventListener('click', ()=>{
 // ── Display ───────────────────────────────────────────────
 function showGreen(){
   overlay.className='green';
+  document.getElementById('main-logo').style.display='none';
   greenMsg.style.display='block';
   fbTitle.style.display='none'; fbSub.style.display='none';
   bcDisp.style.display='none'; scanHintEl.style.display='none';
 }
 function showRed(product, barcode){
   overlay.className='red';
-  fbTitle.textContent = product[TAG_COL] || '';
-  fbTitle.style.display = fbTitle.textContent ? 'block' : 'none';
-  const txt = getGradingText(product[GRADE_COL] || '');
+  document.getElementById('main-logo').style.display='none';
+  // Mismatch waarschuwing heeft prioriteit
+  if(product.mismatch){
+    fbTitle.textContent = `⚠️ Let op: dit product hoort bij ${product.leverancier}`;
+    fbTitle.style.display='block';
+  } else {
+    fbTitle.textContent = product.tags || '';
+    fbTitle.style.display = fbTitle.textContent ? 'block' : 'none';
+  }
+  const txt = getGradingText(product.grading || '');
   if(txt){ fbSub.textContent=txt; fbSub.style.display='block'; fbSub.style.direction=activeLang==='ar'?'rtl':'ltr'; }
   else fbSub.style.display='none';
   greenMsg.style.display='none';
   bcDisp.textContent=barcode; bcDisp.style.display='block';
   scanHintEl.style.display='none';
-  sound.currentTime=0; sound.play().catch(()=>{});
 }
 function showIdle(){
   overlay.className='';
+  document.getElementById('main-logo').style.display='block';
   greenMsg.style.display='none'; fbTitle.style.display='none';
   fbSub.style.display='none'; bcDisp.style.display='none';
   scanHintEl.style.display='block';
@@ -721,14 +922,21 @@ custInp.addEventListener('keydown',e=>{if(e.key==='Enter') custConfirm.click();}
 async function commitScan(statusCode, statusWord, extraInfo){
   if(!pendingScan) return;
   const g = pendingGrade;
+
+  // Gebruik supplier_override als die ingesteld is (wissel voor 1 scan)
+  const gebruikteLeverancier = pendingScan.supplier_override || supplier;
+
   const row = {
-    sessionId, userName, userInit, supplier,
+    sessionId, userName, userInit,
+    supplier: gebruikteLeverancier,
     barcode: pendingScan.barcode,
     type: pendingScan.isGrading ? 'Grading' : 'Normal',
     Status_product_code: statusCode,
     Status_product_word: statusWord,
     Info_reparatie: g==='D-rep' ? extraInfo : '',
     Info_defect:    g==='D-def' ? extraInfo : '',
+    mismatch: pendingScan.mismatch ? 'Ja' : 'Nee',
+    leverancier_correct: pendingScan.leverancier_correct || '',
     date: nowDate(),
     time: nowTime()
   };
@@ -751,21 +959,146 @@ async function commitScan(statusCode, statusWord, extraInfo){
   }
 }
 
+// ── Mismatch panel ────────────────────────────────────────
+function toonMismatch(found, barcode) {
+  const gevondenLev = found.leverancier;
+  const gekozenLev  = supplier;
+
+  overlay.className = 'orange';
+  document.getElementById('main-logo').style.display='none';
+  greenMsg.style.display   = 'none';
+  fbTitle.style.display    = 'none';
+  fbSub.style.display      = 'none';
+  bcDisp.style.display     = 'none';
+  scanHintEl.style.display = 'none';
+  gradePanel.style.display = 'none';
+
+  document.getElementById('mm-title').textContent =
+    `⚠️ Let op! Dit product hoort bij:\n${gevondenLev}`;
+  document.getElementById('mm-sub').textContent =
+    `Jij werkt nu voor: ${gekozenLev}`;
+
+  // Knop 1 — doorgaan met gekozen leverancier
+  document.getElementById('mm-klopt-label').textContent =
+    `Doorgaan met ${gekozenLev}`;
+  document.getElementById('mm-klopt-hint').textContent =
+    `Product zit in mijn huidige batch — melding negeren`;
+
+  // Knop 2 — alleen deze scan onder gevonden leverancier
+  document.getElementById('mm-wissel-scan-label').textContent =
+    `Eenmalig scannen onder ${gevondenLev}`;
+  document.getElementById('mm-wissel-scan-hint').textContent =
+    `Alleen deze scan onder ${gevondenLev} — daarna terug naar ${gekozenLev}`;
+
+  // Knop 3 — overstappen naar gevonden leverancier
+  document.getElementById('mm-wissel-std-label').textContent =
+    `Overstappen naar ${gevondenLev}`;
+  document.getElementById('mm-wissel-std-hint').textContent =
+    `Zelfde als op "Wissel leverancier" klikken`;
+
+  document.getElementById('mismatch-panel').style.display = 'flex';
+
+  // Knop handlers
+  document.getElementById('mm-klopt').onclick = () => {
+    verbergMismatch();
+    // Doorgaan met gekozen leverancier — geen mismatch opslaan
+    pendingScan.mismatch = false;
+    pendingScan.leverancier_correct = '';
+    toonNaaMismatch(found, barcode);
+  };
+
+  document.getElementById('mm-wissel-scan').onclick = () => {
+    verbergMismatch();
+    // Alleen deze scan onder gevonden leverancier
+    pendingScan.supplier_override = gevondenLev;
+    toonNaaMismatch(found, barcode);
+  };
+
+  document.getElementById('mm-wissel-standaard').onclick = () => {
+    verbergMismatch();
+    // Standaard leverancier aanpassen
+    supplier = gevondenLev;
+    localStorage.setItem('supplier', supplier);
+    curSupEl.textContent = supplier;
+    pendingScan.mismatch = false;
+    pendingScan.leverancier_correct = '';
+    toonNaaMismatch(found, barcode);
+  };
+
+  document.getElementById('mm-escape').onclick = () => {
+    verbergMismatch();
+    cancelScan();
+  };
+}
+
+function verbergMismatch() {
+  document.getElementById('mismatch-panel').style.display = 'none';
+}
+
+function toonNaaMismatch(found, barcode) {
+  // Toon grading of groen scherm na mismatch keuze
+  const isGrading = !!(found && (found.tags||'').toLowerCase().includes('grading'));
+  if (isGrading) {
+    showRed(found, barcode);
+  } else {
+    showGreen();
+  }
+  showGradePanel();
+}
+
 // ── Scan handler ──────────────────────────────────────────
-function handleScan(barcode){
+let isScanning = false;
+
+async function handleScan(barcode){
   const code=barcode.trim();
   if(!code) return;
   if(gradePanel.style.display==='flex'||subPanel.style.display==='flex') return;
+  if(document.getElementById('mismatch-panel').style.display==='flex') return;
+  if(isScanning) return;
 
-  const found = findProduct(code);
-  const isGrading = !!(found && (found[TAG_COL]||'').toLowerCase().includes('grading'));
+  isScanning = true;
+  bInput.value='';
+  bInput.disabled = true;
+  bInput.placeholder='';
+  overlay.style.opacity = '0.7';
 
-  pendingScan = { barcode: code, isGrading, product: found||null };
+  greenMsg.style.display='none';
+  fbTitle.style.display='none';
+  fbSub.style.display='none';
+  scanHintEl.style.display='none';
+  bcDisp.style.display='none';
+  document.getElementById('scan-loading').style.display='flex';
+
+  const found = await findProduct(code, supplier);
+
+  document.getElementById('scan-loading').style.display='none';
+  overlay.style.opacity = '1';
+  bInput.disabled = false;
+  isScanning = false;
+
+  const isGrading = !!(found && (found.tags||'').toLowerCase().includes('grading'));
+  const mismatch  = !!(found && found.mismatch);
+
+  pendingScan = {
+    barcode: code,
+    isGrading,
+    mismatch,
+    leverancier_correct: found ? (found.leverancier_correct||'') : '',
+    leverancier: found ? (found.leverancier||'') : '',
+    product: found||null
+  };
   pendingGrade = null;
 
-  found ? showRed(found, code) : showGreen();
-  showGradePanel();
-  bInput.value='';
+  if (found && mismatch) {
+    // Toon mismatch scherm
+    toonMismatch(found, code);
+  } else if (found && isGrading) {
+    showRed(found, code);
+    showGradePanel();
+  } else {
+    showGreen();
+    showGradePanel();
+  }
 }
 
 bInput.addEventListener('keydown',e=>{ if(e.key==='Enter') handleScan(bInput.value); });
@@ -773,7 +1106,7 @@ bInput.addEventListener('change',()=>{ if(bInput.value.trim()) handleScan(bInput
 
 // ── Keyboard shortcuts ────────────────────────────────────
 document.addEventListener('keydown',e=>{
-  const anyModal=['m-lang','m-name','m-init','m-sup'].some(id=>document.getElementById(id).style.display!=='none');
+  const anyModal=ALL_MODALS.some(id=>{ const el=document.getElementById(id); return el&&el.style.display!=='none'; });
   if(anyModal) return;
 
   if(e.key==='Escape'){
@@ -809,14 +1142,15 @@ document.addEventListener('click',e=>{
 });
 
 // ── Reset ─────────────────────────────────────────────────
-function doReset(){
+function doReset(silent=false){
   sessionId=genId(); totalScans=0;
-  userName=''; userInit=''; supplier=''; offlineQueue=[];
-  ['sessionId','totalScans','offlineQueue','userName','userInit','supplier','activeLang'].forEach(k=>localStorage.removeItem(k));
+  userName=''; userInit=''; userId=''; supplier=''; offlineQueue=[];
+  ['sessionId','totalScans','offlineQueue','userName','userInit','userId','supplier'].forEach(k=>localStorage.removeItem(k));
+  localStorage.removeItem('activeLang');
   localStorage.setItem('sessionId',sessionId);
   localStorage.setItem('totalScans','0');
   localStorage.setItem('offlineQueue','[]');
-  activeLang=''; langInd.textContent='NL';
+  activeLang=''; langInd.textContent='🌐 Kies taal';
   scanCtr.textContent='Scans: 0';
   queueBadge.style.display='none';
   pendingScan=null; pendingGrade=null;
@@ -826,7 +1160,7 @@ function doReset(){
   startApp();
 }
 
-document.getElementById('reset-btn').addEventListener('click',()=>{ if(!confirm(t('resetConfirm'))) return; doReset(); });
+document.getElementById('reset-btn').addEventListener('click',()=>{ if(!confirm(t('resetConfirm'))) return; doReset(false); });
 document.getElementById('close-btn').addEventListener('click',()=>{ if(!confirm(t('closeConfirm'))) return; window.close(); });
 
 // ── Init ──────────────────────────────────────────────────
@@ -834,8 +1168,17 @@ updateQueueBadge();
 scanCtr.textContent=`Scans: ${totalScans}`;
 setInterval(flushOfflineQueue, 30000);
 
-// Start met CSV laden
-loadCSV();
+// Klik op taal-indicator → taal modal openen
+langInd.addEventListener('click',()=>{
+  const anyPanel = gradePanel.style.display==='flex' || subPanel.style.display==='flex';
+  if(anyPanel) return;
+  hideAllModals();
+  showModal('m-lang');
+  document.querySelectorAll('.lp').forEach(b=>b.classList.toggle('active', b.dataset.lang===activeLang));
+});
+
+// Start app direct — geen CSV meer nodig
+initApp();
 </script>
 </body>
 </html>
