@@ -935,7 +935,8 @@ async function commitScan(statusCode, statusWord, extraInfo){
     Status_product_word: statusWord,
     Info_reparatie: g==='D-rep' ? extraInfo : '',
     Info_defect:    g==='D-def' ? extraInfo : '',
-    mismatch: pendingScan.mismatch ? 'Ja' : 'Nee',
+    mismatch: pendingScan.mismatch ? 'Yes' : 'No',
+    not_found: pendingScan.notFound ? 'Yes' : 'No',
     leverancier_correct: pendingScan.leverancier_correct || '',
     date: nowDate(),
     time: nowTime()
@@ -1083,6 +1084,7 @@ async function handleScan(barcode){
     barcode: code,
     isGrading,
     mismatch,
+    notFound: !found,
     leverancier_correct: found ? (found.leverancier_correct||'') : '',
     leverancier: found ? (found.leverancier||'') : '',
     product: found||null
@@ -1090,10 +1092,12 @@ async function handleScan(barcode){
   pendingGrade = null;
 
   if (found && mismatch) {
-    // Toon mismatch scherm
     toonMismatch(found, code);
   } else if (found && isGrading) {
     showRed(found, code);
+    showGradePanel();
+  } else if (!found) {
+    showGreen();
     showGradePanel();
   } else {
     showGreen();
