@@ -443,8 +443,6 @@ function checkNewDay(){
   }
   localStorage.setItem('lastDay', today);
 }
-// Controleer bij laden én elk uur
-checkNewDay();
 setInterval(checkNewDay, 60 * 60 * 1000);
 
 // ── DOM refs ──────────────────────────────────────────────
@@ -1171,6 +1169,9 @@ document.getElementById('close-btn').addEventListener('click',()=>{ if(!confirm(
 updateQueueBadge();
 scanCtr.textContent=`Scans: ${totalScans}`;
 setInterval(flushOfflineQueue, 30000);
+
+// Controleer nieuwe dag nu DOM refs beschikbaar zijn
+checkNewDay();
 
 // Klik op taal-indicator → taal modal openen
 langInd.addEventListener('click',()=>{
