@@ -175,11 +175,11 @@ body{font-family:'Montserrat','Segoe UI',Arial,sans-serif;min-height:100vh;displ
 <body>
 
 <!-- CSV Loading Screen -->
-<div id="csv-loading">
+<div id="csv-loading" style="display:none">
   <div class="loading-logo"><img src="NRlogo.png" alt="2de Kansje logo"/></div>
   <div class="spinner"></div>
-  <p id="csv-status">Productdata laden...</p>
-  <button id="csv-retry-btn" onclick="loadCSV()">↺ Opnieuw proberen</button>
+  <p id="csv-status">Verbinding maken...</p>
+  <button id="csv-retry-btn" onclick="initApp()">↺ Opnieuw proberen</button>
 </div>
 
 <!-- MODALS -->
@@ -425,9 +425,18 @@ let geselecteerdAccount = null; // tijdelijk tijdens login flow
 localStorage.setItem('sessionId', sessionId);
 
 function genId(){
+  // Sessie ID — blijft hetzelfde voor de hele sessie
   let id='SC';
   for(let i=0;i<8;i++) id+=Math.floor(Math.random()*10);
   return id;
+}
+
+function genScanId(){
+  // Unieke scan ID — datum (6) + random (6) = 12 cijfers
+  const d     = new Date();
+  const datum = `${String(d.getFullYear()).slice(-2)}${String(d.getMonth()+1).padStart(2,'0')}${String(d.getDate()).padStart(2,'0')}`;
+  const rand  = String(Math.floor(Math.random() * 1000000)).padStart(6, '0');
+  return datum + rand;
 }
 
 // ── Nieuwe dag detectie ───────────────────────────────────
@@ -925,6 +934,7 @@ async function commitScan(statusCode, statusWord, extraInfo){
   const gebruikteLeverancier = pendingScan.supplier_override || supplier;
 
   const row = {
+    scanId:   genScanId(),
     sessionId, userName, userInit,
     supplier: gebruikteLeverancier,
     barcode: pendingScan.barcode,
