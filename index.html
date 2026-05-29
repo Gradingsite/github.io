@@ -1010,22 +1010,24 @@ function toonMismatch(found, barcode) {
   // Knop handlers
   document.getElementById('mm-klopt').onclick = () => {
     verbergMismatch();
-    // Doorgaan met gekozen leverancier — geen mismatch opslaan
-    pendingScan.mismatch = false;
-    pendingScan.leverancier_correct = '';
+    // Doorgaan met gekozen leverancier — mismatch YES, correcte leverancier tonen
+    pendingScan.mismatch = true;
+    pendingScan.leverancier_correct = gevondenLev;
     toonNaaMismatch(found, barcode);
   };
 
   document.getElementById('mm-wissel-scan').onclick = () => {
     verbergMismatch();
-    // Alleen deze scan onder gevonden leverancier
+    // Eenmalig onder gevonden leverancier — mismatch NO
+    pendingScan.mismatch = false;
+    pendingScan.leverancier_correct = '';
     pendingScan.supplier_override = gevondenLev;
     toonNaaMismatch(found, barcode);
   };
 
   document.getElementById('mm-wissel-standaard').onclick = () => {
     verbergMismatch();
-    // Standaard leverancier aanpassen
+    // Overstappen naar gevonden leverancier — mismatch NO
     supplier = gevondenLev;
     localStorage.setItem('supplier', supplier);
     curSupEl.textContent = supplier;
