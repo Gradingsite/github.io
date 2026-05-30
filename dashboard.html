@@ -530,7 +530,30 @@ async function haalScansOp() {
   const rows = json.table.rows.map(r => {
     const obj = {};
     r.c.forEach((cell, i) => {
-      obj[cols[i]] = cell ? String(cell.v || '') : '';
+      if (!cell || cell.v === null || cell.v === undefined) {
+        obj[cols[i]] = '';
+        return;
+      }
+      const val = String(cell.v);
+      // Datum: Date(2026,4,30) → 30-05-2026
+      if (val.startsWith('Date(') && cols[i] === 'Datum') {
+        const parts = val.replace('Date(','').replace(')','').split(',');
+        const jaar  = parts[0];
+        const maand = String(parseInt(parts[1]) + 1).padStart(2,'0');
+        const dag   = String(parts[2]).padStart(2,'0');
+        obj[cols[i]] = `${dag}-${maand}-${jaar}`;
+        return;
+      }
+      // Tijd: Date(1899,11,30,17,27,46) → 17:27:46
+      if (val.startsWith('Date(') && cols[i] === 'Tijd') {
+        const parts = val.replace('Date(','').replace(')','').split(',');
+        const uur   = String(parts[3]||0).padStart(2,'0');
+        const min   = String(parts[4]||0).padStart(2,'0');
+        const sec   = String(parts[5]||0).padStart(2,'0');
+        obj[cols[i]] = `${uur}:${min}:${sec}`;
+        return;
+      }
+      obj[cols[i]] = val;
     });
     return obj;
   });
