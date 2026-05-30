@@ -524,9 +524,9 @@ async function haalScansOp() {
   const url = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json&sheet=${encodeURIComponent(SHEET_TAB)}`;
   const res  = await fetch(url);
   const text = await res.text();
-  // Google wraps response in /*O_o*/\ngoogle.visualization.Query.setResponse({...})
   const json = JSON.parse(text.replace(/^[^{]*/, '').replace(/[^}]*$/, ''));
   const cols = json.table.cols.map(c => c.label);
+  console.log('Kolommen:', cols);
   const rows = json.table.rows.map(r => {
     const obj = {};
     r.c.forEach((cell, i) => {
@@ -534,6 +534,8 @@ async function haalScansOp() {
     });
     return obj;
   });
+  console.log('Eerste rij:', rows[0]);
+  console.log('Totaal rijen:', rows.length);
   return rows;
 }
 
@@ -542,6 +544,8 @@ function filterScansOpPeriode(scans, periode) {
   const vandaag  = `${String(nu.getDate()).padStart(2,'0')}-${String(nu.getMonth()+1).padStart(2,'0')}-${nu.getFullYear()}`;
   const gisterD  = new Date(nu); gisterD.setDate(gisterD.getDate()-1);
   const gisteren = `${String(gisterD.getDate()).padStart(2,'0')}-${String(gisterD.getMonth()+1).padStart(2,'0')}-${gisterD.getFullYear()}`;
+
+  console.log('Filter periode:', periode, '| Vandaag:', vandaag, '| Voorbeeld datum uit sheet:', scans[0]?.Datum);
 
   return scans.filter(s => {
     const datum = s.Datum || '';
