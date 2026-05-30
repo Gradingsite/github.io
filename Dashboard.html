@@ -1,0 +1,786 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>2de Kansje — Admin Dashboard</title>
+<link rel="icon" type="image/png" href="NRlogo.png">
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;font-family:'Montserrat','Segoe UI',sans-serif}
+:root{
+  --g1:#92D050;--g2:#70AD47;--red:#E84C3D;--red2:#CC3845;
+  --bg:#F5F7F2;--white:#fff;--sidebar:#1C2A1A;--sidebar2:#243320;
+  --text:#1a1a1a;--muted:#6b7280;--border:#e5e7eb;--amber:#EF9F27;
+}
+
+/* ── Login ── */
+#login-screen{position:fixed;inset:0;background:var(--sidebar);display:flex;align-items:center;justify-content:center;z-index:9999}
+.login-box{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);border-radius:20px;padding:40px 32px;width:min(360px,90vw);display:flex;flex-direction:column;align-items:center;gap:16px}
+.login-logo{width:72px;height:72px;border-radius:50%;border:3px solid var(--g2);overflow:hidden}
+.login-logo img{width:100%;height:100%;object-fit:cover}
+.login-title{color:white;font-size:20px;font-weight:800}
+.login-sub{color:rgba(255,255,255,.4);font-size:12px;font-weight:500}
+.acc-list{width:100%;max-height:220px;overflow-y:auto;display:flex;flex-direction:column;gap:6px}
+.acc-item{padding:11px 16px;border-radius:12px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.15);color:white;font-size:14px;font-weight:700;cursor:pointer;text-align:left;font-family:inherit;display:flex;align-items:center;gap:10px;transition:all .15s;width:100%}
+.acc-item:hover{background:rgba(146,208,80,.2);border-color:var(--g1)}
+.acc-avatar{width:32px;height:32px;border-radius:50%;background:var(--g1);color:var(--sidebar);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;flex-shrink:0}
+.acc-badge{margin-left:auto;background:var(--g1);color:var(--sidebar);font-size:10px;font-weight:800;padding:2px 8px;border-radius:20px}
+.pw-wrap{width:100%;display:flex;flex-direction:column;gap:10px}
+.pw-inp{width:100%;padding:13px 16px;font-size:17px;border-radius:12px;border:2px solid transparent;outline:none;font-weight:700;text-align:center;font-family:inherit;letter-spacing:3px;transition:border-color .2s}
+.pw-inp:focus{border-color:var(--g1)}
+.pw-inp.err{border-color:var(--red)}
+.pw-hint{font-size:12px;color:rgba(255,255,255,.4);text-align:center;font-weight:500}
+.pw-hint.err{color:#ff6b6b}
+.login-btn{width:100%;padding:13px;background:var(--g1);color:var(--sidebar);border:none;border-radius:50px;font-size:15px;font-weight:800;cursor:pointer;font-family:inherit;transition:all .15s}
+.login-btn:hover{background:var(--g2);color:white}
+.back-btn{background:none;border:none;color:rgba(255,255,255,.4);font-size:12px;cursor:pointer;font-family:inherit}
+.no-admin-msg{color:#ff6b6b;font-size:13px;text-align:center;font-weight:600}
+
+/* ── Dashboard layout ── */
+#dashboard{display:none;height:100vh;display:grid;grid-template-columns:220px 1fr;grid-template-rows:100vh}
+.sidebar{background:var(--sidebar);display:flex;flex-direction:column;height:100vh;position:sticky;top:0}
+.sidebar-logo{padding:20px 16px;border-bottom:1px solid rgba(255,255,255,.08);display:flex;align-items:center;gap:10px}
+.logo-circle{width:38px;height:38px;border-radius:50%;overflow:hidden;border:2px solid var(--g2);flex-shrink:0}
+.logo-circle img{width:100%;height:100%;object-fit:cover}
+.logo-text{color:white;font-weight:800;font-size:14px}
+.logo-sub{color:rgba(255,255,255,.4);font-size:10px;font-weight:500}
+.nav{padding:12px 8px;flex:1;overflow-y:auto}
+.nav-section{color:rgba(255,255,255,.3);font-size:10px;font-weight:700;letter-spacing:1.5px;padding:10px 8px 4px;margin-top:6px}
+.nav-item{display:flex;align-items:center;gap:10px;padding:9px 10px;border-radius:8px;color:rgba(255,255,255,.6);font-size:13px;font-weight:600;cursor:pointer;margin-bottom:2px;transition:all .15s;border:none;background:transparent;width:100%;text-align:left;font-family:inherit}
+.nav-item:hover{background:rgba(255,255,255,.08);color:white}
+.nav-item.active{background:var(--g1);color:var(--sidebar)}
+.nav-item i{font-size:16px;width:18px;text-align:center;flex-shrink:0}
+.sidebar-footer{padding:16px;border-top:1px solid rgba(255,255,255,.08)}
+.user-pill{display:flex;align-items:center;gap:10px}
+.user-avatar{width:32px;height:32px;border-radius:50%;background:var(--g1);color:var(--sidebar);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;flex-shrink:0}
+.user-name{color:white;font-size:12px;font-weight:700;flex:1}
+.user-rol{color:rgba(255,255,255,.4);font-size:10px}
+.logout-btn{background:none;border:none;color:rgba(255,255,255,.4);cursor:pointer;font-size:16px;padding:4px}
+.logout-btn:hover{color:white}
+
+/* ── Main ── */
+.main{display:flex;flex-direction:column;height:100vh;overflow:hidden;background:var(--bg)}
+.topbar{background:var(--white);border-bottom:1px solid var(--border);padding:0 24px;height:56px;display:flex;align-items:center;gap:12px;flex-shrink:0}
+.page-title-bar{font-size:16px;font-weight:800;color:var(--text)}
+.tb-right{display:flex;align-items:center;gap:8px;margin-left:auto}
+.period-btn{padding:6px 14px;border:1px solid var(--border);border-radius:20px;background:var(--white);font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;color:var(--muted);transition:all .15s}
+.period-btn.active{background:var(--sidebar);color:var(--g1);border-color:var(--sidebar)}
+.period-btn:hover:not(.active){background:var(--bg)}
+.refresh-btn{width:34px;height:34px;border-radius:8px;border:1px solid var(--border);background:var(--white);display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--muted);font-size:16px;transition:all .15s}
+.refresh-btn:hover{background:var(--bg);color:var(--text)}
+.refresh-btn.spin i{animation:spin .6s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+.content{padding:20px 24px;overflow-y:auto;flex:1}
+
+/* ── Pages ── */
+.page{display:none}
+.page.active{display:block}
+
+/* ── Stats grid ── */
+.stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:16px}
+.stat-card{background:var(--white);border:1px solid var(--border);border-radius:12px;padding:16px}
+.stat-label{font-size:11px;color:var(--muted);margin-bottom:6px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;display:flex;align-items:center;justify-content:space-between}
+.stat-icon{width:28px;height:28px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:14px}
+.icon-green{background:#EAF3DE;color:#3B6D11}
+.icon-red{background:#FCEBEB;color:var(--red2)}
+.icon-blue{background:#E6F1FB;color:#185FA5}
+.icon-amber{background:#FAEEDA;color:#854F0B}
+.icon-purple{background:#F3EEFF;color:#6B3FA0}
+.stat-val{font-size:26px;font-weight:800;color:var(--text)}
+.stat-delta{font-size:11px;margin-top:4px;color:var(--muted);font-weight:600}
+
+/* ── Cards ── */
+.cards-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px}
+.cards-row-3{display:grid;grid-template-columns:2fr 1fr;gap:12px;margin-bottom:16px}
+.card{background:var(--white);border:1px solid var(--border);border-radius:12px;padding:16px}
+.card-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+.card-title{font-size:13px;font-weight:800;color:var(--text);display:flex;align-items:center;gap:6px}
+.card-title i{color:var(--g2)}
+
+/* ── Bar chart ── */
+.bar-row{display:flex;align-items:center;gap:8px;margin-bottom:8px}
+.bar-label{font-size:11px;color:var(--muted);width:65px;font-weight:600;flex-shrink:0}
+.bar-track{flex:1;height:8px;background:var(--bg);border-radius:4px;overflow:hidden}
+.bar-fill{height:100%;border-radius:4px;background:var(--g1);transition:width .4s}
+.bar-fill.r{background:var(--red)}
+.bar-fill.a{background:var(--amber)}
+.bar-fill.b{background:#378ADD}
+.bar-fill.p{background:#8B5CF6}
+.bar-pct{font-size:11px;color:var(--text);width:36px;text-align:right;font-weight:700}
+.bar-count{font-size:10px;color:var(--muted);width:28px;text-align:right}
+
+/* ── Scan tabel ── */
+.scan-table{width:100%;border-collapse:collapse;font-size:12px}
+.scan-table th{text-align:left;padding:6px 8px;color:var(--muted);font-weight:700;font-size:10px;text-transform:uppercase;letter-spacing:.5px;border-bottom:1px solid var(--border)}
+.scan-table td{padding:7px 8px;border-bottom:1px solid var(--border);color:var(--text);vertical-align:middle}
+.scan-table tr:last-child td{border:none}
+.scan-table tr:hover td{background:var(--bg)}
+.grade-badge{font-size:10px;padding:2px 8px;border-radius:20px;font-weight:700;white-space:nowrap}
+.grade-A{background:#EAF3DE;color:#27500A}
+.grade-B{background:#E6F1FB;color:#0C447C}
+.grade-B3{background:#F3EEFF;color:#6B3FA0}
+.grade-C{background:#FAEEDA;color:#633806}
+.grade-Drep{background:#FFF3CD;color:#854F0B}
+.grade-Ddef{background:#FCEBEB;color:#791F1F}
+
+/* ── Medewerker tabel ── */
+.mdw-row{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--border);font-size:12px}
+.mdw-row:last-child{border:none}
+.mdw-avatar{width:28px;height:28px;border-radius:50%;background:var(--sidebar);color:var(--g1);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:800;flex-shrink:0}
+.mdw-naam{flex:1;font-weight:700;color:var(--text)}
+.mdw-count{color:var(--muted);font-weight:600;margin-right:8px}
+.mdw-bar{width:80px;height:6px;background:var(--bg);border-radius:3px;overflow:hidden}
+.mdw-bar-fill{height:100%;background:var(--g1);border-radius:3px}
+
+/* ── Leverancier tabel ── */
+.lev-row{display:flex;align-items:center;gap:10px;padding:7px 0;border-bottom:1px solid var(--border);font-size:12px}
+.lev-row:last-child{border:none}
+.lev-init{width:28px;height:28px;border-radius:6px;background:var(--sidebar);color:var(--g1);display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:800;flex-shrink:0}
+.lev-naam{flex:1;color:var(--text);font-weight:600}
+.lev-count{color:var(--muted);font-weight:600}
+
+/* ── Uur grafiek ── */
+.uur-chart{display:flex;align-items:flex-end;gap:3px;height:80px;padding-top:4px}
+.uur-bar-wrap{display:flex;flex-direction:column;align-items:center;flex:1;gap:3px}
+.uur-bar{width:100%;background:var(--g1);border-radius:3px 3px 0 0;min-height:2px;transition:height .3s}
+.uur-label{font-size:9px;color:var(--muted);font-weight:600}
+
+/* ── Account beheer ── */
+.acc-table{width:100%;border-collapse:collapse;font-size:13px}
+.acc-table th{text-align:left;padding:8px 12px;color:var(--muted);font-weight:700;font-size:11px;text-transform:uppercase;letter-spacing:.5px;border-bottom:1px solid var(--border);background:var(--bg)}
+.acc-table td{padding:10px 12px;border-bottom:1px solid var(--border);color:var(--text);vertical-align:middle}
+.acc-table tr:last-child td{border:none}
+.acc-table tr:hover td{background:var(--bg)}
+.rol-badge{font-size:10px;padding:2px 8px;border-radius:20px;font-weight:700}
+.rol-admin{background:#EAF3DE;color:#27500A}
+.rol-user{background:var(--bg);color:var(--muted);border:1px solid var(--border)}
+.action-btn{padding:5px 10px;border-radius:6px;font-size:11px;font-weight:700;cursor:pointer;font-family:inherit;border:1px solid var(--border);background:var(--white);color:var(--text);transition:all .15s;margin-right:4px}
+.action-btn:hover{background:var(--bg)}
+.action-btn.danger{color:var(--red2);border-color:var(--red2)}
+.action-btn.danger:hover{background:#FCEBEB}
+.action-btn.primary{background:var(--sidebar);color:var(--g1);border-color:var(--sidebar)}
+.add-acc-btn{padding:9px 18px;background:var(--g1);color:var(--sidebar);border:none;border-radius:8px;font-size:13px;font-weight:800;cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:6px;transition:all .15s}
+.add-acc-btn:hover{background:var(--g2);color:white}
+
+/* ── Modal ── */
+.modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.5);display:flex;align-items:center;justify-content:center;z-index:9999;display:none}
+.modal-bg.open{display:flex}
+.modal-box{background:white;border-radius:16px;padding:28px;width:min(420px,90vw);display:flex;flex-direction:column;gap:14px}
+.modal-title{font-size:16px;font-weight:800;color:var(--text)}
+.modal-input{width:100%;padding:10px 14px;border:1.5px solid var(--border);border-radius:8px;font-size:14px;font-family:inherit;outline:none;transition:border-color .2s}
+.modal-input:focus{border-color:var(--g1)}
+.modal-label{font-size:11px;color:var(--muted);font-weight:700;margin-bottom:3px}
+.modal-btns{display:flex;gap:8px;justify-content:flex-end;margin-top:4px}
+.modal-btn{padding:9px 20px;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;border:none;transition:all .15s}
+.modal-btn.primary{background:var(--sidebar);color:var(--g1)}
+.modal-btn.secondary{background:var(--bg);color:var(--text);border:1px solid var(--border)}
+.modal-error{color:var(--red);font-size:12px;font-weight:600;display:none}
+
+/* ── Loading / empty ── */
+.loading{text-align:center;padding:32px;color:var(--muted);font-size:13px;font-weight:600}
+.empty{text-align:center;padding:32px;color:var(--muted);font-size:13px}
+
+/* ── Responsive ── */
+@media(max-width:768px){
+  #dashboard{grid-template-columns:1fr}
+  .sidebar{display:none}
+  .stats-grid{grid-template-columns:repeat(2,1fr)}
+  .cards-row,.cards-row-3{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+
+<!-- LOGIN SCREEN -->
+<div id="login-screen">
+  <div class="login-box">
+    <div class="login-logo"><img src="NRlogo.png" alt="Logo"/></div>
+    <div class="login-title">Admin Dashboard</div>
+    <div class="login-sub">2de Kansje — Intern portaal</div>
+
+    <div id="login-accounts" style="width:100%">
+      <div class="acc-list" id="acc-lijst"><div class="loading">Laden...</div></div>
+    </div>
+
+    <div id="login-pw" style="display:none;width:100%">
+      <div class="pw-wrap">
+        <div id="login-naam" style="color:rgba(255,255,255,.7);font-size:13px;font-weight:700;text-align:center"></div>
+        <input class="pw-inp" id="pw-inp" type="password" placeholder="••••••" autocomplete="off"/>
+        <div class="pw-hint" id="pw-hint">Voer je wachtwoord in</div>
+        <button class="login-btn" id="login-btn">Inloggen →</button>
+        <button class="back-btn" id="back-btn">← Terug</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- DASHBOARD -->
+<div id="dashboard" style="display:none">
+  <div class="sidebar">
+    <div class="sidebar-logo">
+      <div class="logo-circle"><img src="NRlogo.png" alt="Logo"/></div>
+      <div>
+        <div class="logo-text">2de Kansje</div>
+        <div class="logo-sub">Admin Dashboard</div>
+      </div>
+    </div>
+    <nav class="nav">
+      <div class="nav-section">OVERZICHT</div>
+      <button class="nav-item active" data-page="overview"><i class="ti ti-home"></i>Dashboard</button>
+      <button class="nav-item" data-page="scans"><i class="ti ti-barcode"></i>Alle scans</button>
+      <div class="nav-section">BEHEER</div>
+      <button class="nav-item" data-page="accounts"><i class="ti ti-users"></i>Accounts</button>
+    </nav>
+    <div class="sidebar-footer">
+      <div class="user-pill">
+        <div class="user-avatar" id="sb-avatar"></div>
+        <div>
+          <div class="user-name" id="sb-naam"></div>
+          <div class="user-rol">Admin</div>
+        </div>
+        <button class="logout-btn" id="logout-btn" title="Uitloggen"><i class="ti ti-logout"></i></button>
+      </div>
+    </div>
+  </div>
+
+  <div class="main">
+    <div class="topbar">
+      <div class="page-title-bar" id="topbar-title">Dashboard</div>
+      <div class="tb-right">
+        <button class="period-btn active" data-period="vandaag">Vandaag</button>
+        <button class="period-btn" data-period="gisteren">Gisteren</button>
+        <button class="period-btn" data-period="week">7 dagen</button>
+        <button class="refresh-btn" id="refresh-btn" title="Verversen"><i class="ti ti-refresh"></i></button>
+      </div>
+    </div>
+
+    <div class="content">
+
+      <!-- OVERVIEW PAGE -->
+      <div class="page active" id="page-overview">
+        <div class="stats-grid" id="stats-grid">
+          <div class="stat-card"><div class="stat-label">Totaal scans<div class="stat-icon icon-green"><i class="ti ti-barcode"></i></div></div><div class="stat-val" id="st-totaal">—</div><div class="stat-delta" id="st-totaal-d"></div></div>
+          <div class="stat-card"><div class="stat-label">3de kansje<div class="stat-icon icon-purple"><i class="ti ti-camera"></i></div></div><div class="stat-val" id="st-b3">—</div><div class="stat-delta" id="st-b3-d"></div></div>
+          <div class="stat-card"><div class="stat-label">Gem. tijd/scan<div class="stat-icon icon-blue"><i class="ti ti-clock"></i></div></div><div class="stat-val" id="st-gemtijd">—</div><div class="stat-delta">seconden gemiddeld</div></div>
+          <div class="stat-card"><div class="stat-label">Mismatches<div class="stat-icon icon-amber"><i class="ti ti-alert-triangle"></i></div></div><div class="stat-val" id="st-mismatch">—</div><div class="stat-delta" id="st-mismatch-d"></div></div>
+        </div>
+
+        <div class="cards-row">
+          <div class="card">
+            <div class="card-header"><div class="card-title"><i class="ti ti-chart-bar"></i>Grade verdeling</div></div>
+            <div id="grade-bars"><div class="loading">Laden...</div></div>
+          </div>
+          <div class="card">
+            <div class="card-header"><div class="card-title"><i class="ti ti-clock"></i>Scans per uur</div></div>
+            <div class="uur-chart" id="uur-chart"></div>
+          </div>
+        </div>
+
+        <div class="cards-row">
+          <div class="card">
+            <div class="card-header"><div class="card-title"><i class="ti ti-users"></i>Scans per medewerker</div></div>
+            <div id="mdw-list"><div class="loading">Laden...</div></div>
+          </div>
+          <div class="card">
+            <div class="card-header"><div class="card-title"><i class="ti ti-building-store"></i>Top leveranciers</div></div>
+            <div id="lev-list"><div class="loading">Laden...</div></div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-header"><div class="card-title"><i class="ti ti-clock"></i>Recente scans</div></div>
+          <div style="overflow-x:auto">
+            <table class="scan-table">
+              <thead><tr><th>ScanID</th><th>Barcode</th><th>Medewerker</th><th>Leverancier</th><th>Grade</th><th>Tijd</th></tr></thead>
+              <tbody id="recente-scans"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- SCANS PAGE -->
+      <div class="page" id="page-scans">
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title"><i class="ti ti-barcode"></i>Alle scans</div>
+            <input type="text" id="scan-search" placeholder="Zoek op barcode, medewerker..." style="padding:6px 12px;border:1px solid var(--border);border-radius:8px;font-size:12px;font-family:inherit;outline:none;width:220px"/>
+          </div>
+          <div style="overflow-x:auto">
+            <table class="scan-table">
+              <thead><tr><th>ScanID</th><th>Datum</th><th>Tijd</th><th>Barcode</th><th>Medewerker</th><th>Leverancier</th><th>Grade</th><th>Info</th><th>Mismatch</th></tr></thead>
+              <tbody id="alle-scans"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- ACCOUNTS PAGE -->
+      <div class="page" id="page-accounts">
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title"><i class="ti ti-users"></i>Accounts beheren</div>
+            <button class="add-acc-btn" id="nieuw-acc-btn"><i class="ti ti-plus"></i>Nieuw account</button>
+          </div>
+          <table class="acc-table">
+            <thead><tr><th>Naam</th><th>Initialen</th><th>Rol</th><th>Aangemaakt</th><th>Laatste login</th><th>Acties</th></tr></thead>
+            <tbody id="acc-tbody"></tbody>
+          </table>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- MODALS -->
+<div class="modal-bg" id="modal-nieuw">
+  <div class="modal-box">
+    <div class="modal-title">Nieuw account aanmaken</div>
+    <div><div class="modal-label">Volledige naam</div><input class="modal-input" id="m-naam" type="text" placeholder="Jan de Vries" autocomplete="off"/></div>
+    <div><div class="modal-label">Initialen</div><input class="modal-input" id="m-init" type="text" maxlength="4" placeholder="JD" autocomplete="off" style="text-transform:uppercase"/></div>
+    <div><div class="modal-label">Wachtwoord</div><input class="modal-input" id="m-pw" type="password" placeholder="Min. 6 tekens + 1 cijfer" autocomplete="off"/></div>
+    <div><div class="modal-label">Rol</div>
+      <select class="modal-input" id="m-rol"><option value="user">Medewerker</option><option value="admin">Admin</option></select>
+    </div>
+    <div class="modal-error" id="m-error"></div>
+    <div class="modal-btns">
+      <button class="modal-btn secondary" id="modal-nieuw-cancel">Annuleren</button>
+      <button class="modal-btn primary" id="modal-nieuw-ok">Aanmaken</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-bg" id="modal-reset">
+  <div class="modal-box">
+    <div class="modal-title">Wachtwoord resetten</div>
+    <div id="reset-naam" style="font-size:13px;color:var(--muted)"></div>
+    <div><div class="modal-label">Nieuw wachtwoord</div><input class="modal-input" id="r-pw" type="text" placeholder="Tijdelijk wachtwoord" autocomplete="off"/></div>
+    <div class="modal-error" id="r-error"></div>
+    <div class="modal-btns">
+      <button class="modal-btn secondary" id="modal-reset-cancel">Annuleren</button>
+      <button class="modal-btn primary" id="modal-reset-ok">Resetten</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const SCANS_URL = 'https://script.google.com/macros/s/AKfycbxub5myYuJOE6jF5LIFRZRmOgY0v0L0dzpAX88MGcw4RqqGalo7i6QnCZoqQDZMu4pq/exec';
+
+// ── State ────────────────────────────────────────────────
+let adminId   = localStorage.getItem('adminId')   || '';
+let adminWw   = localStorage.getItem('adminWw')   || '';
+let adminNaam = localStorage.getItem('adminNaam') || '';
+let adminInit = localStorage.getItem('adminInit') || '';
+let huidigePeriode = 'vandaag';
+let alleScans = [];
+let geselecteerdAcc = null;
+
+// ── Auto-login als sessie beschikbaar ────────────────────
+if (adminId && adminWw) {
+  document.getElementById('login-screen').style.display = 'none';
+  document.getElementById('dashboard').style.display = 'grid';
+  document.getElementById('sb-naam').textContent = adminNaam;
+  document.getElementById('sb-avatar').textContent = adminInit;
+  laadData();
+}
+
+// ── Login flow ───────────────────────────────────────────
+async function laadAccounts() {
+  try {
+    const res  = await fetch(SCANS_URL + '?actie=accounts');
+    const data = await res.json();
+    const lijst = document.getElementById('acc-lijst');
+    lijst.innerHTML = '';
+    if (!data.accounts || data.accounts.length === 0) {
+      lijst.innerHTML = '<div style="color:rgba(255,255,255,.4);font-size:13px;text-align:center">Geen accounts gevonden</div>';
+      return;
+    }
+    data.accounts.forEach(acc => {
+      if (acc.rol !== 'admin') return; // alleen admins tonen
+      const btn = document.createElement('button');
+      btn.className = 'acc-item';
+      btn.innerHTML = `<div class="acc-avatar">${acc.initialen}</div><span>${acc.naam}</span><span class="acc-badge">Admin</span>`;
+      btn.addEventListener('click', () => toonPwVeld(acc));
+      lijst.appendChild(btn);
+    });
+    if (lijst.innerHTML === '') {
+      lijst.innerHTML = '<div style="color:rgba(255,255,255,.4);font-size:13px;text-align:center">Geen admin accounts gevonden</div>';
+    }
+  } catch(err) {
+    document.getElementById('acc-lijst').innerHTML = '<div style="color:#ff6b6b;font-size:13px;text-align:center">Verbindingsfout</div>';
+  }
+}
+
+function toonPwVeld(acc) {
+  geselecteerdAcc = acc;
+  document.getElementById('login-accounts').style.display = 'none';
+  document.getElementById('login-pw').style.display = 'block';
+  document.getElementById('login-naam').textContent = acc.naam;
+  document.getElementById('pw-inp').value = '';
+  document.getElementById('pw-hint').textContent = 'Voer je wachtwoord in';
+  document.getElementById('pw-hint').className = 'pw-hint';
+  setTimeout(() => document.getElementById('pw-inp').focus(), 100);
+}
+
+document.getElementById('back-btn').addEventListener('click', () => {
+  document.getElementById('login-pw').style.display = 'none';
+  document.getElementById('login-accounts').style.display = 'block';
+});
+
+document.getElementById('pw-inp').addEventListener('keydown', e => { if(e.key === 'Enter') document.getElementById('login-btn').click(); });
+
+document.getElementById('login-btn').addEventListener('click', async () => {
+  const ww = document.getElementById('pw-inp').value;
+  if (!ww) return;
+  document.getElementById('login-btn').textContent = '...';
+  document.getElementById('login-btn').disabled = true;
+
+  try {
+    const url  = `${SCANS_URL}?actie=login&id=${encodeURIComponent(geselecteerdAcc.id)}&wachtwoord=${encodeURIComponent(ww)}`;
+    const res  = await fetch(url);
+    const data = await res.json();
+
+    if (data.status === 'ok' && data.rol === 'admin') {
+      adminId   = geselecteerdAcc.id;
+      adminWw   = ww;
+      adminNaam = data.naam;
+      adminInit = data.initialen;
+      openDashboard();
+    } else if (data.status === 'ok') {
+      document.getElementById('pw-hint').textContent = 'Geen admin rechten';
+      document.getElementById('pw-hint').className = 'pw-hint err';
+      document.getElementById('pw-inp').className = 'pw-inp err';
+    } else {
+      document.getElementById('pw-hint').textContent = 'Wachtwoord onjuist';
+      document.getElementById('pw-hint').className = 'pw-hint err';
+      document.getElementById('pw-inp').className = 'pw-inp err';
+      document.getElementById('pw-inp').value = '';
+      document.getElementById('pw-inp').focus();
+    }
+  } catch(err) {
+    document.getElementById('pw-hint').textContent = 'Verbindingsfout';
+    document.getElementById('pw-hint').className = 'pw-hint err';
+  }
+
+  document.getElementById('login-btn').textContent = 'Inloggen →';
+  document.getElementById('login-btn').disabled = false;
+});
+
+function openDashboard() {
+  localStorage.setItem('adminId',   adminId);
+  localStorage.setItem('adminWw',   adminWw);
+  localStorage.setItem('adminNaam', adminNaam);
+  localStorage.setItem('adminInit', adminInit);
+  document.getElementById('login-screen').style.display = 'none';
+  document.getElementById('dashboard').style.display = 'grid';
+  document.getElementById('sb-naam').textContent = adminNaam;
+  document.getElementById('sb-avatar').textContent = adminInit;
+  laadData();
+}
+
+document.getElementById('logout-btn').addEventListener('click', () => {
+  localStorage.removeItem('adminId');
+  localStorage.removeItem('adminWw');
+  localStorage.removeItem('adminNaam');
+  localStorage.removeItem('adminInit');
+  window.location.href = 'index.html';
+});
+
+// ── Navigatie ────────────────────────────────────────────
+document.querySelectorAll('.nav-item[data-page]').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById('page-' + btn.dataset.page).classList.add('active');
+    const titels = {overview:'Dashboard', scans:'Alle scans', accounts:'Accounts'};
+    document.getElementById('topbar-title').textContent = titels[btn.dataset.page] || '';
+    if (btn.dataset.page === 'accounts') laadAccountsBeheer();
+  });
+});
+
+// ── Periodes ─────────────────────────────────────────────
+document.querySelectorAll('.period-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.period-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    huidigePeriode = btn.dataset.period;
+    laadData();
+  });
+});
+
+document.getElementById('refresh-btn').addEventListener('click', () => {
+  const btn = document.getElementById('refresh-btn');
+  btn.classList.add('spin');
+  laadData().finally(() => btn.classList.remove('spin'));
+});
+
+// ── Data laden ───────────────────────────────────────────
+async function laadData() {
+  try {
+    const url  = `${SCANS_URL}?actie=adminGetScans&adminId=${encodeURIComponent(adminId)}&adminWw=${encodeURIComponent(adminWw)}&periode=${huidigePeriode}`;
+    const res  = await fetch(url);
+    const data = await res.json();
+    console.log('API response:', data);
+    if (data.status !== 'ok') { console.error('API fout:', data); return; }
+    alleScans = data.scans || [];
+    console.log('Scans geladen:', alleScans.length, 'headers:', data.headers);
+    renderOverview();
+    renderAlleScans();
+  } catch(err) {
+    console.error('Data laad fout:', err);
+  }
+}
+
+function renderOverview() {
+  const scans = alleScans;
+  const totaal = scans.length;
+
+  document.getElementById('st-totaal').textContent = totaal;
+  document.getElementById('st-b3').textContent = scans.filter(s => s.Status_code === 'B3').length;
+  document.getElementById('st-mismatch').textContent = scans.filter(s => s.Mismatch === 'Yes').length;
+
+  // Gemiddelde tijd tussen scans
+  const tijden = scans.map(s => s.Tijd).filter(Boolean).sort();
+  if (tijden.length >= 2) {
+    let totalSec = 0, count = 0;
+    for (let i = 1; i < tijden.length; i++) {
+      const a = tijdNaarSec(tijden[i-1]);
+      const b = tijdNaarSec(tijden[i]);
+      const diff = b - a;
+      if (diff > 0 && diff < 3600) { totalSec += diff; count++; }
+    }
+    document.getElementById('st-gemtijd').textContent = count > 0 ? Math.round(totalSec/count) + 's' : '—';
+  } else {
+    document.getElementById('st-gemtijd').textContent = '—';
+  }
+
+  // Grade verdeling — gebruikt Status_code
+  const grades = {A:0,B:0,B3:0,C:0,'D-rep':0,'D-def':0};
+  scans.forEach(s => { const g = s.Status_code; if(grades[g] !== undefined) grades[g]++; });
+  const gradeLabels = {A:'Perfect',B:'2dekans',B3:'3dekans',C:'Schoonmaak','D-rep':'Reparatie','D-def':'Defect'};
+  const gradeKleuren = {A:'',B:'b',B3:'p',C:'a','D-rep':'a','D-def':'r'};
+  const maxG = Math.max(...Object.values(grades), 1);
+  document.getElementById('grade-bars').innerHTML = Object.entries(grades).map(([g,n]) =>
+    `<div class="bar-row">
+      <div class="bar-label">${gradeLabels[g]}</div>
+      <div class="bar-track"><div class="bar-fill ${gradeKleuren[g]}" style="width:${Math.round(n/maxG*100)}%"></div></div>
+      <div class="bar-pct">${totaal>0?Math.round(n/totaal*100):0}%</div>
+      <div class="bar-count">${n}</div>
+    </div>`
+  ).join('');
+
+  // Uur grafiek
+  const uurTelling = Array(24).fill(0);
+  scans.forEach(s => {
+    if (s.Tijd) { const u = parseInt(s.Tijd.split(':')[0]); if(!isNaN(u)) uurTelling[u]++; }
+  });
+  const maxU = Math.max(...uurTelling, 1);
+  const uurChart = document.getElementById('uur-chart');
+  uurChart.innerHTML = '';
+  for (let u = 6; u <= 22; u++) {
+    const h = Math.max(Math.round(uurTelling[u]/maxU*76), uurTelling[u]>0?4:2);
+    const wrap = document.createElement('div');
+    wrap.className = 'uur-bar-wrap';
+    wrap.innerHTML = `<div class="uur-bar" style="height:${h}px" title="${uurTelling[u]} scans om ${u}:00"></div><div class="uur-label">${u}</div>`;
+    uurChart.appendChild(wrap);
+  }
+
+  // Medewerkers — gebruikt Naam + Initialen
+  const mdwMap = {};
+  scans.forEach(s => {
+    const n = s.Naam || s.Initialen || '?';
+    const i = s.Initialen || '?';
+    if (!mdwMap[n]) mdwMap[n] = {naam:n, init:i, count:0};
+    mdwMap[n].count++;
+  });
+  const mdwLijst = Object.values(mdwMap).sort((a,b) => b.count-a.count).slice(0,8);
+  const maxM = Math.max(...mdwLijst.map(m=>m.count), 1);
+  document.getElementById('mdw-list').innerHTML = mdwLijst.length === 0 ? '<div class="empty">Geen data</div>' :
+    mdwLijst.map(m => `<div class="mdw-row">
+      <div class="mdw-avatar">${m.init}</div>
+      <div class="mdw-naam">${m.naam}</div>
+      <div class="mdw-count">${m.count}</div>
+      <div class="mdw-bar"><div class="mdw-bar-fill" style="width:${Math.round(m.count/maxM*100)}%"></div></div>
+    </div>`).join('');
+
+  // Leveranciers
+  const levMap = {};
+  scans.forEach(s => {
+    const l = s.Leverancier || '?';
+    if (!levMap[l]) levMap[l] = 0;
+    levMap[l]++;
+  });
+  const levLijst = Object.entries(levMap).sort((a,b) => b[1]-a[1]).slice(0,8);
+  document.getElementById('lev-list').innerHTML = levLijst.length === 0 ? '<div class="empty">Geen data</div>' :
+    levLijst.map(([l,n]) => `<div class="lev-row">
+      <div class="lev-init">${l.slice(0,3)}</div>
+      <div class="lev-naam">${l}</div>
+      <div class="lev-count">${n}</div>
+    </div>`).join('');
+
+  // Recente scans (laatste 15)
+  const recente = [...scans].reverse().slice(0,15);
+  document.getElementById('recente-scans').innerHTML = recente.length === 0
+    ? '<tr><td colspan="6" class="empty">Geen scans</td></tr>'
+    : recente.map(s => {
+        const g = s.Status_code || '';
+        const cls = 'grade-' + g.replace('-','');
+        const label = {A:'Perfect',B:'2dekans',B3:'3dekans',C:'Schoon','D-rep':'Reparatie','D-def':'Defect'}[g] || g;
+        return `<tr>
+          <td style="font-family:monospace;font-size:11px">${s.ScanID||''}</td>
+          <td>${s.Barcode||''}</td>
+          <td>${s.Naam||s.Initialen||''}</td>
+          <td>${s.Leverancier||''}</td>
+          <td><span class="grade-badge ${cls}">${label}</span></td>
+          <td>${s.Tijd||''}</td>
+        </tr>`;
+      }).join('');
+}
+
+function renderAlleScans() {
+  const q = (document.getElementById('scan-search')?.value||'').toLowerCase();
+  const gefilterd = q ? alleScans.filter(s =>
+    (s.Barcode||'').toLowerCase().includes(q) ||
+    (s.Naam||'').toLowerCase().includes(q) ||
+    (s.Leverancier||'').toLowerCase().includes(q) ||
+    (s.ScanID||'').toLowerCase().includes(q)
+  ) : alleScans;
+
+  document.getElementById('alle-scans').innerHTML = gefilterd.length === 0
+    ? '<tr><td colspan="9" class="empty">Geen scans gevonden</td></tr>'
+    : [...gefilterd].reverse().map(s => {
+        const g = s.Status_code || '';
+        const cls = 'grade-' + g.replace('-','');
+        const label = {A:'Perfect',B:'2dekans',B3:'3dekans',C:'Schoon','D-rep':'Reparatie','D-def':'Defect'}[g] || g;
+        const info = s.Info_reparatie || s.Info_defect || '';
+        return `<tr>
+          <td style="font-family:monospace;font-size:11px">${s.ScanID||''}</td>
+          <td>${s.Datum||''}</td>
+          <td>${s.Tijd||''}</td>
+          <td>${s.Barcode||''}</td>
+          <td>${s.Naam||''}</td>
+          <td>${s.Leverancier||''}</td>
+          <td><span class="grade-badge ${cls}">${label}</span></td>
+          <td style="max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${info}">${info}</td>
+          <td>${s.Mismatch==='Yes'?'⚠️':''}</td>
+        </tr>`;
+      }).join('');
+}
+
+document.getElementById('scan-search')?.addEventListener('input', renderAlleScans);
+
+// ── Accounts beheer ──────────────────────────────────────
+async function laadAccountsBeheer() {
+  const url  = `${SCANS_URL}?actie=adminGetAccounts&adminId=${encodeURIComponent(adminId)}&adminWw=${encodeURIComponent(adminWw)}`;
+  const res  = await fetch(url);
+  const data = await res.json();
+  if (data.status !== 'ok') return;
+
+  const tbody = document.getElementById('acc-tbody');
+  tbody.innerHTML = data.accounts.map(acc => `
+    <tr data-id="${acc.id}" data-naam="${acc.naam}">
+      <td><b>${acc.naam}</b></td>
+      <td>${acc.initialen}</td>
+      <td><span class="rol-badge ${acc.rol==='admin'?'rol-admin':'rol-user'}">${acc.rol==='admin'?'Admin':'Medewerker'}</span></td>
+      <td>${formatDatum(acc.aangemaakt)}</td>
+      <td>${formatDatum(acc.laatstLogin)}</td>
+      <td>
+        <button class="action-btn" onclick="openReset('${acc.id}','${acc.naam}')">🔑 Reset ww</button>
+        ${acc.id !== adminId ? `<button class="action-btn danger" onclick="verwijderAcc('${acc.id}','${acc.naam}')">🗑 Verwijder</button>` : ''}
+      </td>
+    </tr>
+  `).join('');
+}
+
+function formatDatum(iso) {
+  if (!iso) return '—';
+  try { return new Date(iso).toLocaleDateString('nl-NL', {day:'2-digit',month:'2-digit',year:'numeric'}); }
+  catch { return iso.slice(0,10); }
+}
+
+// Nieuw account
+document.getElementById('nieuw-acc-btn').addEventListener('click', () => {
+  document.getElementById('m-naam').value = '';
+  document.getElementById('m-init').value = '';
+  document.getElementById('m-pw').value = '';
+  document.getElementById('m-rol').value = 'user';
+  document.getElementById('m-error').style.display = 'none';
+  document.getElementById('modal-nieuw').classList.add('open');
+});
+document.getElementById('modal-nieuw-cancel').addEventListener('click', () => document.getElementById('modal-nieuw').classList.remove('open'));
+document.getElementById('modal-nieuw-ok').addEventListener('click', async () => {
+  const naam = document.getElementById('m-naam').value.trim();
+  const init = document.getElementById('m-init').value.trim().toUpperCase();
+  const pw   = document.getElementById('m-pw').value;
+  const rol  = document.getElementById('m-rol').value;
+  const err  = document.getElementById('m-error');
+
+  if (!naam || !init || !pw) { err.textContent='Alle velden verplicht'; err.style.display='block'; return; }
+  if (pw.length < 6) { err.textContent='Min. 6 tekens'; err.style.display='block'; return; }
+  if (!/\d/.test(pw)) { err.textContent='Min. 1 cijfer verplicht'; err.style.display='block'; return; }
+
+  const url = `${SCANS_URL}?actie=adminNieuw&adminId=${encodeURIComponent(adminId)}&adminWw=${encodeURIComponent(adminWw)}&naam=${encodeURIComponent(naam)}&initialen=${encodeURIComponent(init)}&wachtwoord=${encodeURIComponent(pw)}&rol=${rol}`;
+  const res = await fetch(url);
+  const data = await res.json();
+  if (data.status === 'ok') {
+    document.getElementById('modal-nieuw').classList.remove('open');
+    laadAccountsBeheer();
+  } else {
+    err.textContent = data.message || 'Fout';
+    err.style.display = 'block';
+  }
+});
+
+// Reset wachtwoord
+function openReset(id, naam) {
+  document.getElementById('reset-naam').textContent = naam;
+  document.getElementById('r-pw').value = '';
+  document.getElementById('r-error').style.display = 'none';
+  document.getElementById('modal-reset').classList.add('open');
+  document.getElementById('modal-reset-ok').dataset.targetId = id;
+}
+document.getElementById('modal-reset-cancel').addEventListener('click', () => document.getElementById('modal-reset').classList.remove('open'));
+document.getElementById('modal-reset-ok').addEventListener('click', async () => {
+  const targetId = document.getElementById('modal-reset-ok').dataset.targetId;
+  const nieuwWw  = document.getElementById('r-pw').value.trim();
+  const err      = document.getElementById('r-error');
+  if (!nieuwWw) { err.textContent='Voer een wachtwoord in'; err.style.display='block'; return; }
+
+  const url = `${SCANS_URL}?actie=adminResetWw&adminId=${encodeURIComponent(adminId)}&adminWw=${encodeURIComponent(adminWw)}&targetId=${encodeURIComponent(targetId)}&nieuwWw=${encodeURIComponent(nieuwWw)}`;
+  const res = await fetch(url);
+  const data = await res.json();
+  if (data.status === 'ok') {
+    document.getElementById('modal-reset').classList.remove('open');
+    alert(`✓ Wachtwoord van ${document.getElementById('reset-naam').textContent} gereset naar: ${nieuwWw}`);
+  } else {
+    err.textContent = data.message || 'Fout';
+    err.style.display = 'block';
+  }
+});
+
+// Verwijder account
+async function verwijderAcc(id, naam) {
+  if (!confirm(`Account "${naam}" verwijderen? Dit kan niet ongedaan worden.`)) return;
+  const url = `${SCANS_URL}?actie=adminVerwijder&adminId=${encodeURIComponent(adminId)}&adminWw=${encodeURIComponent(adminWw)}&targetId=${encodeURIComponent(id)}`;
+  const res = await fetch(url);
+  const data = await res.json();
+  if (data.status === 'ok') { laadAccountsBeheer(); }
+  else { alert('Fout: ' + (data.message||'onbekend')); }
+}
+
+// ── Helpers ──────────────────────────────────────────────
+function tijdNaarSec(tijdStr) {
+  const parts = (tijdStr||'').split(':');
+  if (parts.length < 2) return 0;
+  return parseInt(parts[0])*3600 + parseInt(parts[1])*60 + (parseInt(parts[2])||0);
+}
+
+// ── Init ─────────────────────────────────────────────────
+laadAccounts();
+</script>
+</body>
+</html>
