@@ -369,7 +369,9 @@
 <div id="jsonp-container" style="display:none"></div>
 
 <script>
-const SCANS_URL = 'https://script.google.com/macros/s/AKfycbxub5myYuJOE6jF5LIFRZRmOgY0v0L0dzpAX88MGcw4RqqGalo7i6QnCZoqQDZMu4pq/exec';
+const SCANS_URL  = 'https://script.google.com/macros/s/AKfycbxub5myYuJOE6jF5LIFRZRmOgY0v0L0dzpAX88MGcw4RqqGalo7i6QnCZoqQDZMu4pq/exec';
+const SHEET_ID   = '1Bke9Hu4xqrRGhewjrBPO5CrJznugsBecth6QYIwn25M';
+const SHEET_TAB  = 'Scans';
 
 // ── State ────────────────────────────────────────────────
 let adminId   = localStorage.getItem('adminId')   || '';
@@ -516,9 +518,6 @@ document.getElementById('refresh-btn').addEventListener('click', () => {
   btn.classList.add('spin');
   laadData().finally(() => btn.classList.remove('spin'));
 });
-
-const SHEET_ID   = '1Bke9Hu4xqrRGhewjrBPO5CrJznugsBecth6QYIwn25M';
-const SHEET_TAB  = 'Scans';
 
 // ── Sheets data ophalen ──────────────────────────────────
 async function haalScansOp() {
