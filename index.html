@@ -114,7 +114,31 @@ body{font-family:'Montserrat','Segoe UI',Arial,sans-serif;min-height:100vh;displ
 /* ── Lang indicator ── */
 #lang-ind{position:fixed;top:16px;left:16px;color:rgba(255,255,255,.7);font-size:11px;font-weight:800;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.15);padding:6px 12px;border-radius:50px;z-index:9999;letter-spacing:1px;cursor:pointer}
 
-/* ── MODAL ── */
+#m-camera{position:fixed;inset:0;background:rgba(0,0,0,.85);display:none;align-items:center;justify-content:center;z-index:99999;padding:16px}
+#m-camera .cam-box{background:var(--dark);border:1px solid rgba(255,255,255,.12);border-radius:20px;padding:24px;display:flex;flex-direction:column;gap:14px;align-items:center;width:min(520px,96vw);max-height:96vh;overflow-y:auto}
+#m-camera h2{color:white;font-size:17px;font-weight:800;text-align:center}
+#cam-beschrijving{width:100%;padding:12px 16px;font-size:15px;border-radius:12px;border:2px solid transparent;outline:none;font-weight:600;font-family:inherit;resize:none;height:88px;transition:border-color .2s}
+#cam-beschrijving:focus{border-color:var(--g1)}
+#cam-beschrijving.ingevuld{border-color:var(--g1)}
+#cam-stap2{width:100%;display:none;flex-direction:column;align-items:center;gap:12px}
+#cam-preview{width:100%;max-width:460px;border-radius:12px;background:#000;display:block}
+.cam-fotos{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;width:100%}
+.cam-foto-wrap{position:relative;width:100px;height:100px}
+.cam-foto-wrap img{width:100%;height:100%;object-fit:cover;border-radius:8px;border:2px solid var(--g1)}
+.cam-foto-del{position:absolute;top:-6px;right:-6px;width:20px;height:20px;background:var(--red);border:none;border-radius:50%;color:white;font-size:12px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-weight:800}
+.cam-hint{font-size:12px;color:rgba(255,255,255,.4);text-align:center}
+.cam-btns{display:flex;gap:10px;width:100%;flex-wrap:wrap;justify-content:center}
+.cam-btn{padding:11px 20px;border:none;border-radius:50px;font-size:13px;font-weight:800;cursor:pointer;font-family:inherit}
+.cam-btn-groen{background:var(--g1);color:var(--dark)}
+.cam-btn-groen:hover{background:var(--g2);color:white}
+.cam-btn-groen:disabled{opacity:.4;cursor:not-allowed}
+.cam-btn-wit{background:rgba(255,255,255,.1);color:white;border:1px solid rgba(255,255,255,.2)}
+.cam-btn-wit:hover{background:rgba(255,255,255,.2)}
+.cam-btn-wit:disabled{opacity:.4;cursor:not-allowed}
+.cam-btn-rood{background:rgba(232,76,61,.15);color:rgba(255,255,255,.7);border:1px solid rgba(232,76,61,.3)}
+.cam-btn-rood:hover{background:var(--red);color:white}
+#cam-foto-teller{font-size:12px;color:rgba(255,255,255,.5);font-weight:600}
+.cam-stap-label{font-size:11px;font-weight:800;letter-spacing:2px;color:rgba(255,255,255,.35);text-transform:uppercase}
 .modal{position:fixed;inset:0;background:rgba(0,0,0,.75);display:flex;align-items:center;justify-content:center;z-index:99999;padding:16px}
 .modal-box{background:var(--dark);border:1px solid rgba(255,255,255,.12);border-radius:20px;padding:36px 32px;display:flex;flex-direction:column;gap:16px;align-items:center;width:min(400px,96vw)}
 .modal-logo{width:70px;height:70px;border-radius:50%;overflow:hidden;border:3px solid var(--g2);margin-bottom:4px}
@@ -182,7 +206,56 @@ body{font-family:'Montserrat','Segoe UI',Arial,sans-serif;min-height:100vh;displ
   <button id="csv-retry-btn" onclick="initApp()">↺ Opnieuw proberen</button>
 </div>
 
+<!-- Camera modal voor 3de kansje -->
+<div id="m-camera">
+  <div class="cam-box">
+    <div class="modal-logo"><img src="NRlogo.png" alt="2de Kansje logo"/></div>
+    <h2>3de Kansje — Schade vastleggen</h2>
+
+    <!-- Stap 1: Beschrijving -->
+    <div id="cam-stap1-wrap" style="width:100%">
+      <div class="cam-stap-label">Stap 1 — Beschrijf de schade</div>
+      <textarea id="cam-beschrijving" placeholder="Wat is er beschadigd? Waar zit de schade?"></textarea>
+      <div style="margin-top:10px;text-align:center">
+        <button class="cam-btn cam-btn-groen" id="cam-stap1-verder" disabled>Verder → Foto's maken</button>
+      </div>
+    </div>
+
+    <!-- Stap 2: Fotos (verschijnt na stap 1) -->
+    <div id="cam-stap2" style="display:none;width:100%;flex-direction:column;align-items:center;gap:12px">
+      <div class="cam-stap-label">Stap 2 — Maak foto's (min. 1, max. 3)</div>
+      <video id="cam-preview" autoplay playsinline></video>
+      <canvas id="cam-canvas" style="display:none"></canvas>
+      <div class="cam-fotos" id="cam-fotos"></div>
+      <div id="cam-foto-teller">0 / 3 foto's</div>
+      <div class="cam-hint" id="cam-hint">Maak minimaal 1 foto</div>
+      <button class="cam-btn cam-btn-wit" id="cam-foto-btn">📷 Foto maken</button>
+    </div>
+
+    <div class="cam-btns">
+      <button class="cam-btn cam-btn-groen" id="cam-bevestig-btn" disabled style="display:none">✓ Bevestigen</button>
+      <button class="cam-btn cam-btn-rood" id="cam-annuleer-btn">⎋ Annuleren</button>
+    </div>
+  </div>
+</div>
+
 <!-- MODALS -->
+<!-- Zebra Browser Print waarschuwing -->
+<div class="modal" id="m-zebra" style="display:none">
+  <div class="modal-box">
+    <div class="modal-logo"><img src="NRlogo.png" alt="2de Kansje logo"/></div>
+    <div style="font-size:32px">🦓</div>
+    <h2 id="mz-warn"></h2>
+    <button class="m-btn" id="mz-ok"></button>
+    <button id="mz-help-btn" style="background:none;border:none;color:rgba(255,255,255,.5);font-size:13px;cursor:pointer;font-family:inherit;text-decoration:underline"></button>
+    <div id="mz-help" style="display:none;width:100%;text-align:center">
+      <p id="mz-help-txt" style="color:rgba(255,255,255,.7);font-size:13px;margin-bottom:10px"></p>
+      <img src="uitlegzebraprint.png" alt="Zebra uitleg" style="width:100%;border-radius:10px;border:1px solid rgba(255,255,255,.2)"/>
+      <img src="grotereafbeeldingzebraprinter.png" alt="Zebra printer afbeelding" style="width:100%;border-radius:10px;border:1px solid rgba(255,255,255,.2);margin-top:8px"/>
+    </div>
+  </div>
+</div>
+
 <div class="modal" id="m-lang" style="display:none">
   <div class="modal-box">
     <div class="modal-logo"><img src="NRlogo.png" alt="2de Kansje logo"/></div>
@@ -301,9 +374,10 @@ body{font-family:'Montserrat','Segoe UI',Arial,sans-serif;min-height:100vh;displ
       <div id="grade-row">
         <button class="g-btn" data-g="A"><span class="sc">1</span><span id="gl-A"></span></button>
         <button class="g-btn" data-g="B"><span class="sc">2</span><span id="gl-B"></span></button>
-        <button class="g-btn" data-g="C"><span class="sc">3</span><span id="gl-C"></span></button>
-        <button class="g-btn" data-g="D-rep"><span class="sc">4</span><span id="gl-D"></span></button>
-        <button class="g-btn" data-g="D-def"><span class="sc">5</span><span id="gl-E"></span></button>
+        <button class="g-btn" data-g="B3"><span class="sc">3</span><span id="gl-B3"></span></button>
+        <button class="g-btn" data-g="C"><span class="sc">4</span><span id="gl-C"></span></button>
+        <button class="g-btn" data-g="D-rep"><span class="sc">5</span><span id="gl-D"></span></button>
+        <button class="g-btn" data-g="D-def"><span class="sc">6</span><span id="gl-E"></span></button>
       </div>
       <button id="escape-btn">⎋ Terug</button>
     </div>
@@ -363,7 +437,7 @@ const T = {
     supQ:"Kies leverancier",supPh:"Zoek of typ...",supHint:"Selecteer een leverancier",supLabel:"Leverancier:",supChange:"↺ Wissel",
     scanHint:"Scan of typ een barcode en druk op Enter",
     green:"U kunt dit product graden zoals u normaal ook doet",
-    grades:["Perfect","2dekans","Schoonmaak","Reparatie","Defect"],
+    grades:["Perfect","2dekans","3dekans","Schoonmaak","Reparatie","Defect"],
     repQ:"Reparatie reden:",repGiven:"Reden al gegeven",repCustom:"Anders...",
     defQ:"Defect reden:",defGiven:"Defect al gegeven",defCustom:"Anders...",
     customPh:"Typ reden...",customOk:"Bevestigen",
@@ -372,6 +446,10 @@ const T = {
     back:"⎋ Terug",
     syncOk:"✓ Opgeslagen",syncErr:"✗ Fout",syncing:"⟳ Opslaan...",
     resetBtn:"Nieuwe sessie",closeBtn:"Afsluiten",liveData:"📋 Live data",
+    zebraWarn:"Let op: start voor de sessie Zebra Browser Print op.",
+    zebraBtn:"Ik kan hem niet vinden, wat nu?",
+    zebraOk:"Begrepen, doorgaan →",
+    zebraHelp:"Klik op de zwart-witte Zebra icon onder in je taakbalk.",
   },
   en:{
     nameQ:"What is your name?",namePh:"Enter your name...",
@@ -379,7 +457,7 @@ const T = {
     supQ:"Choose supplier",supPh:"Search or type...",supHint:"Select a supplier",supLabel:"Supplier:",supChange:"↺ Switch",
     scanHint:"Scan or type a barcode and press Enter",
     green:"You can grade this product as you normally would",
-    grades:["Perfect","2nd chance","Cleaning","Repair","Defect"],
+    grades:["Perfect","2nd chance","3rd chance","Cleaning","Repair","Defect"],
     repQ:"Repair reason:",repGiven:"Reason already given",repCustom:"Other...",
     defQ:"Defect reason:",defGiven:"Defect already given",defCustom:"Other...",
     customPh:"Type reason...",customOk:"Confirm",
@@ -387,6 +465,10 @@ const T = {
     resetConfirm:"Start new session?",closeConfirm:"Close?",
     back:"⎋ Back",
     syncOk:"✓ Saved",syncErr:"✗ Error",syncing:"⟳ Saving...",
+    zebraWarn:"Warning: start Zebra Browser Print before your session.",
+    zebraBtn:"I can't find it, what now?",
+    zebraOk:"Got it, continue →",
+    zebraHelp:"Click the black and white Zebra icon in your taskbar.",
     resetBtn:"New session",closeBtn:"Close",liveData:"📋 Live data",
   },
   ar:{
@@ -395,7 +477,7 @@ const T = {
     supQ:"اختر المورد",supPh:"ابحث أو اكتب...",supHint:"اختر موردًا",supLabel:"المورد:",supChange:"↺ تغيير",
     scanHint:"امسح الباركود واضغط Enter",
     green:"يمكنك تصنيف هذا المنتج كما تفعل عادةً",
-    grades:["ممتاز","فرصة ثانية","تنظيف","إصلاح","معطوب"],
+    grades:["ممتاز","فرصة ثانية","فرصة ثالثة","تنظيف","إصلاح","معطوب"],
     repQ:"سبب الإصلاح:",repGiven:"السبب معطى",repCustom:"أخرى...",
     defQ:"سبب العطل:",defGiven:"العطل معطى",defCustom:"أخرى...",
     customPh:"اكتب السبب...",customOk:"تأكيد",
@@ -403,11 +485,15 @@ const T = {
     resetConfirm:"بدء جلسة جديدة؟",closeConfirm:"إغلاق؟",
     back:"⎋ رجوع",
     syncOk:"✓ تم الحفظ",syncErr:"✗ خطأ",syncing:"⟳ جارٍ الحفظ...",
+    zebraWarn:"تنبيه: شغّل Zebra Browser Print قبل بدء الجلسة.",
+    zebraBtn:"لا أجده، ماذا أفعل؟",
+    zebraOk:"حسناً، متابعة →",
+    zebraHelp:"انقر على أيقونة Zebra بالأبيض والأسود في شريط المهام.",
     resetBtn:"جلسة جديدة",closeBtn:"إغلاق",liveData:"📋 بيانات مباشرة",
   }
 };
 
-const gradeWords = {A:"Perfect",B:"2dekans",C:"Cleaning","D-rep":"Repair","D-def":"Defect"};
+const gradeWords = {A:"Perfect",B:"2dekans",B3:"3dekans",C:"Cleaning","D-rep":"Repair","D-def":"Defect"};
 
 // ── State ─────────────────────────────────────────────────
 let activeLang   = localStorage.getItem('activeLang') || '';
@@ -497,11 +583,12 @@ function applyLang(){
   scanHintEl.textContent = t('scanHint');
   greenMsg.textContent   = t('green');
   const gl = t('grades');
-  document.getElementById('gl-A').textContent = gl[0];
-  document.getElementById('gl-B').textContent = gl[1];
-  document.getElementById('gl-C').textContent = gl[2];
-  document.getElementById('gl-D').textContent = gl[3];
-  document.getElementById('gl-E').textContent = gl[4];
+  document.getElementById('gl-A').textContent  = gl[0];
+  document.getElementById('gl-B').textContent  = gl[1];
+  document.getElementById('gl-B3').textContent = gl[2];
+  document.getElementById('gl-C').textContent  = gl[3];
+  document.getElementById('gl-D').textContent  = gl[4];
+  document.getElementById('gl-E').textContent  = gl[5];
   custInp.placeholder = t('customPh');
   custConfirm.textContent = t('customOk');
   escapeBtnGrade.textContent = t('back');
@@ -517,7 +604,7 @@ function applyLang(){
 }
 
 // ── Modal flow ────────────────────────────────────────────
-const ALL_MODALS = ['m-lang','m-account','m-wachtwoord','m-nieuw-acc','m-sup'];
+const ALL_MODALS = ['m-lang','m-account','m-wachtwoord','m-nieuw-acc','m-sup','m-zebra'];
 function showModal(id){ ALL_MODALS.forEach(m=>{ const el=document.getElementById(m); if(el) el.style.display=m===id?'flex':'none'; }); }
 function hideAllModals(){ ALL_MODALS.forEach(m=>{ const el=document.getElementById(m); if(el) el.style.display='none'; }); }
 
@@ -572,12 +659,11 @@ async function laadAccountsEnToon(){
       });
     }
 
-    // Nieuw account knop altijd onderaan
-    const nieuw = document.createElement('button');
-    nieuw.className = 'acc-item acc-nieuw';
-    nieuw.textContent = activeLang==='ar' ? '+ حساب جديد' : activeLang==='en' ? '+ New account' : '+ Nieuw account';
-    nieuw.addEventListener('click', () => showModal('m-nieuw-acc'));
-    lijst.appendChild(nieuw);
+    // Verwijzing naar admin dashboard ipv nieuw account knop
+    const adminLink = document.createElement('div');
+    adminLink.style.cssText = 'color:rgba(255,255,255,.3);font-size:11px;text-align:center;padding:8px;font-weight:500';
+    adminLink.textContent = activeLang==='ar' ? 'لإنشاء حساب جديد، تواصل مع المسؤول' : activeLang==='en' ? 'Contact an admin to create a new account' : 'Nieuw account? Vraag een admin via het dashboard';
+    lijst.appendChild(adminLink);
 
   } catch(err) {
     lijst.innerHTML = '<div style="color:#ff6b6b;font-size:13px;text-align:center">Kan accounts niet laden</div>';
@@ -622,6 +708,13 @@ document.getElementById('pw-confirm').addEventListener('click', async ()=>{
       document.getElementById('pw-hint').textContent = '✓';
       document.getElementById('pw-hint').className   = 'pw-hint ok';
       document.getElementById('pw-inp').className    = 'm-input-pw ok';
+
+      // Admin → doorsturen naar dashboard
+      if(data.rol === 'admin') {
+        setTimeout(() => { window.location.href = 'dashboard.html'; }, 400);
+        return;
+      }
+
       setTimeout(()=>{
         showModal('m-sup'); renderSupList(''); supSearch.value=''; supSearch.focus();
       }, 400);
@@ -707,6 +800,26 @@ document.getElementById('na-confirm').addEventListener('click', async ()=>{
   document.getElementById('na-confirm').disabled = false;
 });
 
+// ── Zebra Browser Print waarschuwing ─────────────────────
+function toonZebraModal(){
+  document.getElementById('mz-warn').textContent     = t('zebraWarn');
+  document.getElementById('mz-ok').textContent       = t('zebraOk');
+  document.getElementById('mz-help-btn').textContent = t('zebraBtn');
+  document.getElementById('mz-help-txt').textContent = t('zebraHelp');
+  document.getElementById('mz-help').style.display   = 'none';
+  showModal('m-zebra');
+}
+
+document.getElementById('mz-ok').addEventListener('click', ()=>{
+  hideAllModals();
+  focusInput();
+});
+
+document.getElementById('mz-help-btn').addEventListener('click', ()=>{
+  const help = document.getElementById('mz-help');
+  help.style.display = help.style.display === 'none' ? 'block' : 'none';
+});
+
 // ── Supplier ──────────────────────────────────────────────
 function renderSupList(q){
   const fil=suppliers.filter(s=>s.toLowerCase().includes(q.toLowerCase()));
@@ -722,7 +835,9 @@ function renderSupList(q){
 }
 function selectSupplier(s){
   supplier=s; localStorage.setItem('supplier',supplier);
-  hideAllModals(); showSupBar(); focusInput();
+  hideAllModals();
+  showSupBar();
+  toonZebraModal();
 }
 supSearch.addEventListener('input',()=>renderSupList(supSearch.value));
 supSearch.addEventListener('keydown',e=>{
@@ -898,6 +1013,17 @@ function handleGrade(g){
     pendingGrade=g;
     hideGradePanel();
     showSubPanel(g);
+  } else if(g==='B3'){
+    // 3de kansje — open camera
+    pendingGrade=g;
+    hideGradePanel();
+    openCamera({
+      barcode:  pendingScan.barcode,
+      supplier: pendingScan.supplier_override || supplier,
+      mismatch: pendingScan.mismatch,
+      notFound: pendingScan.notFound,
+      leverancier_correct: pendingScan.leverancier_correct || ''
+    });
   } else {
     commitScan(g, gradeWords[g], '');
   }
@@ -925,6 +1051,205 @@ custConfirm.addEventListener('click',()=>{
 });
 custInp.addEventListener('keydown',e=>{if(e.key==='Enter') custConfirm.click();});
 
+// ── Camera (3de kansje) ───────────────────────────────────
+let cameraStream    = null;
+let gemaakteFotos   = []; // array van base64 strings
+let pending3deKansje = null;
+
+async function openCamera(scanData) {
+  pending3deKansje = scanData;
+  gemaakteFotos    = [];
+  document.getElementById('cam-beschrijving').value   = '';
+  document.getElementById('cam-fotos').innerHTML      = '';
+  document.getElementById('cam-foto-teller').textContent = '0 / 3 foto\'s';
+  document.getElementById('cam-bevestig-btn').disabled   = true;
+  document.getElementById('cam-bevestig-btn').style.display = 'none';
+  document.getElementById('cam-hint').textContent        = 'Maak minimaal 1 foto';
+  document.getElementById('cam-stap2').style.display     = 'none';
+  document.getElementById('cam-stap1-wrap').style.display = 'block';
+  document.getElementById('cam-stap1-verder').disabled   = true;
+  document.getElementById('m-camera').style.display      = 'flex';
+  bInput.disabled = true;
+  setTimeout(() => document.getElementById('cam-beschrijving').focus(), 300);
+}
+
+function sluitCamera() {
+  if(cameraStream) { cameraStream.getTracks().forEach(t => t.stop()); cameraStream = null; }
+  document.getElementById('m-camera').style.display = 'none';
+  bInput.disabled = false;
+  pending3deKansje = null;
+}
+
+function maakFoto() {
+  if(gemaakteFotos.length >= 3) return;
+  const video  = document.getElementById('cam-preview');
+  const canvas = document.getElementById('cam-canvas');
+  canvas.width  = video.videoWidth;
+  canvas.height = video.videoHeight;
+  canvas.getContext('2d').drawImage(video, 0, 0);
+  const base64 = canvas.toDataURL('image/jpeg', 0.7);
+  gemaakteFotos.push(base64);
+  updateFotoGrid();
+}
+
+function verwijderFoto(idx) {
+  gemaakteFotos.splice(idx, 1);
+  updateFotoGrid();
+}
+
+function updateFotoGrid() {
+  const container = document.getElementById('cam-fotos');
+  container.innerHTML = '';
+  gemaakteFotos.forEach((b64, i) => {
+    const wrap = document.createElement('div');
+    wrap.className = 'cam-foto-wrap';
+    const img = document.createElement('img');
+    img.src = b64;
+    const del = document.createElement('button');
+    del.className = 'cam-foto-del';
+    del.textContent = '×';
+    del.onclick = () => verwijderFoto(i);
+    wrap.appendChild(img);
+    wrap.appendChild(del);
+    container.appendChild(wrap);
+  });
+
+  const teller = document.getElementById('cam-foto-teller');
+  teller.textContent = `${gemaakteFotos.length} / 3 foto's`;
+
+  const fotoBtn = document.getElementById('cam-foto-btn');
+  fotoBtn.disabled = gemaakteFotos.length >= 3;
+  fotoBtn.style.opacity = gemaakteFotos.length >= 3 ? '0.4' : '1';
+
+  const bevestig = document.getElementById('cam-bevestig-btn');
+  if(gemaakteFotos.length > 0) {
+    bevestig.style.display = 'block';
+    bevestig.disabled = false;
+  } else {
+    bevestig.style.display = 'none';
+    bevestig.disabled = true;
+  }
+
+  const hint = document.getElementById('cam-hint');
+  if(gemaakteFotos.length === 0)      hint.textContent = 'Minimaal 1 foto verplicht';
+  else if(gemaakteFotos.length < 3)   hint.textContent = `${3 - gemaakteFotos.length} foto's nog mogelijk`;
+  else                                 hint.textContent = 'Maximum bereikt';
+}
+
+// Stap 1: beschrijving — activeer "Verder" knop
+document.getElementById('cam-beschrijving').addEventListener('input', () => {
+  const beschr = document.getElementById('cam-beschrijving').value.trim();
+  document.getElementById('cam-stap1-verder').disabled = beschr.length === 0;
+});
+
+// Stap 1 → Stap 2: beschrijving opgeslagen, camera starten
+document.getElementById('cam-stap1-verder').addEventListener('click', async () => {
+  document.getElementById('cam-stap1-wrap').style.display = 'none';
+  const stap2 = document.getElementById('cam-stap2');
+  stap2.style.display = 'flex';
+
+  // Start camera
+  try {
+    cameraStream = await navigator.mediaDevices.getUserMedia({video: {facingMode: 'environment'}, audio: false});
+    document.getElementById('cam-preview').srcObject = cameraStream;
+  } catch(err) {
+    document.getElementById('cam-hint').textContent = '❌ Camera niet beschikbaar: ' + err.message;
+  }
+});
+
+document.getElementById('cam-foto-btn').addEventListener('click', maakFoto);
+document.getElementById('cam-annuleer-btn').addEventListener('click', () => {
+  sluitCamera();
+  cancelScan();
+});
+
+document.getElementById('cam-bevestig-btn').addEventListener('click', async () => {
+  const beschrijving = document.getElementById('cam-beschrijving').value.trim();
+  if(!beschrijving || gemaakteFotos.length === 0) return;
+
+  document.getElementById('cam-bevestig-btn').textContent = 'Uploaden...';
+  document.getElementById('cam-bevestig-btn').disabled = true;
+
+  await bevestig3deKansje(beschrijving, gemaakteFotos);
+  sluitCamera();
+});
+
+function maak3deLeverancier(lev) {
+  // Als begint met 1 of 2 → vervang door 3
+  if (/^[12]/.test(lev)) return lev.replace(/^[12]/, '3');
+  // Als begint met 3 → al goed
+  if (/^3/.test(lev)) return lev;
+  // Geen getal → voeg 3 toe
+  return '3' + lev;
+}
+
+async function bevestig3deKansje(beschrijving, fotos) {
+  if(!pending3deKansje) return;
+
+  const scanId = genScanId();
+
+  showSync('syncing', '⟳ Opslaan...');
+
+  const supplier3de = maak3deLeverancier(pending3deKansje.supplier);
+
+  const row = {
+    scanId,
+    sessionId, userName, userInit,
+    supplier: supplier3de,
+    barcode:  pending3deKansje.barcode,
+    type:     'Grading',
+    Status_product_code: 'B3',
+    Status_product_word: '3dekans',
+    Info_reparatie: '',
+    Info_defect:    beschrijving,
+    mismatch:  pending3deKansje.mismatch ? 'Yes' : 'No',
+    not_found: pending3deKansje.notFound ? 'Yes' : 'No',
+    leverancier_correct: pending3deKansje.leverancier_correct || '',
+    fotos: fotos, // base64 array — Apps Script upload naar Picqer
+    date: nowDate(),
+    time: nowTime()
+  };
+
+  updateCounter(true);
+  showIdle();
+  focusInput();
+  printSticker(scanId, userInit, '3dekans');
+
+  const ok = await sendToSheets(row);
+  if(!ok){
+    offlineQueue.push(row);
+    localStorage.setItem('offlineQueue', JSON.stringify(offlineQueue));
+    updateQueueBadge();
+  } else {
+    flushOfflineQueue();
+  }
+}
+const BROWSER_PRINT_URL = 'http://localhost:9100';
+
+async function printSticker(scanId, initialen, grade) {
+  try {
+    // Haal standaard printer op
+    const printerRes = await fetch(`${BROWSER_PRINT_URL}/available`);
+    const printerData = await printerRes.json();
+    const printer = printerData.printer && printerData.printer[0];
+    if (!printer) { console.warn('Geen printer gevonden'); return; }
+
+    // ZPL label — 50mm × 25mm (400 dpi = ~800 × 400 dots)
+    const zpl = `^XA^MMT^PW400^LL200^LS0^FO65,10^BY2^BCN,60,Y,N,N^FD${scanId}^FS^FO0,150^FB400,1,0,C,0^A0N,28,28^FD${initialen} ${grade}^FS^XZ`.trim();
+
+    // Stuur naar Browser Print
+    await fetch(`${BROWSER_PRINT_URL}/write`, {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({device: printer, data: zpl})
+    });
+
+    console.log('Sticker geprint!');
+  } catch(err) {
+    console.warn('Print fout (Browser Print actief?):', err);
+  }
+}
+
 // ── Commit scan ───────────────────────────────────────────
 async function commitScan(statusCode, statusWord, extraInfo){
   if(!pendingScan) return;
@@ -933,8 +1258,10 @@ async function commitScan(statusCode, statusWord, extraInfo){
   // Gebruik supplier_override als die ingesteld is (wissel voor 1 scan)
   const gebruikteLeverancier = pendingScan.supplier_override || supplier;
 
+  const scanId = genScanId();
+
   const row = {
-    scanId:   genScanId(),
+    scanId,
     sessionId, userName, userInit,
     supplier: gebruikteLeverancier,
     barcode: pendingScan.barcode,
@@ -957,6 +1284,9 @@ async function commitScan(statusCode, statusWord, extraInfo){
   custWrap.style.display='none';
   showIdle();
   focusInput();
+
+  // Print sticker
+  printSticker(scanId, userInit, statusWord);
 
   const ok = await sendToSheets(row);
   if(!ok){
@@ -1064,7 +1394,6 @@ async function handleScan(barcode){
   const code=barcode.trim();
   if(!code) return;
   if(gradePanel.style.display==='flex'||subPanel.style.display==='flex') return;
-  if(document.getElementById('mismatch-panel').style.display==='flex') return;
   if(isScanning) return;
 
   isScanning = true;
@@ -1137,7 +1466,7 @@ document.addEventListener('keydown',e=>{
   if(custWrap.style.display==='flex') return;
 
   if(gradePanel.style.display==='flex'){
-    const map={'1':'A','2':'B','3':'C','4':'D-rep','5':'D-def'};
+    const map={'1':'A','2':'B','3':'B3','4':'C','5':'D-rep','6':'D-def'};
     if(map[e.key]){e.preventDefault();handleGrade(map[e.key]);}
     return;
   }
