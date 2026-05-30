@@ -368,7 +368,8 @@
 
 <div id="jsonp-container" style="display:none"></div>
 
-<script> = 'https://script.google.com/macros/s/AKfycbxub5myYuJOE6jF5LIFRZRmOgY0v0L0dzpAX88MGcw4RqqGalo7i6QnCZoqQDZMu4pq/exec';
+<script>
+const SCANS_URL = 'https://script.google.com/macros/s/AKfycbxub5myYuJOE6jF5LIFRZRmOgY0v0L0dzpAX88MGcw4RqqGalo7i6QnCZoqQDZMu4pq/exec';
 
 // ── State ────────────────────────────────────────────────
 let adminId   = localStorage.getItem('adminId')   || '';
@@ -484,7 +485,7 @@ document.getElementById('logout-btn').addEventListener('click', () => {
   localStorage.removeItem('adminWw');
   localStorage.removeItem('adminNaam');
   localStorage.removeItem('adminInit');
-  window.location.href = 'index.html';
+  window.location.href = '/github.io/index.html';
 });
 
 // ── Navigatie ────────────────────────────────────────────
