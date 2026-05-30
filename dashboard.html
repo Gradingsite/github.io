@@ -366,8 +366,9 @@
   </div>
 </div>
 
-<script>
-const SCANS_URL = 'https://script.google.com/macros/s/AKfycbxub5myYuJOE6jF5LIFRZRmOgY0v0L0dzpAX88MGcw4RqqGalo7i6QnCZoqQDZMu4pq/exec';
+<div id="jsonp-container" style="display:none"></div>
+
+<script> = 'https://script.google.com/macros/s/AKfycbxub5myYuJOE6jF5LIFRZRmOgY0v0L0dzpAX88MGcw4RqqGalo7i6QnCZoqQDZMu4pq/exec';
 
 // ── State ────────────────────────────────────────────────
 let adminId   = localStorage.getItem('adminId')   || '';
@@ -390,8 +391,7 @@ if (adminId && adminWw) {
 // ── Login flow ───────────────────────────────────────────
 async function laadAccounts() {
   try {
-    const res  = await fetch(SCANS_URL + '?actie=accounts');
-    const data = await res.json();
+    const data = await apiFetch({actie: 'accounts'});
     const lijst = document.getElementById('acc-lijst');
     lijst.innerHTML = '';
     if (!data.accounts || data.accounts.length === 0) {
@@ -439,9 +439,7 @@ document.getElementById('login-btn').addEventListener('click', async () => {
   document.getElementById('login-btn').disabled = true;
 
   try {
-    const url  = `${SCANS_URL}?actie=login&id=${encodeURIComponent(geselecteerdAcc.id)}&wachtwoord=${encodeURIComponent(ww)}`;
-    const res  = await fetch(url);
-    const data = await res.json();
+    const data = await apiFetch({actie: 'login', id: geselecteerdAcc.id, wachtwoord: ww});
 
     if (data.status === 'ok' && data.rol === 'admin') {
       adminId   = geselecteerdAcc.id;
@@ -519,15 +517,43 @@ document.getElementById('refresh-btn').addEventListener('click', () => {
 });
 
 // ── Data laden ───────────────────────────────────────────
+function apiFetch(params) {
+  return new Promise((resolve, reject) => {
+    const cbName = '_cb_' + Date.now();
+    const url = SCANS_URL + '?' + new URLSearchParams({...params, callback: cbName}).toString();
+    
+    window[cbName] = (data) => {
+      delete window[cbName];
+      document.getElementById('jsonp-container').removeChild(script);
+      resolve(data);
+    };
+
+    const script = document.createElement('script');
+    script.src = url;
+    script.onerror = () => {
+      delete window[cbName];
+      // Fallback: gewone fetch
+      fetch(SCANS_URL + '?' + new URLSearchParams(params).toString())
+        .then(r => r.json())
+        .then(resolve)
+        .catch(reject);
+    };
+    document.getElementById('jsonp-container').appendChild(script);
+  });
+}
+
 async function laadData() {
   try {
-    const url  = `${SCANS_URL}?actie=adminGetScans&adminId=${encodeURIComponent(adminId)}&adminWw=${encodeURIComponent(adminWw)}&periode=${huidigePeriode}`;
-    const res  = await fetch(url);
-    const data = await res.json();
+    const data = await apiFetch({
+      actie:   'adminGetScans',
+      adminId: adminId,
+      adminWw: adminWw,
+      periode: huidigePeriode
+    });
     console.log('API response:', data);
     if (data.status !== 'ok') { console.error('API fout:', data); return; }
     alleScans = data.scans || [];
-    console.log('Scans geladen:', alleScans.length, 'headers:', data.headers);
+    console.log('Scans geladen:', alleScans.length);
     renderOverview();
     renderAlleScans();
   } catch(err) {
@@ -675,9 +701,7 @@ document.getElementById('scan-search')?.addEventListener('input', renderAlleScan
 
 // ── Accounts beheer ──────────────────────────────────────
 async function laadAccountsBeheer() {
-  const url  = `${SCANS_URL}?actie=adminGetAccounts&adminId=${encodeURIComponent(adminId)}&adminWw=${encodeURIComponent(adminWw)}`;
-  const res  = await fetch(url);
-  const data = await res.json();
+  const data = await apiFetch({actie: 'adminGetAccounts', adminId, adminWw});
   if (data.status !== 'ok') return;
 
   const tbody = document.getElementById('acc-tbody');
@@ -723,9 +747,7 @@ document.getElementById('modal-nieuw-ok').addEventListener('click', async () => 
   if (pw.length < 6) { err.textContent='Min. 6 tekens'; err.style.display='block'; return; }
   if (!/\d/.test(pw)) { err.textContent='Min. 1 cijfer verplicht'; err.style.display='block'; return; }
 
-  const url = `${SCANS_URL}?actie=adminNieuw&adminId=${encodeURIComponent(adminId)}&adminWw=${encodeURIComponent(adminWw)}&naam=${encodeURIComponent(naam)}&initialen=${encodeURIComponent(init)}&wachtwoord=${encodeURIComponent(pw)}&rol=${rol}`;
-  const res = await fetch(url);
-  const data = await res.json();
+  const data = await apiFetch({actie: 'adminNieuw', adminId, adminWw, naam, initialen: init, wachtwoord: pw, rol});
   if (data.status === 'ok') {
     document.getElementById('modal-nieuw').classList.remove('open');
     laadAccountsBeheer();
@@ -750,9 +772,7 @@ document.getElementById('modal-reset-ok').addEventListener('click', async () => 
   const err      = document.getElementById('r-error');
   if (!nieuwWw) { err.textContent='Voer een wachtwoord in'; err.style.display='block'; return; }
 
-  const url = `${SCANS_URL}?actie=adminResetWw&adminId=${encodeURIComponent(adminId)}&adminWw=${encodeURIComponent(adminWw)}&targetId=${encodeURIComponent(targetId)}&nieuwWw=${encodeURIComponent(nieuwWw)}`;
-  const res = await fetch(url);
-  const data = await res.json();
+  const data = await apiFetch({actie: 'adminResetWw', adminId, adminWw, targetId, nieuwWw});
   if (data.status === 'ok') {
     document.getElementById('modal-reset').classList.remove('open');
     alert(`✓ Wachtwoord van ${document.getElementById('reset-naam').textContent} gereset naar: ${nieuwWw}`);
@@ -765,9 +785,7 @@ document.getElementById('modal-reset-ok').addEventListener('click', async () => 
 // Verwijder account
 async function verwijderAcc(id, naam) {
   if (!confirm(`Account "${naam}" verwijderen? Dit kan niet ongedaan worden.`)) return;
-  const url = `${SCANS_URL}?actie=adminVerwijder&adminId=${encodeURIComponent(adminId)}&adminWw=${encodeURIComponent(adminWw)}&targetId=${encodeURIComponent(id)}`;
-  const res = await fetch(url);
-  const data = await res.json();
+  const data = await apiFetch({actie: 'adminVerwijder', adminId, adminWw, targetId: id});
   if (data.status === 'ok') { laadAccountsBeheer(); }
   else { alert('Fout: ' + (data.message||'onbekend')); }
 }
