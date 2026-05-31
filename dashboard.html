@@ -649,6 +649,14 @@ async function laadData() {
   }
 }
 
+function formatTijd(sec) {
+  if (sec === null || sec === undefined) return '—';
+  if (sec < 60) return sec + 's';
+  const m = Math.floor(sec / 60);
+  const s = sec % 60;
+  return s > 0 ? `${m}m ${s}s` : `${m}m`;
+}
+
 function renderOverview() {
   const scans = alleScans;
   const totaal = scans.length;
@@ -667,7 +675,7 @@ function renderOverview() {
       const diff = b - a;
       if (diff > 0 && diff < 900) { totalSec += diff; count++; } // max 15 min
     }
-    document.getElementById('st-gemtijd').textContent = count > 0 ? Math.round(totalSec/count) + 's' : '—';
+    document.getElementById('st-gemtijd').textContent = count > 0 ? formatTijd(Math.round(totalSec/count)) : '—';
   } else {
     document.getElementById('st-gemtijd').textContent = '—';
   }
@@ -729,12 +737,19 @@ function renderOverview() {
   const mdwLijst = Object.values(mdwMap).sort((a,b) => b.count-a.count).slice(0,12);
   const maxM = Math.max(...mdwLijst.map(m=>m.count), 1);
   document.getElementById('mdw-list').innerHTML = mdwLijst.length === 0 ? '<div class="empty">Geen data</div>' :
-    mdwLijst.map(m => `<div class="mdw-row">
+    '<div style="display:flex;align-items:center;padding:0 0 6px;font-size:10px;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:.5px;border-bottom:1px solid var(--border);margin-bottom:4px">'
+    + '<div style="width:28px"></div>'
+    + '<div style="flex:1;margin-left:10px">Naam</div>'
+    + '<div style="width:28px;text-align:right">Scans</div>'
+    + '<div style="width:80px"></div>'
+    + '<div style="min-width:60px;text-align:right">Gem. tijd</div>'
+    + '</div>'
+    + mdwLijst.map(m => `<div class="mdw-row">
       <div class="mdw-avatar">${m.init}</div>
       <div class="mdw-naam">${m.naam}</div>
       <div class="mdw-count">${m.count}</div>
       <div class="mdw-bar"><div class="mdw-bar-fill" style="width:${Math.round(m.count/maxM*100)}%"></div></div>
-      <div style="font-size:11px;color:var(--muted);font-weight:600;white-space:nowrap;min-width:48px;text-align:right">${m.gemTijd !== null ? m.gemTijd + 's' : '—'}</div>
+      <div style="font-size:11px;color:var(--muted);font-weight:600;white-space:nowrap;min-width:60px;text-align:right">${formatTijd(m.gemTijd)}</div>
     </div>`).join('');
 
   // Leveranciers — top 12
