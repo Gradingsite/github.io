@@ -274,9 +274,6 @@ body{font-family:'Montserrat','Segoe UI',Arial,sans-serif;min-height:100vh;displ
   <div class="modal-box">
     <div class="modal-logo"><img src="NRlogo.png" alt="2de Kansje logo"/></div>
     <h2 id="mac-title">Kies je account</h2>
-    <input id="acc-zoek" type="text" placeholder="Zoek je naam..." autocomplete="off" spellcheck="false"
-      style="width:100%;padding:10px 14px;border-radius:10px;border:2px solid rgba(255,255,255,.15);background:rgba(255,255,255,.08);color:white;font-size:14px;font-family:inherit;outline:none;transition:border-color .2s"
-      onfocus="this.style.borderColor='var(--g1)'" onblur="this.style.borderColor='rgba(255,255,255,.15)'"/>
     <div class="acc-list" id="acc-list">
       <div style="color:rgba(255,255,255,.4);font-size:13px;text-align:center">Laden...</div>
     </div>
@@ -650,8 +647,6 @@ document.getElementById('ml-confirm').addEventListener('click',()=>{
 // ── Accounts laden en tonen ───────────────────────────────
 async function laadAccountsEnToon(){
   showModal('m-account');
-  const zoek = document.getElementById('acc-zoek');
-  if (zoek) { zoek.value = ''; setTimeout(() => zoek.focus(), 150); }
   const lijst = document.getElementById('acc-list');
   lijst.innerHTML = '<div style="color:rgba(255,255,255,.4);font-size:13px;text-align:center">Laden...</div>';
 
@@ -661,10 +656,13 @@ async function laadAccountsEnToon(){
     lijst.innerHTML = '';
 
     if(data.accounts && data.accounts.length > 0){
-      // Sla accounts op voor zoekfunctie
-      window._alleAccounts = data.accounts;
-      renderAccLijst('');
-    }
+      data.accounts.forEach(acc => {
+        const btn = document.createElement('button');
+        btn.className = 'acc-item';
+        btn.innerHTML = `<div class="acc-avatar">${acc.initialen}</div><span>${acc.naam}</span>`;
+        btn.addEventListener('click', () => toonWachtwoordModal(acc));
+        lijst.appendChild(btn);
+      });
     }
 
     // Verwijzing naar admin dashboard ipv nieuw account knop
@@ -677,40 +675,6 @@ async function laadAccountsEnToon(){
     lijst.innerHTML = '<div style="color:#ff6b6b;font-size:13px;text-align:center">Kan accounts niet laden</div>';
   }
 }
-
-function renderAccLijst(q) {
-  const lijst = document.getElementById('acc-list');
-  const accounts = (window._alleAccounts || []).filter(acc =>
-    acc.naam.toLowerCase().includes(q.toLowerCase())
-  );
-  lijst.innerHTML = '';
-  accounts.forEach(acc => {
-    const btn = document.createElement('button');
-    btn.className = 'acc-item';
-    btn.innerHTML = `<div class="acc-avatar">${acc.initialen}</div><span>${acc.naam}</span>`;
-    btn.addEventListener('click', () => toonWachtwoordModal(acc));
-    lijst.appendChild(btn);
-  });
-  if (accounts.length === 0) {
-    lijst.innerHTML = '<div style="color:rgba(255,255,255,.4);font-size:13px;text-align:center">Geen resultaten</div>';
-  }
-  // Verwijzing naar admin
-  const adminLink = document.createElement('div');
-  adminLink.style.cssText = 'color:rgba(255,255,255,.3);font-size:11px;text-align:center;padding:8px;font-weight:500';
-  adminLink.textContent = activeLang==='ar' ? 'لإنشاء حساب جديد، تواصل مع المسؤول' : activeLang==='en' ? 'Contact an admin to create a new account' : 'Nieuw account? Vraag een admin via het dashboard';
-  lijst.appendChild(adminLink);
-}
-
-// Zoekbalk event
-document.getElementById('acc-zoek').addEventListener('input', e => {
-  renderAccLijst(e.target.value);
-});
-document.getElementById('acc-zoek').addEventListener('keydown', e => {
-  if (e.key === 'Enter') {
-    const eerste = document.querySelector('#acc-list .acc-item');
-    if (eerste) eerste.click();
-  }
-});
 
 // ── Wachtwoord modal ──────────────────────────────────────
 function toonWachtwoordModal(acc){
