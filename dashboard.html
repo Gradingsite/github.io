@@ -392,8 +392,56 @@ if (adminId && adminWw) {
 }
 
 // ── Login flow ───────────────────────────────────────────
+let alleAccounts = [];
+
+async function haalAccountsOp() {
+  const url = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json&sheet=Accounts`;
+  const res  = await fetch(url);
+  const text = await res.text();
+  const json = JSON.parse(text.replace(/^[^{]*/, '').replace(/[^}]*$/, ''));
+  const cols = json.table.cols.map(c => c.label);
+  return json.table.rows.map(r => {
+    const obj = {};
+    r.c.forEach((cell, i) => { obj[cols[i]] = cell ? String(cell.v || '') : ''; });
+    return obj;
+  });
+}
+
+async function sha256(str) {
+  const buf  = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(str));
+  return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2,'0')).join('');
+}
+
 async function laadAccounts() {
   try {
+    alleAccounts = await haalAccountsOp();
+    const lijst = document.getElementById('acc-lijst');
+    lijst.innerHTML = '';
+    let hadAdmin = false;
+    alleAccounts.forEach(acc => {
+      const id   = acc.ID   || acc.id   || '';
+      const naam = acc.Naam || acc.naam || '';
+      const init = acc.Initialen || acc.initialen || '';
+      const hash = acc.WachtwoordHash || acc.Hash || acc.hash || '';
+      const rol  = acc.Rol  || acc.rol  || '';
+      if (rol.toLowerCase() !== 'admin') return;
+      hadAdmin = true;
+      const btn  = document.createElement('button');
+      btn.className = 'acc-item';
+      btn.innerHTML = `<div class="acc-avatar">${init}</div><span>${naam}</span><span class="acc-badge">Admin</span>`;
+      btn.addEventListener('click', () => toonPwVeld({id, naam, initialen: init, hash}));
+      lijst.appendChild(btn);
+    });
+    if (!hadAdmin) {
+      lijst.innerHTML = '<div style="color:rgba(255,255,255,.4);font-size:13px;text-align:center">Geen admin accounts gevonden</div>';
+    }
+  } catch(err) {
+    console.error('Accounts fout:', err);
+    document.getElementById('acc-lijst').innerHTML = '<div style="color:#ff6b6b;font-size:13px;text-align:center">Verbindingsfout</div>';
+  }
+}
+
+async function _unused_old() {
     const data = await apiFetch({actie: 'accounts'});
     const lijst = document.getElementById('acc-lijst');
     lijst.innerHTML = '';
@@ -442,18 +490,15 @@ document.getElementById('login-btn').addEventListener('click', async () => {
   document.getElementById('login-btn').disabled = true;
 
   try {
-    const data = await apiFetch({actie: 'login', id: geselecteerdAcc.id, wachtwoord: ww});
+    const hash = await sha256(ww);
+    const opgeslagenHash = (geselecteerdAcc.hash || '').toLowerCase();
 
-    if (data.status === 'ok' && data.rol === 'admin') {
+    if (hash === opgeslagenHash) {
       adminId   = geselecteerdAcc.id;
       adminWw   = ww;
-      adminNaam = data.naam;
-      adminInit = data.initialen;
+      adminNaam = geselecteerdAcc.naam;
+      adminInit = geselecteerdAcc.initialen;
       openDashboard();
-    } else if (data.status === 'ok') {
-      document.getElementById('pw-hint').textContent = 'Geen admin rechten';
-      document.getElementById('pw-hint').className = 'pw-hint err';
-      document.getElementById('pw-inp').className = 'pw-inp err';
     } else {
       document.getElementById('pw-hint').textContent = 'Wachtwoord onjuist';
       document.getElementById('pw-hint').className = 'pw-hint err';
@@ -462,7 +507,7 @@ document.getElementById('login-btn').addEventListener('click', async () => {
       document.getElementById('pw-inp').focus();
     }
   } catch(err) {
-    document.getElementById('pw-hint').textContent = 'Verbindingsfout';
+    document.getElementById('pw-hint').textContent = 'Fout bij verificatie';
     document.getElementById('pw-hint').className = 'pw-hint err';
   }
 
@@ -635,7 +680,7 @@ function renderOverview() {
   document.getElementById('st-b3').textContent = scans.filter(s => s.Status_code === 'B3').length;
   document.getElementById('st-mismatch').textContent = scans.filter(s => s.Mismatch === 'Yes').length;
 
-  // Gemiddelde tijd tussen scans
+  // Gemiddelde tijd tussen scans — pauzes > 15 min worden overgeslagen
   const tijden = scans.map(s => s.Tijd).filter(Boolean).sort();
   if (tijden.length >= 2) {
     let totalSec = 0, count = 0;
@@ -643,14 +688,14 @@ function renderOverview() {
       const a = tijdNaarSec(tijden[i-1]);
       const b = tijdNaarSec(tijden[i]);
       const diff = b - a;
-      if (diff > 0 && diff < 3600) { totalSec += diff; count++; }
+      if (diff > 0 && diff < 900) { totalSec += diff; count++; } // max 15 min
     }
     document.getElementById('st-gemtijd').textContent = count > 0 ? Math.round(totalSec/count) + 's' : '—';
   } else {
     document.getElementById('st-gemtijd').textContent = '—';
   }
 
-  // Grade verdeling — gebruikt Status_code
+  // Grade verdeling
   const grades = {A:0,B:0,B3:0,C:0,'D-rep':0,'D-def':0};
   scans.forEach(s => { const g = s.Status_code; if(grades[g] !== undefined) grades[g]++; });
   const gradeLabels = {A:'Perfect',B:'2dekans',B3:'3dekans',C:'Schoonmaak','D-rep':'Reparatie','D-def':'Defect'};
@@ -681,15 +726,30 @@ function renderOverview() {
     uurChart.appendChild(wrap);
   }
 
-  // Medewerkers — gebruikt Naam + Initialen
+  // Medewerkers — met gemiddelde tijd per persoon (pauzes > 15 min uitgesloten)
   const mdwMap = {};
   scans.forEach(s => {
     const n = s.Naam || s.Initialen || '?';
     const i = s.Initialen || '?';
-    if (!mdwMap[n]) mdwMap[n] = {naam:n, init:i, count:0};
+    if (!mdwMap[n]) mdwMap[n] = {naam:n, init:i, count:0, tijden:[]};
     mdwMap[n].count++;
+    if (s.Tijd) mdwMap[n].tijden.push(s.Tijd);
   });
-  const mdwLijst = Object.values(mdwMap).sort((a,b) => b.count-a.count).slice(0,8);
+
+  // Bereken gem tijd per medewerker
+  Object.values(mdwMap).forEach(m => {
+    const gesorteerd = m.tijden.sort();
+    let totalSec = 0, count = 0;
+    for (let i = 1; i < gesorteerd.length; i++) {
+      const a = tijdNaarSec(gesorteerd[i-1]);
+      const b = tijdNaarSec(gesorteerd[i]);
+      const diff = b - a;
+      if (diff > 0 && diff < 900) { totalSec += diff; count++; }
+    }
+    m.gemTijd = count > 0 ? Math.round(totalSec / count) : null;
+  });
+
+  const mdwLijst = Object.values(mdwMap).sort((a,b) => b.count-a.count).slice(0,12);
   const maxM = Math.max(...mdwLijst.map(m=>m.count), 1);
   document.getElementById('mdw-list').innerHTML = mdwLijst.length === 0 ? '<div class="empty">Geen data</div>' :
     mdwLijst.map(m => `<div class="mdw-row">
@@ -697,16 +757,17 @@ function renderOverview() {
       <div class="mdw-naam">${m.naam}</div>
       <div class="mdw-count">${m.count}</div>
       <div class="mdw-bar"><div class="mdw-bar-fill" style="width:${Math.round(m.count/maxM*100)}%"></div></div>
+      <div style="font-size:11px;color:var(--muted);font-weight:600;white-space:nowrap;min-width:48px;text-align:right">${m.gemTijd !== null ? m.gemTijd + 's' : '—'}</div>
     </div>`).join('');
 
-  // Leveranciers
+  // Leveranciers — top 12
   const levMap = {};
   scans.forEach(s => {
     const l = s.Leverancier || '?';
     if (!levMap[l]) levMap[l] = 0;
     levMap[l]++;
   });
-  const levLijst = Object.entries(levMap).sort((a,b) => b[1]-a[1]).slice(0,8);
+  const levLijst = Object.entries(levMap).sort((a,b) => b[1]-a[1]).slice(0,12);
   document.getElementById('lev-list').innerHTML = levLijst.length === 0 ? '<div class="empty">Geen data</div>' :
     levLijst.map(([l,n]) => `<div class="lev-row">
       <div class="lev-init">${l.slice(0,3)}</div>
