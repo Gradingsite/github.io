@@ -98,20 +98,24 @@ body{font-family:'Montserrat','Segoe UI',Arial,sans-serif;min-height:100vh;displ
 #sync-indicator.err{display:block;background:rgba(204,56,69,.9)}
 
 /* ── Data badge ── */
-#data-badge{position:fixed;bottom:106px;right:16px;background:rgba(146,208,80,.15);border:1px solid rgba(146,208,80,.4);color:rgba(255,255,255,.8);font-size:11px;font-weight:700;padding:9px 16px;border-radius:50px;z-index:9999;cursor:pointer;font-family:inherit}
-#data-badge:hover{background:rgba(146,208,80,.25);color:white}
+
 
 /* ── Counter ── */
 #scan-counter{position:fixed;top:16px;right:16px;color:white;font-size:13px;font-weight:800;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.15);padding:7px 14px;border-radius:50px;z-index:9999;letter-spacing:.5px}
 
 /* ── Control buttons ── */
 .ctrl-btn{position:fixed;right:16px;padding:9px 16px;border:none;border-radius:50px;font-weight:800;cursor:pointer;z-index:9999;font-size:12px;letter-spacing:.5px;font-family:inherit}
-#reset-btn{bottom:60px;background:rgba(232,76,61,.15);color:rgba(255,255,255,.7);border:1px solid rgba(232,76,61,.35)}
+#reset-btn{bottom:68px;background:rgba(232,76,61,.15);color:rgba(255,255,255,.7);border:1px solid rgba(232,76,61,.35)}
 #reset-btn:hover{background:var(--red);color:white}
-#close-btn{bottom:16px;background:rgba(255,255,255,.06);color:rgba(255,255,255,.5);border:1px solid rgba(255,255,255,.12)}
+#close-btn{bottom:24px;background:rgba(255,255,255,.06);color:rgba(255,255,255,.5);border:1px solid rgba(255,255,255,.12)}
 #close-btn:hover{background:rgba(255,255,255,.12);color:white}
-#print-labels-btn{bottom:148px;background:rgba(146,208,80,.18);color:rgba(255,255,255,.82);border:1px solid rgba(146,208,80,.45)}
+#print-labels-btn{bottom:112px;background:rgba(146,208,80,.18);color:rgba(255,255,255,.82);border:1px solid rgba(146,208,80,.45)}
 #print-labels-btn:hover{background:var(--g1);color:var(--dark)}
+#overlay.gold{background:#D4AF37}
+#overlay.alarm-red{background:#ff2b2b}
+#overlay.alarm-blink{animation:alarmBlink .45s linear infinite}
+@keyframes alarmBlink{0%,100%{background:#B71C1C}50%{background:#ff2b2b}}
+.mpl-section{display:flex;flex-direction:column;gap:10px;width:100%}
 
 /* ── Lang indicator ── */
 #lang-ind{position:fixed;top:16px;left:16px;color:rgba(255,255,255,.7);font-size:11px;font-weight:800;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.15);padding:6px 12px;border-radius:50px;z-index:9999;letter-spacing:1px;cursor:pointer}
@@ -276,16 +280,30 @@ body{font-family:'Montserrat','Segoe UI',Arial,sans-serif;min-height:100vh;displ
   </div>
 </div>
 
-<!-- Labeltaal kiezen voor printlabels -->
+<!-- Printlabels -->
 <div class="modal" id="m-print-labels" style="display:none">
   <div class="modal-box">
     <div class="modal-logo"><img src="NRlogo.png" alt="2de Kansje logo"/></div>
-    <h2 id="mpl-title">Kies labeltaal</h2>
-    <div class="label-lang-grid">
+    <h2 id="mpl-title">Labels printen</h2>
+
+    <div class="mpl-section" id="mpl-menu">
+      <button class="m-btn" id="mpl-scan-labels">Scan labels</button>
+      <button class="m-btn" id="mpl-custom">Custom</button>
+    </div>
+
+    <div class="mpl-section" id="mpl-scan-options" style="display:none">
       <button class="m-btn label-lang-choice" id="mpl-nl" data-label-lang="nl">Nederlands</button>
       <button class="m-btn label-lang-choice" id="mpl-en" data-label-lang="en">Engels</button>
       <button class="m-btn label-lang-choice" id="mpl-ar" data-label-lang="ar">Arabisch</button>
+      <button class="m-btn m-btn-secondary" id="mpl-back-scan">Terug</button>
     </div>
+
+    <div class="mpl-section" id="mpl-custom-options" style="display:none">
+      <input class="m-input" id="custom-label-barcode" type="text" placeholder="Barcode..." autocomplete="off" spellcheck="false"/>
+      <button class="m-btn" id="custom-label-print">Print</button>
+      <button class="m-btn m-btn-secondary" id="mpl-back-custom">Terug</button>
+    </div>
+
     <button class="m-btn m-btn-secondary" id="mpl-cancel">Annuleren</button>
   </div>
 </div>
@@ -342,10 +360,11 @@ body{font-family:'Montserrat','Segoe UI',Arial,sans-serif;min-height:100vh;displ
 
 <!-- UI -->
 <div id="lang-ind" title="Klik om taal te wijzigen" style="cursor:pointer">🌐 Kies taal</div>
+<div id="account-ind" title="Klik om van account te wisselen" style="cursor:pointer;position:fixed;top:52px;left:16px;color:rgba(255,255,255,.7);font-size:11px;font-weight:800;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.15);padding:6px 12px;border-radius:50px;z-index:9999;letter-spacing:.5px;display:none">👤 —</div>
 <div id="scan-counter">Scans: 0</div>
 <div id="sync-indicator">⟳ Syncing...</div>
 <div id="queue-badge">📤 <span id="queue-count">0</span> wachtend</div>
-<div id="data-badge" title="Klik om data te herladen">📋 0 producten</div>
+<button id="fullscreen-btn" title="Volledig scherm (F11)" style="position:fixed;bottom:16px;left:16px;padding:9px 16px;border:none;border-radius:50px;font-weight:800;cursor:pointer;z-index:9999;font-size:12px;letter-spacing:.5px;font-family:inherit;background:rgba(255,255,255,.06);color:rgba(255,255,255,.5);border:1px solid rgba(255,255,255,.12)">⛶ Volledig scherm</button>
 
 <div id="overlay">
   <div id="scanner-box">
@@ -440,14 +459,11 @@ const SCANS_URL    = 'https://script.google.com/macros/s/AKfycbxub5myYuJOE6jF5LI
 // ── App opstarten ─────────────────────────────────────────
 function initApp() {
   document.getElementById('csv-loading').style.display = 'none';
-  document.getElementById('data-badge').textContent = '📋 Live data';
   startApp();
 }
 
 // Klik op badge
-document.getElementById('data-badge').addEventListener('click', ()=>{
-  document.getElementById('data-badge').textContent = '📋 Live data';
-});
+
 
 // ── Suppliers ─────────────────────────────────────────────
 const suppliers = ["1AGI DC","1ALV DC","1AMC DC","1AYE DC","1BPT DC","1BRG DC","1BUG DC","1CIN DC","1DDY DC","1DEN DC","1DK DC","1ELH DC","1EMB DC","1GOW DC","1GSI DC","1IBO DC","1LTB DC","1MMO DC","1MON DC","1NIC DC","1ODC DC","1OUT DC","1PUR DC","1QSP DC","1SBC DC","1SPO DC","1TCH DC","1TLC DC","1VAM DC","1VEL DC","1VOC DC","1WF DC","1WIT DC","2AAA DC","2ACH DC","2ADJ DC","2AGI DC","2AGL DC","2AIR DC","2ALV DC","2AMA DC","2AMC DC","2AMO DC","2AOS DC","2ART DC","2ATH DC","2ATS DC","2AVT DC","2AYE DC","2BAT DC","2BBF DC","2BBL DC","2BDO DC","2BFF DC","2BLA DC","2BLD DC","2BLK DC","2BLU DC","2BOM DC","2BOU DC","2BPT DC","2BRD DC","2BRE DC","2BRI DC","2BRV DC","2BSK DC","2BSM DC","2BTC DC","2BTL DC","2BUD DC","2BUF DC","2BUG DC","2BUU DC","2BXX DC","2CAS DC","2CFH DC","2CHA DC","2CHE DC","2CIN DC","2CLE DC","2CNX DC","2CRM DC","2CSB DC","2CSW DC","2D4Y DC","2DAM DC","2DAS DC","2DDY DC","2DEN DC","2DIV DC","2DK DC","2DLD DC","2DLG DC","2DNZ DC","2DOB DC","2DPK DC","2DVD DC","2EAK DC","2ECH DC","2EDC DC","2EDG DC","2EDM DC","2ELH DC","2ELV DC","2EMQ DC","2ERG DC","2EVN DC","2EWS DC","2FAR DC","2FGP DC","2FLB DC","2FNQ DC","2FTG DC","2FTL DC","2FTW DC","2GAR DC","2GFE DC","2GGO DC","2GKA DC","2GMT DC","2GOS DC","2GOW DC","2GRZ DC","2GSI DC","2GTN DC","2HEL DC","2HIL DC","2HLS DC","2HOM DC","2HOZ DC","2HPM DC","2HST DC","2HWK DC","2HYB DC","2HYC DC","2HYU DC","2IBO DC","2IDS DC","2IFY DC","2IND DC","2INV DC","2ISE DC","2IZA DC","2JAS DC","2JSY DC","2JWG DC","2KAR DC","2KEB DC","2KEM DC","2KLG DC","2KOI DC","2KPM DC","2KTL DC","2LEO DC","2LFG DC","2LHR DC","2LIF DC","2LKG DC","2LOO DC","2LTB DC","2MAG DC","2MAI DC","2MAO DC","2MAT DC","2MAU DC","2MBH DC","2MCB DC","2MCM DC","2MCT","2MED DC","2MEG DC","2MIR DC","2MIS DC","2MKA DC","2MLD DC","2MMA DC","2MMB DC","2MMO DC","2MON DC","2MOS DC","2MOV DC","2MRH DC","2MST DC","2MSY DC","2MTZ DC","2N25 DC","2NBX DC","2NED DC","2NEX DC","2NFR DC","2NHW DC","2NIC DC","2NOL DC","2NOO DC","2NOV DC","2NPI DC","2NTM DC","2NUM DC","2NUT DC","2NVT DC","2OFP DC","2OFS DC","2OKB DC","2OLV DC","2OPM DC","2OPP DC","2OPT DC","2OTT DC","2OUT DC","2PLT DC","2PRA DC","2PUR DC","2PYG DC","2QMX DC","2QSP DC","2QTP DC","2QUA DC","2RAS DC","2RBD DC","2RBS DC","2RDC - DC","2RDP DC","2REN DC","2RIT DC","2ROS DC","2RYL DC","2SAH DC","2SAL DC","2SAN DC","2SB2 DC","2SBC DC","2SBE DC","2SBI DC","2SBR DC","2SCF DC","2SCK DC","2SER DC","2SFK DC","2SFS DC","2SHT DC","2SJU DC","2SKL DC","2SKR DC","2SKY DC","2SLD DC","2SMC DC","2SMH DC","2SNB DC","2SOB DC","2SOD DC","2SOL DC","2SPE DC","2SPF DC","2SPO DC","2SPS DC","2SSN DC","2STE DC","2STX DC","2SUG DC","2SUN DC","2SV2 DC","2SVB DC","2SWA DC","2SWP DC","2TBS DC","2TCH DC","2TCW DC","2TEM DC","2TGB DC","2THK DC","2TIB DC","2TJP DC","2TKP DC","2TLC DC","2TLS DC","2TOY DC","2TRE DC","2TRP DC","2TSM DC","2TTC DC","2TTD DC","2TTY DC","2UBS DC","2UMB DC","2URG DC","2VAH DC","2VAM DC","2VBX DC","2VDG DC","2VEL DC","2VID DC","2VIT DC","2VOC DC","2VOF DC","2VPG DC","2VS2 DC","2VSA DC","2VTS DC","2VUL DC","2VVI DC","2VWR DC","2VXL DC","2WAD DC","2WAY DC","2WDM DC","2WDU DC","2WF DC","2WHL DC","2WHV DC","2WIT DC","2WOL DC","2WRT DC","2WTC DC","2WWS DC","2XCR DC","2YAH DC","2YOR DC","2ZER DC","3ACH DC","3ADJ DC","3AIR DC","3AMC DC","3AMO DC","3AOS DC","3ATS DC","3AVT DC","3AYE DC","3BAT DC","3BDO DC","3BFF DC","3BLA DC","3BLD DC","3BLU DC","3BOM DC","3BOU DC","3BRD DC","3BRI DC","3BRV DC","3BSK DC","3BUD DC","3BUF DC","3CFH DC","3CHE DC","3CLE DC","3CSW DC","3D4Y DC","3DAS DC","3DDY DC","3DEN DC","3DK DC","3DOB DC","3DPK DC","3DVD DC","3EAK DC","3ECH DC","3EDM DC","3ELH DC","3ELV DC","3EWS DC","3FGP DC","3FNQ DC","3FTG DC","3FTW","3GOS DC","3GTN DC","3HOM DC","3HWK DC","3HYC DC","3IBO DC","3IDS DC","3IFY DC","3INV DC","3JAS DC","3JSY DC","3JWG DC","3KAR DC","3KEM DC","3KPM DC","3LFG DC","3LHR DC","3LIF DC","3LKG DC","3MAG DC","3MAI DC","3MAT DC","3MAU DC","3MIR DC","3MIS DC","3MMB DC","3MMO DC","3MOA DC","3MON DC","3MOS DC","3MOV DC","3MST DC","3MSY DC","3MTZ DC","3N25 DC","3NFR DC","3NIC DC","3NOL DC","3NOO DC","3NUM DC","3NVT DC","3OFP DC","3OFS DC","3OLV DC","3OPM DC","3OPP DC","3OPT DC","3OTT DC","3OUT DC","3PUR DC","3QMX DC","3QUA DC","3RDP DC","3REN DC","3ROS DC","3SAN DC","3SBC DC","3SBE DC","3SCK DC","3SFS DC","3SKL DC","3SKR DC","3SKY DC","3SMC DC","3SNB DC","3SOB DC","3SOL DC","3SPO DC","3SSN DC","3STE DC","3STX DC","3SUN","3SWP DC","3TBS DC","3TCW DC","3TIB DC","3TLC DC","3TLS DC","3TRE DC","3TTC DC","3TTD DC","3URG DC","3VAH DC","3VBX DC","3VDG DC","3VEL DC","3VID DC","3VOC DC","3VPG DC","3VSA DC","3VUL DC","3VVI DC","3VXL DC","3WAY DC","3WDM DC","3WDU DC","3WHL DC","3WHV DC","3WIT DC","3WTC DC","amazon","ATM DC","AVA DC","BAT DC","BOU DC","BUG DC","BUU DC","CFH DC","DRB DC","EDC DC","ELK DC","EUG DC","EUR DC","EXP DC","FSH DC","GEK DC","GRZ DC","GUD DC","HAT DC","HHI DC","HOL DC","HOZ DC","HRT DC","HYU DC","HZL DC","INT DC","JWG DC","KEB DC","KEM DC","KMP DC","KPM DC","MDO DC","MEG DC","MON DC","New Returns","NRD DC","Perel","PRA DC","RYL DC","SBE DC","Scheppach DC","Scheppach DS","SVR DC","TOY DC","TSM DC","TXS DC","UPP DC","VEL DC","VSA DC","WF DC","ZEP DC","ZPR DC"];
@@ -475,11 +491,13 @@ const T = {
     zebraOk:"Begrepen, doorgaan →",
     zebraHelp:"Klik op de zwart-witte Zebra icon onder in je taakbalk.",
     printLabelsBtn:"Labels printen",
-    printLabelsTitle:"Kies labeltaal",
+    printLabelsTitle:"Labels printen",
+    scanLabelsOpt:"Scan labels",customLabelsOpt:"Custom",printCustomLabel:"Print",customBarcodePh:"Barcode...",labelBack:"Terug",
     labelDutch:"Nederlands",labelEnglish:"Engels",labelArabic:"Arabisch",labelCancel:"Annuleren",
     labelPrintNoPrinter:"Geen Zebra-printer gevonden. Controleer Zebra Browser Print.",
     labelPrintError:"Printen mislukt. Controleer of Zebra Browser Print actief is.",
-    labelPrintDone:"✓ Labels geprint",
+    labelPrintDone:"✓ Labels geprint",customLabelEmpty:"Vul eerst een barcode in",
+    goldProductTitle:"Goud product",alarmProductTitle:"Alarmproduct",
   },
   en:{
     nameQ:"What is your name?",namePh:"Enter your name...",
@@ -502,11 +520,13 @@ const T = {
     zebraHelp:"Click the black and white Zebra icon in your taskbar.",
     resetBtn:"New session",closeBtn:"Close",liveData:"📋 Live data",
     printLabelsBtn:"Print labels",
-    printLabelsTitle:"Choose label language",
+    printLabelsTitle:"Print labels",
+    scanLabelsOpt:"Scan labels",customLabelsOpt:"Custom",printCustomLabel:"Print",customBarcodePh:"Barcode...",labelBack:"Back",
     labelDutch:"Dutch",labelEnglish:"English",labelArabic:"Arabic",labelCancel:"Cancel",
     labelPrintNoPrinter:"No Zebra printer found. Check Zebra Browser Print.",
     labelPrintError:"Printing failed. Check whether Zebra Browser Print is running.",
-    labelPrintDone:"✓ Labels printed",
+    labelPrintDone:"✓ Labels printed",customLabelEmpty:"Enter a barcode first",
+    goldProductTitle:"Gold product",alarmProductTitle:"Alarm product",
   },
   ar:{
     nameQ:"ما اسمك؟",namePh:"أدخل اسمك...",
@@ -529,15 +549,23 @@ const T = {
     zebraHelp:"انقر على أيقونة Zebra بالأبيض والأسود في شريط المهام.",
     resetBtn:"جلسة جديدة",closeBtn:"إغلاق",liveData:"📋 بيانات مباشرة",
     printLabelsBtn:"طباعة الملصقات",
-    printLabelsTitle:"اختر لغة الملصقات",
+    printLabelsTitle:"طباعة الملصقات",
+    scanLabelsOpt:"ملصقات المسح",customLabelsOpt:"مخصص",printCustomLabel:"طباعة",customBarcodePh:"الباركود...",labelBack:"رجوع",
     labelDutch:"الهولندية",labelEnglish:"الإنجليزية",labelArabic:"العربية",labelCancel:"إلغاء",
     labelPrintNoPrinter:"لم يتم العثور على طابعة Zebra. تحقق من Zebra Browser Print.",
     labelPrintError:"فشلت الطباعة. تحقق من تشغيل Zebra Browser Print.",
-    labelPrintDone:"✓ تمت طباعة الملصقات",
+    labelPrintDone:"✓ تمت طباعة الملصقات",customLabelEmpty:"أدخل الباركود أولاً",
+    goldProductTitle:"منتج ذهبي",alarmProductTitle:"منتج إنذار",
   }
 };
 
 const gradeWords = {A:"Perfect",B:"2dekans",B3:"3dekans",C:"Cleaning","D-rep":"Repair","D-def":"Defect"};
+
+// Tijdelijke interne testcodes voor speciale tags
+const SPECIAL_TAG_TEST_PRODUCTS = {
+  '36735462': {tag: 'Alarmproduct'},
+  '23985740': {tag: 'Goud'}
+};
 
 // ── State ─────────────────────────────────────────────────
 let activeLang   = localStorage.getItem('activeLang') || '';
@@ -642,9 +670,15 @@ function applyLang(){
   // Knoppen rechtsonder
   document.getElementById('reset-btn').textContent = t('resetBtn');
   document.getElementById('close-btn').textContent = t('closeBtn');
-  document.getElementById('data-badge').textContent = t('liveData');
+  updateAccountInd();
   document.getElementById('print-labels-btn').textContent = t('printLabelsBtn');
   document.getElementById('mpl-title').textContent = t('printLabelsTitle');
+  document.getElementById('mpl-scan-labels').textContent = t('scanLabelsOpt');
+  document.getElementById('mpl-custom').textContent = t('customLabelsOpt');
+  document.getElementById('custom-label-print').textContent = t('printCustomLabel');
+  document.getElementById('custom-label-barcode').placeholder = t('customBarcodePh');
+  document.getElementById('mpl-back-scan').textContent = t('labelBack');
+  document.getElementById('mpl-back-custom').textContent = t('labelBack');
   document.getElementById('mpl-nl').textContent = t('labelDutch');
   document.getElementById('mpl-en').textContent = t('labelEnglish');
   document.getElementById('mpl-ar').textContent = t('labelArabic');
@@ -681,6 +715,7 @@ function startApp(){
   if(!supplier){ showModal('m-sup'); renderSupList(''); supSearch.value=''; supSearch.focus(); return; }
   hideAllModals();
   showSupBar();
+  updateAccountInd();
   updateCounter(false);
   focusInput();
   flushOfflineQueue();
@@ -1013,12 +1048,70 @@ document.getElementById('change-sup-btn').addEventListener('click',()=>{
 function showSupBar(){
   curSupEl.textContent=supplier;
   supplierBar.style.display='flex';
+  updateAccountInd();
 }
+
+function updateAccountInd(){
+  const el = document.getElementById('account-ind');
+  if(!el) return;
+  if(userName){
+    el.textContent = '👤 ' + userName;
+    el.style.display = 'block';
+  } else {
+    el.style.display = 'none';
+  }
+}
+
+// Account indicator klik → wissel account
+document.getElementById('account-ind').addEventListener('click', ()=>{
+  const anyPanel = gradePanel.style.display==='flex' || subPanel.style.display==='flex';
+  if(anyPanel) return;
+  // Reset account maar behoud leverancier en taal
+  userName=''; userInit=''; userId='';
+  localStorage.removeItem('userName');
+  localStorage.removeItem('userInit');
+  localStorage.removeItem('userId');
+  document.getElementById('account-ind').style.display='none';
+  laadAccountsEnToon();
+});
+
+// Fullscreen knop
+document.getElementById('fullscreen-btn').addEventListener('click', toggleFullscreen);
+document.addEventListener('keydown', e => {
+  if(e.key === 'F11'){ e.preventDefault(); toggleFullscreen(); }
+});
+function toggleFullscreen(){
+  if(!document.fullscreenElement){
+    document.documentElement.requestFullscreen().catch(()=>{});
+    document.getElementById('fullscreen-btn').textContent = '✕ Volledig scherm';
+  } else {
+    document.exitFullscreen().catch(()=>{});
+    document.getElementById('fullscreen-btn').textContent = '⛶ Volledig scherm';
+  }
+}
+document.addEventListener('fullscreenchange', ()=>{
+  const btn = document.getElementById('fullscreen-btn');
+  if(btn) btn.textContent = document.fullscreenElement ? '✕ Volledig scherm' : '⛶ Volledig scherm';
+});
 
 // ── Product zoeken via Firebase ───────────────────────────
 async function findProduct(barcode, supplier) {
   try {
-    const key = 'p_' + barcode.trim().replace(/[.#$[\]/]/g, '_');
+    const cleanBarcode = barcode.trim();
+    if (SPECIAL_TAG_TEST_PRODUCTS[cleanBarcode]) {
+      return {
+        status: 'found',
+        barcode: cleanBarcode,
+        productcode: cleanBarcode,
+        leverancier: supplier || '',
+        mismatch: false,
+        leverancier_correct: '',
+        tags: SPECIAL_TAG_TEST_PRODUCTS[cleanBarcode].tag,
+        grading: ''
+      };
+    }
+
+    const key = 'p_' + cleanBarcode.replace(/[.#$[\]/]/g, '_');
     const url = `${FIREBASE_URL}/producten/${key}.json`;
     const res  = await fetch(url);
     const data = await res.json();
@@ -1051,6 +1144,13 @@ function getGradingText(raw) {
   const idx = {nl:0, en:1, ar:2}[activeLang] ?? 0;
   return parts[idx] || parts[0] || '';
 }
+
+function productHasTag(product, tagName) {
+  if(!product || !product.tags) return false;
+  return String(product.tags).toLowerCase().includes(String(tagName).toLowerCase());
+}
+
+function wait(ms){ return new Promise(resolve => setTimeout(resolve, ms)); }
 
 // ── Sync naar Google Sheets ───────────────────────────────
 function showSync(state, msg){
@@ -1115,6 +1215,7 @@ function updateCounter(increment){
 
 // ── Escape / Cancel ───────────────────────────────────────
 function cancelScan(){
+  stopAlarm();
   pendingScan=null; pendingGrade=null;
   hideGradePanel();
   subPanel.style.display='none';
@@ -1137,6 +1238,56 @@ function showGreen(){
   greenMsg.style.display='block';
   fbTitle.style.display='none'; fbSub.style.display='none';
   bcDisp.style.display='none'; scanHintEl.style.display='none';
+}
+function showGoldProduct(product, barcode){
+  overlay.className='gold';
+  document.getElementById('main-logo').style.display='none';
+  greenMsg.style.display='none';
+  fbTitle.textContent = '🏆 ' + t('goldProductTitle');
+  fbTitle.style.display='block';
+  const txt = getGradingText(product && product.grading || '');
+  if(txt){ fbSub.textContent=txt; fbSub.style.display='block'; fbSub.style.direction=activeLang==='ar'?'rtl':'ltr'; }
+  else fbSub.style.display='none';
+  bcDisp.textContent=barcode; bcDisp.style.display='block';
+  scanHintEl.style.display='none';
+}
+// ── Alarm timer state ─────────────────────────────────────
+let alarmInterval = null;
+let alarmTimeout  = null;
+
+function stopAlarm() {
+  if (alarmInterval) { clearInterval(alarmInterval); alarmInterval = null; }
+  if (alarmTimeout)  { clearTimeout(alarmTimeout);   alarmTimeout  = null; }
+}
+
+function showAlarmProductWarning(barcode) {
+  return new Promise(resolve => {
+    stopAlarm(); // stop eventueel vorige alarm
+
+    overlay.className = 'red';
+    document.getElementById('main-logo').style.display = 'none';
+    greenMsg.style.display  = 'none';
+    fbTitle.textContent     = '🚨 ' + t('alarmProductTitle');
+    fbTitle.style.display   = 'block';
+    fbSub.textContent       = barcode;
+    fbSub.style.display     = 'block';
+    bcDisp.style.display    = 'none';
+    scanHintEl.style.display= 'none';
+
+    // Wissel tussen red en alarm-red elke 400ms
+    let staat = false;
+    alarmInterval = setInterval(() => {
+      staat = !staat;
+      overlay.className = staat ? 'alarm-red' : 'red';
+    }, 400);
+
+    // Stop na 5000ms en zet definitief op red
+    alarmTimeout = setTimeout(() => {
+      stopAlarm();
+      overlay.className = 'red';
+      resolve();
+    }, 5000);
+  });
 }
 function showRed(product, barcode){
   overlay.className='red';
@@ -1483,6 +1634,42 @@ async function printGradeLabels(labelLang) {
   }
 }
 
+async function printCustomLabel(barcodeValue) {
+  const barcode = String(barcodeValue || '').trim();
+  if(!barcode){ alert(t('customLabelEmpty')); return; }
+
+  try {
+    const printerRes = await fetch(`${BROWSER_PRINT_URL}/available`);
+    if (!printerRes.ok) throw new Error('Browser Print /available gaf geen geldige response');
+
+    const printerData = await printerRes.json();
+    const printer = printerData.printer && printerData.printer[0];
+
+    if (!printer) {
+      alert(t('labelPrintNoPrinter'));
+      return;
+    }
+
+    const safe = zplSafe(barcode);
+    const zpl = `^XA^MMT^PW400^LL200^LS0^FO65,10^BY2^BCN,60,Y,N,N^FD${safe}^FS^FO0,150^FB400,1,0,C,0^A0N,28,28^FD${safe}^FS^XZ`;
+
+    const writeRes = await fetch(`${BROWSER_PRINT_URL}/write`, {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({device: printer, data: zpl})
+    });
+
+    if (!writeRes.ok) throw new Error('Browser Print /write gaf geen geldige response');
+
+    hideAllModals();
+    showSync('ok', t('labelPrintDone'));
+    focusInput();
+  } catch(err) {
+    console.warn('Custom label print fout (Browser Print actief?):', err);
+    alert(t('labelPrintError'));
+  }
+}
+
 // ── Commit scan ───────────────────────────────────────────
 async function commitScan(statusCode, statusWord, extraInfo){
   if(!pendingScan) return;
@@ -1612,7 +1799,9 @@ function verbergMismatch() {
 function toonNaaMismatch(found, barcode) {
   // Toon grading of groen scherm na mismatch keuze
   const isGrading = !!(found && (found.tags||'').toLowerCase().includes('grading'));
-  if (isGrading) {
+  if (productHasTag(found, 'Goud')) {
+    showGoldProduct(found, barcode);
+  } else if (isGrading) {
     showRed(found, barcode);
   } else {
     showGreen();
@@ -1628,6 +1817,9 @@ async function handleScan(barcode){
   if(!code) return;
   if(gradePanel.style.display==='flex'||subPanel.style.display==='flex') return;
   if(isScanning) return;
+
+  // Stop eventueel lopend alarm
+  stopAlarm();
 
   isScanning = true;
   bInput.value='';
@@ -1652,6 +1844,13 @@ async function handleScan(barcode){
   const isGrading = !!(found && (found.tags||'').toLowerCase().includes('grading'));
   const mismatch  = !!(found && found.mismatch);
 
+  // Detectie op barcode OF tag — prioriteit: Alarmproduct > Goud
+  const ALARM_BARCODES = ['36735462'];
+  const GOUD_BARCODES  = ['23985740'];
+
+  const isAlarm = ALARM_BARCODES.includes(code) || !!(found && productHasTag(found, 'Alarmproduct'));
+  const isGoud  = !isAlarm && (GOUD_BARCODES.includes(code) || !!(found && productHasTag(found, 'Goud')));
+
   pendingScan = {
     barcode: code,
     isGrading,
@@ -1663,8 +1862,33 @@ async function handleScan(barcode){
   };
   pendingGrade = null;
 
+  // Alarm heeft prioriteit — knippert 5 seconden, daarna rood grading scherm
+  if (isAlarm) {
+    await showAlarmProductWarning(code);
+    // Na alarm: altijd rood scherm met grade knoppen
+    overlay.className = 'red';
+    document.getElementById('main-logo').style.display = 'none';
+    greenMsg.style.display = 'none';
+    fbTitle.textContent = '🚨 ' + t('alarmProductTitle');
+    fbTitle.style.display = 'block';
+    const txt = found ? getGradingText(found.grading || '') : '';
+    if(txt){ fbSub.textContent=txt; fbSub.style.display='block'; fbSub.style.direction=activeLang==='ar'?'rtl':'ltr'; }
+    else fbSub.style.display='none';
+    bcDisp.textContent = code; bcDisp.style.display='block';
+    scanHintEl.style.display='none';
+    if (mismatch) {
+      toonMismatch(found, code);
+    } else {
+      showGradePanel();
+    }
+    return;
+  }
+
   if (found && mismatch) {
     toonMismatch(found, code);
+  } else if (isGoud) {
+    showGoldProduct(found, code);
+    showGradePanel();
   } else if (found && isGrading) {
     showRed(found, code);
     showGradePanel();
@@ -1714,17 +1938,39 @@ document.addEventListener('keydown',e=>{
 document.addEventListener('click',e=>{
   if(!e.target.closest('.modal-box')&&!e.target.closest('.ctrl-btn')&&
      !e.target.closest('#grade-panel')&&!e.target.closest('#sub-panel')&&
-     !e.target.closest('#data-badge')) focusInput();
+     !e.target.closest('#account-ind')) focusInput();
 });
 
 // ── Print grade labels ───────────────────────────────────
+function resetPrintLabelsModal(){
+  document.getElementById('mpl-menu').style.display = 'flex';
+  document.getElementById('mpl-scan-options').style.display = 'none';
+  document.getElementById('mpl-custom-options').style.display = 'none';
+  document.getElementById('custom-label-barcode').value = '';
+}
+
 document.getElementById('print-labels-btn').addEventListener('click',()=>{
   const anyPanel = gradePanel.style.display==='flex' || subPanel.style.display==='flex';
   const mismatchOpen = document.getElementById('mismatch-panel').style.display==='flex';
   if(anyPanel || mismatchOpen) return;
   applyLang();
+  resetPrintLabelsModal();
   showModal('m-print-labels');
 });
+
+document.getElementById('mpl-scan-labels').addEventListener('click',()=>{
+  document.getElementById('mpl-menu').style.display = 'none';
+  document.getElementById('mpl-scan-options').style.display = 'flex';
+});
+
+document.getElementById('mpl-custom').addEventListener('click',()=>{
+  document.getElementById('mpl-menu').style.display = 'none';
+  document.getElementById('mpl-custom-options').style.display = 'flex';
+  setTimeout(()=>document.getElementById('custom-label-barcode').focus(), 100);
+});
+
+document.getElementById('mpl-back-scan').addEventListener('click', resetPrintLabelsModal);
+document.getElementById('mpl-back-custom').addEventListener('click', resetPrintLabelsModal);
 
 document.getElementById('mpl-cancel').addEventListener('click',()=>{
   hideAllModals();
@@ -1733,6 +1979,14 @@ document.getElementById('mpl-cancel').addEventListener('click',()=>{
 
 document.querySelectorAll('.label-lang-choice').forEach(btn=>{
   btn.addEventListener('click',()=>printGradeLabels(btn.dataset.labelLang));
+});
+
+document.getElementById('custom-label-print').addEventListener('click',()=>{
+  printCustomLabel(document.getElementById('custom-label-barcode').value);
+});
+
+document.getElementById('custom-label-barcode').addEventListener('keydown',e=>{
+  if(e.key === 'Enter') document.getElementById('custom-label-print').click();
 });
 
 // ── Reset ─────────────────────────────────────────────────
