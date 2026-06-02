@@ -230,6 +230,7 @@
     <nav class="nav">
       <div class="nav-section">OVERZICHT</div>
       <button class="nav-item active" data-page="overview"><i class="ti ti-home"></i>Dashboard</button>
+      <button class="nav-item" data-page="medewerkers"><i class="ti ti-user"></i>Medewerkers</button>
       <button class="nav-item" data-page="scans"><i class="ti ti-barcode"></i>Alle scans</button>
       <div class="nav-section">BEHEER</div>
       <button class="nav-item" data-page="accounts"><i class="ti ti-users"></i>Accounts</button>
@@ -253,8 +254,20 @@
         <button class="period-btn active" data-period="vandaag">Vandaag</button>
         <button class="period-btn" data-period="gisteren">Gisteren</button>
         <button class="period-btn" data-period="week">7 dagen</button>
+        <button class="period-btn" data-period="custom" id="custom-period-btn">📅 Periode</button>
         <button class="refresh-btn" id="refresh-btn" title="Verversen"><i class="ti ti-refresh"></i></button>
+        <button id="test-email-btn" title="Test email sturen" style="padding:6px 14px;border:1px solid var(--border);border-radius:20px;background:var(--white);font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;color:var(--muted);transition:all .15s" onmouseover="this.style.background='var(--bg)'" onmouseout="this.style.background='var(--white)'">📧 Test email</button>
       </div>
+    </div>
+
+    <!-- Datum picker -->
+    <div id="date-picker-bar" style="display:none;background:var(--white);border-bottom:1px solid var(--border);padding:10px 24px;display:none;align-items:center;gap:12px;flex-wrap:wrap">
+      <span style="font-size:13px;font-weight:600;color:var(--muted)">Van</span>
+      <input type="date" id="datum-van" style="padding:6px 10px;border:1px solid var(--border);border-radius:8px;font-size:13px;font-family:inherit;outline:none;cursor:pointer"/>
+      <span style="font-size:13px;font-weight:600;color:var(--muted)">Tot</span>
+      <input type="date" id="datum-tot" style="padding:6px 10px;border:1px solid var(--border);border-radius:8px;font-size:13px;font-family:inherit;outline:none;cursor:pointer"/>
+      <button id="datum-toepassen" style="padding:6px 16px;background:var(--sidebar);color:var(--g1);border:none;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit">Toepassen</button>
+      <button id="datum-annuleren" style="padding:6px 12px;background:transparent;color:var(--muted);border:1px solid var(--border);border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit">Annuleren</button>
     </div>
 
     <div class="content">
@@ -265,7 +278,7 @@
           <div class="stat-card"><div class="stat-label">Totaal scans<div class="stat-icon icon-green"><i class="ti ti-barcode"></i></div></div><div class="stat-val" id="st-totaal">—</div><div class="stat-delta" id="st-totaal-d"></div></div>
           <div class="stat-card"><div class="stat-label">3de kansje<div class="stat-icon icon-purple"><i class="ti ti-camera"></i></div></div><div class="stat-val" id="st-b3">—</div><div class="stat-delta" id="st-b3-d"></div></div>
           <div class="stat-card"><div class="stat-label">Gem. tijd/scan<div class="stat-icon icon-blue"><i class="ti ti-clock"></i></div></div><div class="stat-val" id="st-gemtijd">—</div><div class="stat-delta">seconden gemiddeld</div></div>
-          <div class="stat-card"><div class="stat-label">Mismatches<div class="stat-icon icon-amber"><i class="ti ti-alert-triangle"></i></div></div><div class="stat-val" id="st-mismatch">—</div><div class="stat-delta" id="st-mismatch-d"></div></div>
+          <div class="stat-card"><div class="stat-label">Not found<div class="stat-icon icon-amber"><i class="ti ti-alert-triangle"></i></div></div><div class="stat-val" id="st-mismatch">—</div><div class="stat-delta" id="st-mismatch-d"></div></div>
         </div>
 
         <div class="cards-row">
@@ -281,12 +294,12 @@
 
         <div class="cards-row">
           <div class="card">
-            <div class="card-header"><div class="card-title"><i class="ti ti-users"></i>Scans per medewerker</div></div>
-            <div id="mdw-list"><div class="loading">Laden...</div></div>
-          </div>
-          <div class="card">
             <div class="card-header"><div class="card-title"><i class="ti ti-building-store"></i>Top leveranciers</div></div>
             <div id="lev-list"><div class="loading">Laden...</div></div>
+          </div>
+          <div class="card">
+            <div class="card-header"><div class="card-title"><i class="ti ti-users"></i>Scans per medewerker</div></div>
+            <div id="mdw-list"><div class="loading">Laden...</div></div>
           </div>
         </div>
 
@@ -297,6 +310,47 @@
               <thead><tr><th>ScanID</th><th>Barcode</th><th>Medewerker</th><th>Leverancier</th><th>Grade</th><th>Tijd</th></tr></thead>
               <tbody id="recente-scans"></tbody>
             </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- MEDEWERKERS PAGE -->
+      <div class="page" id="page-medewerkers">
+        <!-- Lijst view -->
+        <div id="mdw-lijst-view">
+          <div class="card">
+            <div class="card-header"><div class="card-title"><i class="ti ti-user"></i>Medewerkers</div></div>
+            <div id="mdw-kaarten" style="display:flex;flex-direction:column;gap:8px;padding:4px 0"></div>
+          </div>
+        </div>
+        <!-- Detail view -->
+        <div id="mdw-detail-view" style="display:none">
+          <div style="margin-bottom:12px">
+            <button onclick="toonMdwLijst()" style="padding:7px 16px;border:1px solid var(--border);border-radius:8px;background:var(--white);font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:6px;color:var(--text)"><i class="ti ti-arrow-left"></i> Terug naar overzicht</button>
+          </div>
+          <div class="stats-grid" id="mdw-stats"></div>
+          <div class="cards-row">
+            <div class="card">
+              <div class="card-header"><div class="card-title"><i class="ti ti-chart-bar"></i>Grade verdeling</div></div>
+              <div id="mdw-grade-bars"></div>
+            </div>
+            <div class="card">
+              <div class="card-header"><div class="card-title"><i class="ti ti-clock"></i>Scans per uur</div></div>
+              <div class="uur-chart" id="mdw-uur-chart"></div>
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-header"><div class="card-title"><i class="ti ti-building-store"></i>Top leveranciers</div></div>
+            <div id="mdw-lev-list"></div>
+          </div>
+          <div class="card" style="margin-top:12px">
+            <div class="card-header"><div class="card-title"><i class="ti ti-clock"></i>Recente scans</div></div>
+            <div style="overflow-x:auto">
+              <table class="scan-table">
+                <thead><tr><th>ScanID</th><th>Barcode</th><th>Leverancier</th><th>Grade</th><th>Tijd</th></tr></thead>
+                <tbody id="mdw-recente-scans"></tbody>
+              </table>
+            </div>
           </div>
         </div>
       </div>
@@ -519,20 +573,74 @@ document.querySelectorAll('.nav-item[data-page]').forEach(btn => {
     document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
     btn.classList.add('active');
     document.getElementById('page-' + btn.dataset.page).classList.add('active');
-    const titels = {overview:'Dashboard', scans:'Alle scans', accounts:'Accounts'};
+    const titels = {overview:'Dashboard', medewerkers:'Medewerkers', scans:'Alle scans', accounts:'Accounts'};
     document.getElementById('topbar-title').textContent = titels[btn.dataset.page] || '';
     if (btn.dataset.page === 'accounts') laadAccountsBeheer();
+    if (btn.dataset.page === 'medewerkers') { toonMdwLijst(); renderMedewerkers(); }
   });
 });
 
 // ── Periodes ─────────────────────────────────────────────
+let customVan = null;
+let customTot = null;
+
 document.querySelectorAll('.period-btn').forEach(btn => {
   btn.addEventListener('click', () => {
+    if (btn.dataset.period === 'custom') {
+      // Toon datum picker
+      const bar = document.getElementById('date-picker-bar');
+      bar.style.display = bar.style.display === 'flex' ? 'none' : 'flex';
+      return;
+    }
     document.querySelectorAll('.period-btn').forEach(b => b.classList.remove('active'));
     btn.classList.add('active');
     huidigePeriode = btn.dataset.period;
+    customVan = null; customTot = null;
+    document.getElementById('date-picker-bar').style.display = 'none';
     laadData();
   });
+});
+
+document.getElementById('datum-toepassen').addEventListener('click', () => {
+  const van = document.getElementById('datum-van').value;
+  const tot = document.getElementById('datum-tot').value;
+  if (!van || !tot) { alert('Vul beide datums in'); return; }
+  customVan = van; customTot = tot;
+  huidigePeriode = 'custom';
+  document.querySelectorAll('.period-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('custom-period-btn').classList.add('active');
+  document.getElementById('custom-period-btn').textContent = `📅 ${van.slice(8,10)}-${van.slice(5,7)}-${van.slice(0,4)} → ${tot.slice(8,10)}-${tot.slice(5,7)}-${tot.slice(0,4)}`;
+  document.getElementById('date-picker-bar').style.display = 'none';
+  laadData();
+});
+
+document.getElementById('datum-annuleren').addEventListener('click', () => {
+  document.getElementById('date-picker-bar').style.display = 'none';
+});
+
+document.getElementById('test-email-btn').addEventListener('click', async () => {
+  const btn = document.getElementById('test-email-btn');
+  btn.textContent = '⟳ Versturen...';
+  btn.disabled = true;
+  try {
+    const res = await apiFetch({
+      actie: 'testEmail',
+      adminId,
+      adminWw,
+      periode: huidigePeriode,
+      customVan: customVan || '',
+      customTot: customTot || ''
+    });
+    if (res && res.status === 'ok') {
+      btn.textContent = '✓ Verstuurd!';
+    } else {
+      btn.textContent = '❌ ' + (res?.message || 'Fout');
+    }
+    setTimeout(() => { btn.textContent = '📧 Test email'; btn.disabled = false; }, 3000);
+  } catch(err) {
+    btn.textContent = '❌ Fout';
+    setTimeout(() => { btn.textContent = '📧 Test email'; btn.disabled = false; }, 3000);
+  }
 });
 
 document.getElementById('refresh-btn').addEventListener('click', () => {
@@ -603,6 +711,15 @@ function filterScansOpPeriode(scans, periode) {
       const diff = (nu - d) / (1000*60*60*24);
       return diff <= 7;
     }
+    if (periode === 'custom' && customVan && customTot) {
+      const parts = datum.split('-');
+      if (parts.length < 3) return false;
+      const d   = new Date(parts[2], parts[1]-1, parts[0]);
+      const van = new Date(customVan);
+      const tot = new Date(customTot);
+      tot.setHours(23,59,59);
+      return d >= van && d <= tot;
+    }
     return true;
   });
 }
@@ -663,7 +780,7 @@ function renderOverview() {
 
   document.getElementById('st-totaal').textContent = totaal;
   document.getElementById('st-b3').textContent = scans.filter(s => s.Status_code === 'B3').length;
-  document.getElementById('st-mismatch').textContent = scans.filter(s => s.Mismatch === 'Yes').length;
+  document.getElementById('st-mismatch').textContent = scans.filter(s => s.Not_found === 'Yes').length;
 
   // Gemiddelde tijd tussen scans — pauzes > 15 min worden overgeslagen
   const tijden = scans.map(s => s.Tijd).filter(Boolean).sort();
@@ -734,24 +851,6 @@ function renderOverview() {
     m.gemTijd = count > 0 ? Math.round(totalSec / count) : null;
   });
 
-  const mdwLijst = Object.values(mdwMap).sort((a,b) => b.count-a.count).slice(0,12);
-  const maxM = Math.max(...mdwLijst.map(m=>m.count), 1);
-  document.getElementById('mdw-list').innerHTML = mdwLijst.length === 0 ? '<div class="empty">Geen data</div>' :
-    '<div style="display:flex;align-items:center;padding:0 0 6px;font-size:10px;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:.5px;border-bottom:1px solid var(--border);margin-bottom:4px">'
-    + '<div style="width:28px"></div>'
-    + '<div style="flex:1;margin-left:10px">Naam</div>'
-    + '<div style="width:28px;text-align:right">Scans</div>'
-    + '<div style="width:80px"></div>'
-    + '<div style="min-width:60px;text-align:right">Gem. tijd</div>'
-    + '</div>'
-    + mdwLijst.map(m => `<div class="mdw-row">
-      <div class="mdw-avatar">${m.init}</div>
-      <div class="mdw-naam">${m.naam}</div>
-      <div class="mdw-count">${m.count}</div>
-      <div class="mdw-bar"><div class="mdw-bar-fill" style="width:${Math.round(m.count/maxM*100)}%"></div></div>
-      <div style="font-size:11px;color:var(--muted);font-weight:600;white-space:nowrap;min-width:60px;text-align:right">${formatTijd(m.gemTijd)}</div>
-    </div>`).join('');
-
   // Leveranciers — top 12
   const levMap = {};
   scans.forEach(s => {
@@ -765,6 +864,39 @@ function renderOverview() {
       <div class="lev-init">${l.slice(0,3)}</div>
       <div class="lev-naam">${l}</div>
       <div class="lev-count">${n}</div>
+    </div>`).join('');
+
+  // Medewerkers — top 12
+  const mdwMap2 = {};
+  scans.forEach(s => {
+    const n = s.Naam || s.Initialen || '?';
+    const i = s.Initialen || '?';
+    if (!mdwMap2[n]) mdwMap2[n] = {naam:n, init:i, count:0, tijden:[]};
+    mdwMap2[n].count++;
+    if (s.Tijd) mdwMap2[n].tijden.push(s.Tijd);
+  });
+  Object.values(mdwMap2).forEach(m => {
+    const gesorteerd = m.tijden.sort();
+    let totalSec = 0, count = 0;
+    for (let i = 1; i < gesorteerd.length; i++) {
+      const a = tijdNaarSec(gesorteerd[i-1]), b = tijdNaarSec(gesorteerd[i]), d = b-a;
+      if (d > 0 && d < 900) { totalSec += d; count++; }
+    }
+    m.gemTijd = count > 0 ? Math.round(totalSec/count) : null;
+  });
+  const mdwLijst = Object.values(mdwMap2).sort((a,b) => b.count-a.count).slice(0,12);
+  const maxM = Math.max(...mdwLijst.map(m=>m.count), 1);
+  document.getElementById('mdw-list').innerHTML = mdwLijst.length === 0 ? '<div class="empty">Geen data</div>' :
+    '<div style="display:flex;padding:0 0 6px;font-size:10px;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:.5px;border-bottom:1px solid var(--border);margin-bottom:4px">'
+    + '<div style="width:38px"></div><div style="flex:1;margin-left:10px">Naam</div>'
+    + '<div style="width:32px;text-align:right">Scans</div><div style="width:80px"></div>'
+    + '<div style="min-width:60px;text-align:right">Gem.</div></div>'
+    + mdwLijst.map(m => `<div class="mdw-row">
+      <div class="mdw-avatar">${m.init}</div>
+      <div class="mdw-naam">${m.naam}</div>
+      <div class="mdw-count">${m.count}</div>
+      <div class="mdw-bar"><div class="mdw-bar-fill" style="width:${Math.round(m.count/maxM*100)}%"></div></div>
+      <div style="font-size:11px;color:var(--muted);font-weight:600;white-space:nowrap;min-width:60px;text-align:right">${formatTijd(m.gemTijd)}</div>
     </div>`).join('');
 
   // Recente scans (laatste 15)
@@ -817,6 +949,133 @@ function renderAlleScans() {
 }
 
 document.getElementById('scan-search')?.addEventListener('input', renderAlleScans);
+
+// ── Medewerkers pagina ───────────────────────────────────
+function renderMedewerkers() {
+  const mdwMap = {};
+  alleScans.forEach(s => {
+    const n = s.Naam || s.Initialen || '?';
+    const i = s.Initialen || '?';
+    if (!mdwMap[n]) mdwMap[n] = {naam:n, init:i, count:0, tijden:[], notFound:0, b3:0};
+    mdwMap[n].count++;
+    if (s.Tijd) mdwMap[n].tijden.push(s.Tijd);
+    if (s.Not_found === 'Yes') mdwMap[n].notFound++;
+    if (s.Status_code === 'B3') mdwMap[n].b3++;
+  });
+
+  Object.values(mdwMap).forEach(m => {
+    const gesorteerd = m.tijden.sort();
+    let totalSec = 0, count = 0;
+    for (let i = 1; i < gesorteerd.length; i++) {
+      const a = tijdNaarSec(gesorteerd[i-1]);
+      const b = tijdNaarSec(gesorteerd[i]);
+      const diff = b - a;
+      if (diff > 0 && diff < 900) { totalSec += diff; count++; }
+    }
+    m.gemTijd = count > 0 ? Math.round(totalSec / count) : null;
+  });
+
+  const lijst = Object.values(mdwMap).sort((a,b) => b.count - a.count);
+  const container = document.getElementById('mdw-kaarten');
+  container.innerHTML = lijst.length === 0 ? '<div class="empty">Geen medewerkers gevonden</div>' :
+    lijst.map(m => {
+      // Eerste scan van de dag
+      const daagScans = alleScans.filter(s => (s.Naam || s.Initialen || '?') === m.naam && s.Tijd);
+      const tijden = daagScans.map(s => s.Tijd).sort();
+      const eersteScan = tijden.length > 0 ? tijden[0] : null;
+
+      return `
+      <div onclick="toonMdwDetail('${m.naam}')" style="display:flex;align-items:center;gap:12px;padding:12px 16px;border:1px solid var(--border);border-radius:10px;cursor:pointer;background:var(--white);transition:all .15s" onmouseover="this.style.background='var(--bg)'" onmouseout="this.style.background='var(--white)'">
+        <div style="width:38px;height:38px;border-radius:50%;background:var(--sidebar);color:var(--g1);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;flex-shrink:0">${m.init}</div>
+        <div style="flex:1">
+          <div style="font-size:14px;font-weight:700;color:var(--text)">${m.naam}</div>
+          <div style="font-size:12px;color:var(--muted);margin-top:2px">${eersteScan ? 'Eerste scan om ' + eersteScan : 'Geen scans vandaag'}</div>
+        </div>
+        <div style="display:flex;gap:24px;text-align:center;align-items:center">
+          <div>
+            <div style="font-size:16px;font-weight:800;color:var(--text)">${m.count}</div>
+            <div style="font-size:10px;color:var(--muted)">scans</div>
+          </div>
+          <div>
+            <div style="font-size:16px;font-weight:800;color:var(--text)">${m.gemTijd !== null ? formatTijd(m.gemTijd) : '—'}</div>
+            <div style="font-size:10px;color:var(--muted)">gem/scan</div>
+          </div>
+        </div>
+        <i class="ti ti-chevron-right" style="color:var(--muted)"></i>
+      </div>`;
+    }).join('');
+}
+
+function toonMdwLijst() {
+  document.getElementById('mdw-lijst-view').style.display = 'block';
+  document.getElementById('mdw-detail-view').style.display = 'none';
+}
+
+function toonMdwDetail(naam) {
+  document.getElementById('mdw-lijst-view').style.display = 'none';
+  document.getElementById('mdw-detail-view').style.display = 'block';
+
+  const scans = alleScans.filter(s => (s.Naam || s.Initialen || '?') === naam);
+  const totaal = scans.length;
+  const init   = scans[0]?.Initialen || naam.slice(0,2).toUpperCase();
+
+  // Stats
+  const tijden = scans.map(s => s.Tijd).filter(Boolean).sort();
+  let totalSec = 0, cnt = 0;
+  for (let i = 1; i < tijden.length; i++) {
+    const a = tijdNaarSec(tijden[i-1]), b = tijdNaarSec(tijden[i]), d = b-a;
+    if (d > 0 && d < 900) { totalSec += d; cnt++; }
+  }
+  const gemTijd = cnt > 0 ? Math.round(totalSec/cnt) : null;
+
+  document.getElementById('mdw-stats').innerHTML = `
+    <div class="stat-card"><div class="stat-label">Totaal scans<div class="stat-icon icon-green"><i class="ti ti-barcode"></i></div></div><div class="stat-val">${totaal}</div></div>
+    <div class="stat-card"><div class="stat-label">3de kansje<div class="stat-icon icon-purple"><i class="ti ti-camera"></i></div></div><div class="stat-val">${scans.filter(s=>s.Status_code==='B3').length}</div></div>
+    <div class="stat-card"><div class="stat-label">Gem. tijd/scan<div class="stat-icon icon-blue"><i class="ti ti-clock"></i></div></div><div class="stat-val">${gemTijd !== null ? formatTijd(gemTijd) : '—'}</div></div>
+    <div class="stat-card"><div class="stat-label">Not found<div class="stat-icon icon-amber"><i class="ti ti-alert-triangle"></i></div></div><div class="stat-val">${scans.filter(s=>s.Not_found==='Yes').length}</div></div>
+  `;
+
+  // Grade verdeling
+  const grades = {A:0,B:0,B3:0,C:0,'D-rep':0,'D-def':0};
+  scans.forEach(s => { if(grades[s.Status_code]!==undefined) grades[s.Status_code]++; });
+  const gradeLabels = {A:'Perfect',B:'2dekans',B3:'3dekans',C:'Schoonmaak','D-rep':'Reparatie','D-def':'Defect'};
+  const gradeKleuren = {A:'',B:'b',B3:'p',C:'a','D-rep':'a','D-def':'r'};
+  const maxG = Math.max(...Object.values(grades),1);
+  document.getElementById('mdw-grade-bars').innerHTML = Object.entries(grades).map(([g,n]) =>
+    `<div class="bar-row"><div class="bar-label">${gradeLabels[g]}</div><div class="bar-track"><div class="bar-fill ${gradeKleuren[g]}" style="width:${Math.round(n/maxG*100)}%"></div></div><div class="bar-pct">${totaal>0?Math.round(n/totaal*100):0}%</div><div class="bar-count">${n}</div></div>`
+  ).join('');
+
+  // Uur grafiek
+  const uurTelling = Array(24).fill(0);
+  scans.forEach(s => { if(s.Tijd){ const u=parseInt(s.Tijd.split(':')[0]); if(!isNaN(u)) uurTelling[u]++; } });
+  const maxU = Math.max(...uurTelling,1);
+  const uurChart = document.getElementById('mdw-uur-chart');
+  uurChart.innerHTML = '';
+  for(let u=6;u<=22;u++){
+    const h=Math.max(Math.round(uurTelling[u]/maxU*76),uurTelling[u]>0?4:2);
+    const wrap=document.createElement('div'); wrap.className='uur-bar-wrap';
+    wrap.innerHTML=`<div class="uur-bar" style="height:${h}px" title="${uurTelling[u]} scans om ${u}:00"></div><div class="uur-label">${u}</div>`;
+    uurChart.appendChild(wrap);
+  }
+
+  // Top leveranciers
+  const levMap = {};
+  scans.forEach(s => { const l=s.Leverancier||'?'; if(!levMap[l]) levMap[l]=0; levMap[l]++; });
+  const levLijst = Object.entries(levMap).sort((a,b)=>b[1]-a[1]).slice(0,8);
+  document.getElementById('mdw-lev-list').innerHTML = levLijst.length===0 ? '<div class="empty">Geen data</div>' :
+    levLijst.map(([l,n])=>`<div class="lev-row"><div class="lev-init">${l.slice(0,3)}</div><div class="lev-naam">${l}</div><div class="lev-count">${n}</div></div>`).join('');
+
+  // Recente scans
+  document.getElementById('mdw-recente-scans').innerHTML = [...scans].reverse().slice(0,15).map(s => {
+    const g = s.Status_code||'';
+    const cls = 'grade-'+g.replace('-','');
+    const label = {A:'Perfect',B:'2dekans',B3:'3dekans',C:'Schoon','D-rep':'Reparatie','D-def':'Defect'}[g]||g;
+    return `<tr><td style="font-family:monospace;font-size:11px">${s.ScanID||''}</td><td>${s.Barcode||''}</td><td>${s.Leverancier||''}</td><td><span class="grade-badge ${cls}">${label}</span></td><td>${s.Tijd||''}</td></tr>`;
+  }).join('');
+
+  // Topbar titel
+  document.getElementById('topbar-title').textContent = naam;
+}
 
 // ── Accounts beheer ──────────────────────────────────────
 async function laadAccountsBeheer() {
