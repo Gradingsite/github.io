@@ -110,6 +110,8 @@ body{font-family:'Montserrat','Segoe UI',Arial,sans-serif;min-height:100vh;displ
 #reset-btn:hover{background:var(--red);color:white}
 #close-btn{bottom:16px;background:rgba(255,255,255,.06);color:rgba(255,255,255,.5);border:1px solid rgba(255,255,255,.12)}
 #close-btn:hover{background:rgba(255,255,255,.12);color:white}
+#print-labels-btn{bottom:148px;background:rgba(146,208,80,.18);color:rgba(255,255,255,.82);border:1px solid rgba(146,208,80,.45)}
+#print-labels-btn:hover{background:var(--g1);color:var(--dark)}
 
 /* ── Lang indicator ── */
 #lang-ind{position:fixed;top:16px;left:16px;color:rgba(255,255,255,.7);font-size:11px;font-weight:800;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.15);padding:6px 12px;border-radius:50px;z-index:9999;letter-spacing:1px;cursor:pointer}
@@ -148,6 +150,9 @@ body{font-family:'Montserrat','Segoe UI',Arial,sans-serif;min-height:100vh;displ
 .m-input:focus{border-color:var(--g1)}
 .m-btn{padding:13px 28px;background:var(--g1);color:var(--dark);border:none;border-radius:50px;font-size:15px;font-weight:800;cursor:pointer;width:100%;font-family:inherit;letter-spacing:.5px;transition:all .15s}
 .m-btn:hover{background:var(--g2);color:white}
+.m-btn-secondary{background:rgba(255,255,255,.08);color:rgba(255,255,255,.75);border:1px solid rgba(255,255,255,.16)}
+.m-btn-secondary:hover{background:rgba(255,255,255,.14);color:white}
+.label-lang-grid{display:flex;flex-direction:column;gap:10px;width:100%}
 
 /* ── Lang picker ── */
 .lang-grid{display:flex;gap:10px}
@@ -182,6 +187,8 @@ body{font-family:'Montserrat','Segoe UI',Arial,sans-serif;min-height:100vh;displ
 
 /* ── Account modal extras ── */
 .acc-list{width:100%;max-height:220px;overflow-y:auto;display:flex;flex-direction:column;gap:6px}
+#acc-search{font-size:15px;font-weight:600;text-align:left;letter-spacing:0}
+#acc-search[dir="rtl"]{text-align:right}
 .acc-item{padding:11px 16px;border-radius:12px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.15);color:white;font-size:14px;font-weight:700;cursor:pointer;text-align:left;font-family:inherit;display:flex;align-items:center;gap:10px;transition:all .15s}
 .acc-item:hover{background:rgba(146,208,80,.2);border-color:var(--g1)}
 .acc-avatar{width:32px;height:32px;border-radius:50%;background:var(--g1);color:var(--dark);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;flex-shrink:0}
@@ -269,11 +276,26 @@ body{font-family:'Montserrat','Segoe UI',Arial,sans-serif;min-height:100vh;displ
   </div>
 </div>
 
+<!-- Labeltaal kiezen voor printlabels -->
+<div class="modal" id="m-print-labels" style="display:none">
+  <div class="modal-box">
+    <div class="modal-logo"><img src="NRlogo.png" alt="2de Kansje logo"/></div>
+    <h2 id="mpl-title">Kies labeltaal</h2>
+    <div class="label-lang-grid">
+      <button class="m-btn label-lang-choice" id="mpl-nl" data-label-lang="nl">Nederlands</button>
+      <button class="m-btn label-lang-choice" id="mpl-en" data-label-lang="en">Engels</button>
+      <button class="m-btn label-lang-choice" id="mpl-ar" data-label-lang="ar">Arabisch</button>
+    </div>
+    <button class="m-btn m-btn-secondary" id="mpl-cancel">Annuleren</button>
+  </div>
+</div>
+
 <!-- Account kiezen -->
 <div class="modal" id="m-account" style="display:none">
   <div class="modal-box">
     <div class="modal-logo"><img src="NRlogo.png" alt="2de Kansje logo"/></div>
     <h2 id="mac-title">Kies je account</h2>
+    <input class="m-input" id="acc-search" type="text" placeholder="Zoek account..." autocomplete="off" spellcheck="false"/>
     <div class="acc-list" id="acc-list">
       <div style="color:rgba(255,255,255,.4);font-size:13px;text-align:center">Laden...</div>
     </div>
@@ -403,6 +425,7 @@ body{font-family:'Montserrat','Segoe UI',Arial,sans-serif;min-height:100vh;displ
   </div>
 </div>
 
+<button class="ctrl-btn" id="print-labels-btn">Labels printen</button>
 <button class="ctrl-btn" id="reset-btn">Nieuwe sessie</button>
 <button class="ctrl-btn" id="close-btn">Afsluiten</button>
 
@@ -435,6 +458,7 @@ const T = {
     nameQ:"Wat is je naam?",namePh:"Voer je naam in...",
     initQ:"Wat zijn je initialen?",initPh:"bv. JD",
     supQ:"Kies leverancier",supPh:"Zoek of typ...",supHint:"Selecteer een leverancier",supLabel:"Leverancier:",supChange:"↺ Wissel",
+    accSearchPh:"Zoek account...",
     scanHint:"Scan of typ een barcode en druk op Enter",
     green:"U kunt dit product graden zoals u normaal ook doet",
     grades:["Perfect","2dekans","3dekans","Schoonmaak","Reparatie","Defect"],
@@ -450,11 +474,18 @@ const T = {
     zebraBtn:"Ik kan hem niet vinden, wat nu?",
     zebraOk:"Begrepen, doorgaan →",
     zebraHelp:"Klik op de zwart-witte Zebra icon onder in je taakbalk.",
+    printLabelsBtn:"Labels printen",
+    printLabelsTitle:"Kies labeltaal",
+    labelDutch:"Nederlands",labelEnglish:"Engels",labelArabic:"Arabisch",labelCancel:"Annuleren",
+    labelPrintNoPrinter:"Geen Zebra-printer gevonden. Controleer Zebra Browser Print.",
+    labelPrintError:"Printen mislukt. Controleer of Zebra Browser Print actief is.",
+    labelPrintDone:"✓ Labels geprint",
   },
   en:{
     nameQ:"What is your name?",namePh:"Enter your name...",
     initQ:"What are your initials?",initPh:"e.g. JD",
     supQ:"Choose supplier",supPh:"Search or type...",supHint:"Select a supplier",supLabel:"Supplier:",supChange:"↺ Switch",
+    accSearchPh:"Search account...",
     scanHint:"Scan or type a barcode and press Enter",
     green:"You can grade this product as you normally would",
     grades:["Perfect","2nd chance","3rd chance","Cleaning","Repair","Defect"],
@@ -470,11 +501,18 @@ const T = {
     zebraOk:"Got it, continue →",
     zebraHelp:"Click the black and white Zebra icon in your taskbar.",
     resetBtn:"New session",closeBtn:"Close",liveData:"📋 Live data",
+    printLabelsBtn:"Print labels",
+    printLabelsTitle:"Choose label language",
+    labelDutch:"Dutch",labelEnglish:"English",labelArabic:"Arabic",labelCancel:"Cancel",
+    labelPrintNoPrinter:"No Zebra printer found. Check Zebra Browser Print.",
+    labelPrintError:"Printing failed. Check whether Zebra Browser Print is running.",
+    labelPrintDone:"✓ Labels printed",
   },
   ar:{
     nameQ:"ما اسمك؟",namePh:"أدخل اسمك...",
     initQ:"ما هي أحرفك الأولى؟",initPh:"مثال: JD",
     supQ:"اختر المورد",supPh:"ابحث أو اكتب...",supHint:"اختر موردًا",supLabel:"المورد:",supChange:"↺ تغيير",
+    accSearchPh:"ابحث عن حساب...",
     scanHint:"امسح الباركود واضغط Enter",
     green:"يمكنك تصنيف هذا المنتج كما تفعل عادةً",
     grades:["ممتاز","فرصة ثانية","فرصة ثالثة","تنظيف","إصلاح","معطوب"],
@@ -490,6 +528,12 @@ const T = {
     zebraOk:"حسناً، متابعة →",
     zebraHelp:"انقر على أيقونة Zebra بالأبيض والأسود في شريط المهام.",
     resetBtn:"جلسة جديدة",closeBtn:"إغلاق",liveData:"📋 بيانات مباشرة",
+    printLabelsBtn:"طباعة الملصقات",
+    printLabelsTitle:"اختر لغة الملصقات",
+    labelDutch:"الهولندية",labelEnglish:"الإنجليزية",labelArabic:"العربية",labelCancel:"إلغاء",
+    labelPrintNoPrinter:"لم يتم العثور على طابعة Zebra. تحقق من Zebra Browser Print.",
+    labelPrintError:"فشلت الطباعة. تحقق من تشغيل Zebra Browser Print.",
+    labelPrintDone:"✓ تمت طباعة الملصقات",
   }
 };
 
@@ -507,6 +551,8 @@ let offlineQueue = JSON.parse(localStorage.getItem('offlineQueue'))||[];
 let pendingScan  = null;
 let pendingGrade = null;
 let geselecteerdAccount = null; // tijdelijk tijdens login flow
+let accountsCache = [];
+let zebraAfterAccount = false;
 
 localStorage.setItem('sessionId', sessionId);
 
@@ -597,14 +643,25 @@ function applyLang(){
   document.getElementById('reset-btn').textContent = t('resetBtn');
   document.getElementById('close-btn').textContent = t('closeBtn');
   document.getElementById('data-badge').textContent = t('liveData');
+  document.getElementById('print-labels-btn').textContent = t('printLabelsBtn');
+  document.getElementById('mpl-title').textContent = t('printLabelsTitle');
+  document.getElementById('mpl-nl').textContent = t('labelDutch');
+  document.getElementById('mpl-en').textContent = t('labelEnglish');
+  document.getElementById('mpl-ar').textContent = t('labelArabic');
+  document.getElementById('mpl-cancel').textContent = t('labelCancel');
   // Account modals teksten
   document.getElementById('mac-title').textContent = activeLang==='ar' ? 'اختر حسابك' : activeLang==='en' ? 'Choose your account' : 'Kies je account';
+  const accSearch = document.getElementById('acc-search');
+  if(accSearch){
+    accSearch.placeholder = t('accSearchPh');
+    accSearch.dir = activeLang==='ar' ? 'rtl' : 'ltr';
+  }
   document.getElementById('mpw-title').textContent = activeLang==='ar' ? 'كلمة المرور' : activeLang==='en' ? 'Password' : 'Wachtwoord';
   document.getElementById('mna-title').textContent = activeLang==='ar' ? 'حساب جديد' : activeLang==='en' ? 'New account' : 'Nieuw account';
 }
 
 // ── Modal flow ────────────────────────────────────────────
-const ALL_MODALS = ['m-lang','m-account','m-wachtwoord','m-nieuw-acc','m-sup','m-zebra'];
+const ALL_MODALS = ['m-lang','m-account','m-wachtwoord','m-nieuw-acc','m-sup','m-zebra','m-print-labels'];
 function showModal(id){ ALL_MODALS.forEach(m=>{ const el=document.getElementById(m); if(el) el.style.display=m===id?'flex':'none'; }); }
 function hideAllModals(){ ALL_MODALS.forEach(m=>{ const el=document.getElementById(m); if(el) el.style.display='none'; }); }
 
@@ -645,35 +702,121 @@ document.getElementById('ml-confirm').addEventListener('click',()=>{
 });
 
 // ── Accounts laden en tonen ───────────────────────────────
+function normaliseerAccountTekst(v){
+  return String(v || '').toLowerCase().trim();
+}
+
+function accountAdminTekst(){
+  return activeLang==='ar'
+    ? 'لإنشاء حساب جديد، تواصل مع المسؤول'
+    : activeLang==='en'
+      ? 'Contact an admin to create a new account'
+      : 'Nieuw account? Vraag een admin via het dashboard';
+}
+
+function renderAccountList(q = ''){
+  const lijst = document.getElementById('acc-list');
+  const zoek = normaliseerAccountTekst(q);
+  lijst.innerHTML = '';
+
+  let resultaten = accountsCache;
+
+  if(zoek){
+    const begintMet = [];
+    const bevat = [];
+
+    accountsCache.forEach(acc => {
+      const naam = normaliseerAccountTekst(acc.naam);
+      const initialen = normaliseerAccountTekst(acc.initialen);
+
+      if(naam.startsWith(zoek) || initialen.startsWith(zoek)){
+        begintMet.push(acc);
+      } else if(naam.includes(zoek) || initialen.includes(zoek)){
+        bevat.push(acc);
+      }
+    });
+
+    resultaten = begintMet.concat(bevat);
+  }
+
+  if(resultaten.length > 0){
+    resultaten.forEach(acc => {
+      const btn = document.createElement('button');
+      btn.className = 'acc-item';
+
+      const avatar = document.createElement('div');
+      avatar.className = 'acc-avatar';
+      avatar.textContent = acc.initialen || '';
+
+      const naam = document.createElement('span');
+      naam.textContent = acc.naam || '';
+
+      btn.appendChild(avatar);
+      btn.appendChild(naam);
+      btn.addEventListener('click', () => toonWachtwoordModal(acc));
+      lijst.appendChild(btn);
+    });
+  } else {
+    const leeg = document.createElement('div');
+    leeg.style.cssText = 'color:rgba(255,255,255,.4);font-size:13px;text-align:center;padding:8px;font-weight:500';
+    leeg.textContent = activeLang==='ar' ? 'لم يتم العثور على حساب' : activeLang==='en' ? 'No accounts found' : 'Geen accounts gevonden';
+    lijst.appendChild(leeg);
+  }
+
+  const adminLink = document.createElement('div');
+  adminLink.style.cssText = 'color:rgba(255,255,255,.3);font-size:11px;text-align:center;padding:8px;font-weight:500';
+  adminLink.textContent = accountAdminTekst();
+  lijst.appendChild(adminLink);
+}
+
 async function laadAccountsEnToon(){
   showModal('m-account');
+
   const lijst = document.getElementById('acc-list');
+  const zoekInput = document.getElementById('acc-search');
+
+  if(zoekInput){
+    zoekInput.value = '';
+    zoekInput.placeholder = t('accSearchPh');
+    zoekInput.dir = activeLang==='ar' ? 'rtl' : 'ltr';
+    setTimeout(() => zoekInput.focus(), 100);
+  }
+
   lijst.innerHTML = '<div style="color:rgba(255,255,255,.4);font-size:13px;text-align:center">Laden...</div>';
 
   try {
     const res  = await fetch(SCANS_URL + '?actie=accounts');
     const data = await res.json();
-    lijst.innerHTML = '';
 
-    if(data.accounts && data.accounts.length > 0){
-      data.accounts.forEach(acc => {
-        const btn = document.createElement('button');
-        btn.className = 'acc-item';
-        btn.innerHTML = `<div class="acc-avatar">${acc.initialen}</div><span>${acc.naam}</span>`;
-        btn.addEventListener('click', () => toonWachtwoordModal(acc));
-        lijst.appendChild(btn);
-      });
+    accountsCache = Array.isArray(data.accounts) ? data.accounts : [];
+    renderAccountList('');
+
+    if(zoekInput){
+      zoekInput.value = '';
+      setTimeout(() => zoekInput.focus(), 100);
     }
 
-    // Verwijzing naar admin dashboard ipv nieuw account knop
-    const adminLink = document.createElement('div');
-    adminLink.style.cssText = 'color:rgba(255,255,255,.3);font-size:11px;text-align:center;padding:8px;font-weight:500';
-    adminLink.textContent = activeLang==='ar' ? 'لإنشاء حساب جديد، تواصل مع المسؤول' : activeLang==='en' ? 'Contact an admin to create a new account' : 'Nieuw account? Vraag een admin via het dashboard';
-    lijst.appendChild(adminLink);
-
   } catch(err) {
+    accountsCache = [];
     lijst.innerHTML = '<div style="color:#ff6b6b;font-size:13px;text-align:center">Kan accounts niet laden</div>';
   }
+}
+
+const accSearchInput = document.getElementById('acc-search');
+if(accSearchInput){
+  accSearchInput.addEventListener('input', e => {
+    renderAccountList(e.target.value);
+  });
+
+  accSearchInput.addEventListener('keydown', e => {
+    if(e.key === 'Enter'){
+      const eersteAccount = document.querySelector('#acc-list .acc-item');
+      if(eersteAccount){
+        e.preventDefault();
+        eersteAccount.click();
+      }
+    }
+  });
 }
 
 // ── Wachtwoord modal ──────────────────────────────────────
@@ -726,7 +869,7 @@ document.getElementById('pw-confirm').addEventListener('click', async ()=>{
       }
 
       setTimeout(()=>{
-        showModal('m-sup'); renderSupList(''); supSearch.value=''; supSearch.focus();
+        toonZebraModal(true);
       }, 400);
     } else {
       document.getElementById('pw-hint').textContent = activeLang==='en'?'Incorrect password':activeLang==='ar'?'كلمة المرور غير صحيحة':'Wachtwoord onjuist';
@@ -795,7 +938,7 @@ document.getElementById('na-confirm').addEventListener('click', async ()=>{
       hint.textContent = '✓ Account aangemaakt!';
       hint.className   = 'pw-hint ok';
       setTimeout(()=>{
-        showModal('m-sup'); renderSupList(''); supSearch.value=''; supSearch.focus();
+        toonZebraModal(true);
       }, 600);
     } else {
       hint.textContent = data.message || 'Fout bij aanmaken';
@@ -811,7 +954,8 @@ document.getElementById('na-confirm').addEventListener('click', async ()=>{
 });
 
 // ── Zebra Browser Print waarschuwing ─────────────────────
-function toonZebraModal(){
+function toonZebraModal(afterAccount = false){
+  zebraAfterAccount = !!afterAccount;
   document.getElementById('mz-warn').textContent     = t('zebraWarn');
   document.getElementById('mz-ok').textContent       = t('zebraOk');
   document.getElementById('mz-help-btn').textContent = t('zebraBtn');
@@ -822,6 +966,16 @@ function toonZebraModal(){
 
 document.getElementById('mz-ok').addEventListener('click', ()=>{
   hideAllModals();
+
+  if(zebraAfterAccount){
+    zebraAfterAccount = false;
+    showModal('m-sup');
+    renderSupList('');
+    supSearch.value = '';
+    supSearch.focus();
+    return;
+  }
+
   focusInput();
 });
 
@@ -847,7 +1001,7 @@ function selectSupplier(s){
   supplier=s; localStorage.setItem('supplier',supplier);
   hideAllModals();
   showSupBar();
-  toonZebraModal();
+  focusInput();
 }
 supSearch.addEventListener('input',()=>renderSupList(supSearch.value));
 supSearch.addEventListener('keydown',e=>{
@@ -1260,6 +1414,75 @@ async function printSticker(scanId, initialen, grade) {
   }
 }
 
+function zplSafe(value) {
+  // ^ en ~ zijn ZPL-controltekens; vervang ze zodat labeltekst de printjob niet breekt.
+  return String(value ?? '').replace(/[\^~]/g, ' ');
+}
+
+function getGradeLabelsForLanguage(labelLang) {
+  const labels = {
+    nl: [
+      {barcode:'1', text:'Perfect'},
+      {barcode:'2', text:'2dekans'},
+      {barcode:'3', text:'3dekans'},
+      {barcode:'4', text:'Schoonmaak'},
+      {barcode:'5', text:'Reparatie'},
+      {barcode:'6', text:'Defect'}
+    ],
+    en: [
+      {barcode:'1', text:'Perfect'},
+      {barcode:'2', text:'2nd chance'},
+      {barcode:'3', text:'3rd chance'},
+      {barcode:'4', text:'Cleaning'},
+      {barcode:'5', text:'Repair'},
+      {barcode:'6', text:'Defect'}
+    ],
+    ar: [
+      {barcode:'1', text:'ممتاز'},
+      {barcode:'2', text:'فرصة ثانية'},
+      {barcode:'3', text:'فرصة ثالثة'},
+      {barcode:'4', text:'تنظيف'},
+      {barcode:'5', text:'إصلاح'},
+      {barcode:'6', text:'معطوب'}
+    ]
+  };
+  return labels[labelLang] || labels.nl;
+}
+
+async function printGradeLabels(labelLang) {
+  try {
+    const printerRes = await fetch(`${BROWSER_PRINT_URL}/available`);
+    if (!printerRes.ok) throw new Error('Browser Print /available gaf geen geldige response');
+
+    const printerData = await printerRes.json();
+    const printer = printerData.printer && printerData.printer[0];
+
+    if (!printer) {
+      alert(t('labelPrintNoPrinter'));
+      return;
+    }
+
+    const zpl = getGradeLabelsForLanguage(labelLang).map(label =>
+      `^XA^MMT^PW400^LL200^LS0^FO85,10^BY5^BCN,70,Y,N,N^FD${zplSafe(label.barcode)}^FS^FO0,150^FB400,1,0,C,0^A0N,28,28^FD${zplSafe(label.text)}^FS^XZ`
+    ).join('');
+
+    const writeRes = await fetch(`${BROWSER_PRINT_URL}/write`, {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({device: printer, data: zpl})
+    });
+
+    if (!writeRes.ok) throw new Error('Browser Print /write gaf geen geldige response');
+
+    hideAllModals();
+    showSync('ok', t('labelPrintDone'));
+    focusInput();
+  } catch(err) {
+    console.warn('Print labels fout (Browser Print actief?):', err);
+    alert(t('labelPrintError'));
+  }
+}
+
 // ── Commit scan ───────────────────────────────────────────
 async function commitScan(statusCode, statusWord, extraInfo){
   if(!pendingScan) return;
@@ -1492,6 +1715,24 @@ document.addEventListener('click',e=>{
   if(!e.target.closest('.modal-box')&&!e.target.closest('.ctrl-btn')&&
      !e.target.closest('#grade-panel')&&!e.target.closest('#sub-panel')&&
      !e.target.closest('#data-badge')) focusInput();
+});
+
+// ── Print grade labels ───────────────────────────────────
+document.getElementById('print-labels-btn').addEventListener('click',()=>{
+  const anyPanel = gradePanel.style.display==='flex' || subPanel.style.display==='flex';
+  const mismatchOpen = document.getElementById('mismatch-panel').style.display==='flex';
+  if(anyPanel || mismatchOpen) return;
+  applyLang();
+  showModal('m-print-labels');
+});
+
+document.getElementById('mpl-cancel').addEventListener('click',()=>{
+  hideAllModals();
+  focusInput();
+});
+
+document.querySelectorAll('.label-lang-choice').forEach(btn=>{
+  btn.addEventListener('click',()=>printGradeLabels(btn.dataset.labelLang));
 });
 
 // ── Reset ─────────────────────────────────────────────────
