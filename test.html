@@ -1614,7 +1614,7 @@ async function printProductBarcodeAantal(aantal) {
   const leverancier = pendingScan.product ? (pendingScan.product.leverancier || supplier) : supplier;
 
   try {
-    const printerRes = await fetch(`${BROWSER_PRINT_URL}/available`);
+    const printerRes = await fetch(`${BROWSER_PRINT_URL}/available`, {targetAddressSpace: 'local'});
     const printerData = await printerRes.json();
     const printer = printerData.printer && printerData.printer[0];
     if (!printer) { console.warn('Geen printer gevonden'); return; }
@@ -1641,7 +1641,7 @@ async function printProductBarcode() { await printProductBarcodeAantal(1); }
 async function printSticker(scanId, initialen, grade) {
   try {
     // Haal standaard printer op
-    const printerRes = await fetch(`${BROWSER_PRINT_URL}/available`);
+    const printerRes = await fetch(`${BROWSER_PRINT_URL}/available`, {targetAddressSpace: 'local'});
     const printerData = await printerRes.json();
     const printer = printerData.printer && printerData.printer[0];
     if (!printer) { console.warn('Geen printer gevonden'); return; }
@@ -1652,6 +1652,7 @@ async function printSticker(scanId, initialen, grade) {
     // Stuur naar Browser Print
     await fetch(`${BROWSER_PRINT_URL}/write`, {
       method: 'POST',
+      targetAddressSpace: 'local',
       headers: {'Content-Type': 'application/json'},
       body: JSON.stringify({device: printer, data: zpl})
     });
@@ -1699,7 +1700,7 @@ function getGradeLabelsForLanguage(labelLang) {
 
 async function printGradeLabels(labelLang) {
   try {
-    const printerRes = await fetch(`${BROWSER_PRINT_URL}/available`);
+    const printerRes = await fetch(`${BROWSER_PRINT_URL}/available`, {targetAddressSpace: 'local'});
     if (!printerRes.ok) throw new Error('Browser Print /available gaf geen geldige response');
 
     const printerData = await printerRes.json();
@@ -1716,6 +1717,7 @@ async function printGradeLabels(labelLang) {
 
     const writeRes = await fetch(`${BROWSER_PRINT_URL}/write`, {
       method: 'POST',
+      targetAddressSpace: 'local',
       headers: {'Content-Type': 'application/json'},
       body: JSON.stringify({device: printer, data: zpl})
     });
@@ -1736,7 +1738,7 @@ async function printCustomLabel(barcodeValue, aantal = 1) {
   if(!barcode){ alert(t('customLabelEmpty')); return; }
 
   try {
-    const printerRes = await fetch(`${BROWSER_PRINT_URL}/available`);
+    const printerRes = await fetch(`${BROWSER_PRINT_URL}/available`, {targetAddressSpace: 'local'});
     if (!printerRes.ok) throw new Error('Browser Print /available gaf geen geldige response');
 
     const printerData = await printerRes.json();
@@ -1929,6 +1931,8 @@ async function handleScan(barcode){
   const code=barcode.trim();
   if(!code) return;
   if(code.length < 4) return;
+  if(code.length > 50) return; // te lang voor een barcode
+  if(/\s/.test(code)) return;  // spaties = geen barcode
   if(gradePanel.style.display==='flex'||subPanel.style.display==='flex') return;
   if(isScanning) return;
 
