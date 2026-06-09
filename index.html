@@ -43,7 +43,7 @@ body{font-family:'Montserrat','Segoe UI',Arial,sans-serif;min-height:100vh;displ
 /* ── Feedback ── */
 #feedback{text-align:center;width:min(820px,94vw);display:flex;flex-direction:column;align-items:center;gap:12px}
 #feedback-title{font-size:clamp(22px,4vw,48px);font-weight:800;color:white;line-height:1.15;display:none;letter-spacing:.5px}
-#feedback-subtitle{font-size:clamp(14px,2.2vw,22px);font-weight:600;color:rgba(255,255,255,.9);line-height:1.6;display:none;white-space:pre-line;max-width:700px}
+#feedback-subtitle{font-size:clamp(14px,2.2vw,20px);font-weight:500;color:rgba(255,255,255,.75);line-height:1.7;display:none;white-space:pre-line;max-width:700px;letter-spacing:.8px;font-style:italic}
 #green-msg{font-size:clamp(18px,3vw,36px);font-weight:800;color:white;display:none;text-align:center}
 #scan-hint{font-size:12px;color:rgba(255,255,255,.3);letter-spacing:1.5px;font-weight:500}
 #barcode-display{font-size:11px;letter-spacing:3px;color:rgba(255,255,255,.3);display:none;font-weight:600}
@@ -297,8 +297,13 @@ body{font-family:'Montserrat','Segoe UI',Arial,sans-serif;min-height:100vh;displ
     </div>
 
     <div class="mpl-section" id="mpl-custom-options" style="display:none">
+      <div style="font-size:13px;font-weight:800;letter-spacing:2px;text-transform:uppercase;color:rgba(255,255,255,.5);text-align:center">Custom label</div>
       <input class="m-input" id="custom-label-barcode" type="text" placeholder="Barcode..." autocomplete="off" spellcheck="false"/>
-      <button class="m-btn" id="custom-label-print">Print</button>
+      <div style="display:flex;align-items:center;gap:12px;justify-content:center">
+        <input id="custom-label-aantal" type="number" min="1" max="99" value="1" style="width:80px;padding:12px;border:2px solid rgba(255,255,255,.3);border-radius:12px;background:rgba(255,255,255,.1);color:var(--dark);font-size:22px;font-weight:800;font-family:inherit;text-align:center;outline:none"/>
+        <span style="color:rgba(0,0,0,.4);font-size:14px;font-weight:600">× stuks</span>
+      </div>
+      <button class="m-btn" id="custom-label-print">🖨 Print</button>
       <button class="m-btn m-btn-secondary" id="mpl-back-custom">Terug</button>
     </div>
 
@@ -420,6 +425,18 @@ body{font-family:'Montserrat','Segoe UI',Arial,sans-serif;min-height:100vh;displ
       </div>
       <button id="escape-btn">⎋ Terug</button>
     </div>
+
+    <!-- BARCODE PRINT PANEL -->
+    <div id="barcode-print-panel" style="display:none;flex-direction:column;align-items:center;gap:20px;width:min(400px,92vw)">
+      <div style="font-size:13px;font-weight:800;letter-spacing:2px;text-transform:uppercase;color:rgba(255,255,255,.5)">Product barcode (EAN) uitprinten</div>
+      <div id="barcode-print-code" style="font-size:22px;font-weight:800;color:white;letter-spacing:3px;text-align:center"></div>
+      <div style="display:flex;align-items:center;gap:12px">
+        <input id="barcode-print-aantal" type="number" min="1" max="99" value="1" style="width:80px;padding:12px;border:2px solid rgba(255,255,255,.3);border-radius:12px;background:rgba(255,255,255,.1);color:white;font-size:22px;font-weight:800;font-family:inherit;text-align:center;outline:none"/>
+        <span style="color:rgba(255,255,255,.5);font-size:14px;font-weight:600">× stuks</span>
+      </div>
+      <button onclick="doPrintProductBarcode()" style="padding:14px 36px;background:var(--g1);color:var(--dark);border:none;border-radius:50px;font-size:15px;font-weight:800;cursor:pointer;font-family:inherit;letter-spacing:.5px">🖨 Printen</button>
+      <button onclick="sluitBarcodePrintPanel()" style="padding:8px 20px;border:1px solid rgba(255,255,255,.2);border-radius:50px;background:transparent;color:rgba(255,255,255,.5);font-size:12px;font-weight:700;cursor:pointer;font-family:inherit">⎋ Terug naar grading</button>
+    </div>
     <div id="sub-panel">
       <div id="sub-question"></div>
       <div id="sub-row">
@@ -433,6 +450,7 @@ body{font-family:'Montserrat','Segoe UI',Arial,sans-serif;min-height:100vh;displ
       <button id="escape-btn-sub">⎋ Terug</button>
     </div>
     <div id="barcode-display"></div>
+    <div id="product-naam-display" style="display:none;font-size:13px;color:rgba(255,255,255,.5);font-weight:600;text-align:center;max-width:500px;letter-spacing:.3px"></div>
     <div id="scan-hint"></div>
     <!-- Laad spinner tijdens lookup -->
     <div id="scan-loading" style="display:none;flex-direction:column;align-items:center;gap:12px">
@@ -1116,12 +1134,13 @@ async function findProduct(barcode, supplier) {
     return {
       status:              'found',
       barcode,
-      productcode:         data.pc  || '',
-      leverancier:         data.lev || '',
+      productcode:         data.pc   || '',
+      name:                data.name || '',
+      leverancier:         data.lev  || '',
       mismatch,
       leverancier_correct: mismatch ? data.lev : '',
-      tags:                data.tag || '',
-      grading:             data.gr  || ''
+      tags:                data.tag  || '',
+      grading:             data.gr   || ''
     };
   } catch(err) {
     console.error('Firebase fout:', err);
@@ -1208,6 +1227,8 @@ function updateCounter(increment){
 
 // ── Escape / Cancel ───────────────────────────────────────
 function cancelScan(){
+  verbergCatNotificatie();
+  verbergProductNaam();
   pendingScan=null; pendingGrade=null;
   hideGradePanel();
   subPanel.style.display='none';
@@ -1280,11 +1301,56 @@ function showIdle(){
   greenMsg.style.display='none'; fbTitle.style.display='none';
   fbSub.style.display='none'; bcDisp.style.display='none';
   scanHintEl.style.display='block';
+  verbergCatNotificatie();
+  verbergProductNaam();
+  if(supplier) showSupBar();
 }
 
 // ── Grade panel ───────────────────────────────────────────
-function showGradePanel(){ gradePanel.style.display='flex'; subPanel.style.display='none'; custWrap.style.display='none'; }
-function hideGradePanel(){ gradePanel.style.display='none'; }
+function showGradePanel(){
+  gradePanel.style.display='flex';
+  subPanel.style.display='none';
+  custWrap.style.display='none';
+  bInput.style.display='none';
+  supplierBar.style.display='none';
+  // Verberg de losse productnaam onderaan
+  verbergProductNaam();
+  // Toon grading tekst groot, productnaam klein + print knop
+  if(pendingScan) {
+    const naam = pendingScan.product ? pendingScan.product.name : '';
+    const gradingTekst = pendingScan.product ? getGradingText(pendingScan.product.grading||'') : '';
+
+    // Grote tekst = grading tekst of standaard bericht
+    if(gradingTekst) {
+      fbTitle.textContent = gradingTekst;
+    } else {
+      fbTitle.textContent = t('green');
+    }
+    fbTitle.style.display = 'block';
+    fbTitle.style.fontSize = 'clamp(18px,3vw,38px)';
+
+    // Kleine tekst = productnaam + print knop of niet gevonden melding
+    if(naam) {
+      fbSub.innerHTML = `${naam} <button onclick="openBarcodePrintPanel()" style="margin-left:10px;padding:6px 16px;border:1px solid rgba(255,255,255,.35);border-radius:20px;background:rgba(255,255,255,.12);color:white;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;vertical-align:middle;letter-spacing:.3px">🖨 Product barcode (EAN) uitprinten</button>`;
+    } else {
+      fbSub.textContent = activeLang === 'en' ? 'Product not yet in our system' : activeLang === 'ar' ? 'المنتج غير موجود في نظامنا' : 'Product staat nog niet in ons systeem';
+    }
+    fbSub.style.display = 'block';
+    fbSub.style.direction = activeLang==='ar'?'rtl':'ltr';
+  }
+  greenMsg.style.display = 'none';
+  // Toon barcode onderaan
+  if(pendingScan) {
+    bcDisp.textContent = pendingScan.barcode;
+    bcDisp.style.display = 'block';
+  }
+}
+function hideGradePanel(){
+  gradePanel.style.display='none';
+  document.getElementById('barcode-print-panel').style.display='none';
+  bInput.style.display='block';
+  showSupBar();
+}
 
 document.querySelectorAll('.g-btn').forEach(btn=>{
   btn.addEventListener('click',()=>handleGrade(btn.dataset.g));
@@ -1321,7 +1387,8 @@ function showSubPanel(g){
 }
 
 document.getElementById('sub-already').addEventListener('click',()=>{
-  commitScan(pendingGrade, gradeWords[pendingGrade], 'already given');
+  const redenTekst = pendingGrade === 'D-rep' ? t('repGiven') : t('defGiven');
+  commitScan(pendingGrade, gradeWords[pendingGrade], redenTekst);
 });
 document.getElementById('sub-custom').addEventListener('click',()=>{
   custWrap.style.display='flex'; custInp.value=''; custInp.focus();
@@ -1329,6 +1396,7 @@ document.getElementById('sub-custom').addEventListener('click',()=>{
 custConfirm.addEventListener('click',()=>{
   const reason=custInp.value.trim();
   if(!reason) return;
+  if(/^\d+$/.test(reason)) { custInp.value=''; custInp.focus(); return; }
   commitScan(pendingGrade, gradeWords[pendingGrade], reason);
 });
 custInp.addEventListener('keydown',e=>{if(e.key==='Enter') custConfirm.click();});
@@ -1508,10 +1576,73 @@ async function bevestig3deKansje(beschrijving, fotos) {
 }
 const BROWSER_PRINT_URL = 'http://localhost:9100';
 
+function openBarcodePrintPanel() {
+  gradePanel.style.display = 'none';
+  document.getElementById('barcode-print-panel').style.display = 'flex';
+  document.getElementById('barcode-print-code').textContent = pendingScan ? pendingScan.barcode : '';
+  const inp = document.getElementById('barcode-print-aantal');
+  if(inp) {
+    inp.value = 1;
+    inp.focus();
+    inp.select();
+    inp.oninput = function() {
+      if(parseInt(this.value) > 99) this.value = 99;
+      if(this.value !== '' && parseInt(this.value) < 1) this.value = 1;
+    };
+    inp.onkeydown = function(e) {
+      if(e.key === 'Enter') doPrintProductBarcode();
+    };
+  }
+}
+
+function sluitBarcodePrintPanel() {
+  document.getElementById('barcode-print-panel').style.display = 'none';
+  gradePanel.style.display = 'flex';
+}
+
+function doPrintProductBarcode() {
+  const inp = document.getElementById('barcode-print-aantal');
+  let aantal = parseInt(inp ? inp.value : 1);
+  if(isNaN(aantal) || aantal < 1 || inp.value === '') aantal = 1;
+  if(aantal > 99) aantal = 99;
+  sluitBarcodePrintPanel();
+  printProductBarcodeAantal(aantal);
+}
+
+async function printProductBarcodeAantal(aantal) {
+  if(!pendingScan) return;
+  const barcode = pendingScan.barcode;
+  const leverancier = pendingScan.product ? (pendingScan.product.leverancier || supplier) : supplier;
+
+  try {
+    const printerRes = await fetch(`${BROWSER_PRINT_URL}/available`, {targetAddressSpace: 'local'});
+    const printerData = await printerRes.json();
+    const printer = printerData.printer && printerData.printer[0];
+    if (!printer) { console.warn('Geen printer gevonden'); return; }
+
+    const safe = zplSafe(barcode);
+    const safeLev = zplSafe(leverancier);
+    const zpl = `^XA^MMT^PW400^LL200^LS0^FO65,10^BY2^BCN,60,Y,N,N^FD${safe}^FS^FO0,150^FB400,1,0,C,0^A0N,28,28^FD${safeLev}^FS^XZ`;
+
+    for(let i = 0; i < aantal; i++) {
+      await fetch(`${BROWSER_PRINT_URL}/write`, {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({device: printer, data: zpl})
+      });
+    }
+    showSync('ok', `✓ ${aantal}× geprint`);
+  } catch(err) {
+    console.warn('Print fout:', err);
+  }
+}
+
+async function printProductBarcode() { await printProductBarcodeAantal(1); }
+
 async function printSticker(scanId, initialen, grade) {
   try {
     // Haal standaard printer op
-    const printerRes = await fetch(`${BROWSER_PRINT_URL}/available`);
+    const printerRes = await fetch(`${BROWSER_PRINT_URL}/available`, {targetAddressSpace: 'local'});
     const printerData = await printerRes.json();
     const printer = printerData.printer && printerData.printer[0];
     if (!printer) { console.warn('Geen printer gevonden'); return; }
@@ -1522,6 +1653,7 @@ async function printSticker(scanId, initialen, grade) {
     // Stuur naar Browser Print
     await fetch(`${BROWSER_PRINT_URL}/write`, {
       method: 'POST',
+      targetAddressSpace: 'local',
       headers: {'Content-Type': 'application/json'},
       body: JSON.stringify({device: printer, data: zpl})
     });
@@ -1569,7 +1701,7 @@ function getGradeLabelsForLanguage(labelLang) {
 
 async function printGradeLabels(labelLang) {
   try {
-    const printerRes = await fetch(`${BROWSER_PRINT_URL}/available`);
+    const printerRes = await fetch(`${BROWSER_PRINT_URL}/available`, {targetAddressSpace: 'local'});
     if (!printerRes.ok) throw new Error('Browser Print /available gaf geen geldige response');
 
     const printerData = await printerRes.json();
@@ -1586,6 +1718,7 @@ async function printGradeLabels(labelLang) {
 
     const writeRes = await fetch(`${BROWSER_PRINT_URL}/write`, {
       method: 'POST',
+      targetAddressSpace: 'local',
       headers: {'Content-Type': 'application/json'},
       body: JSON.stringify({device: printer, data: zpl})
     });
@@ -1601,12 +1734,12 @@ async function printGradeLabels(labelLang) {
   }
 }
 
-async function printCustomLabel(barcodeValue) {
+async function printCustomLabel(barcodeValue, aantal = 1) {
   const barcode = String(barcodeValue || '').trim();
   if(!barcode){ alert(t('customLabelEmpty')); return; }
 
   try {
-    const printerRes = await fetch(`${BROWSER_PRINT_URL}/available`);
+    const printerRes = await fetch(`${BROWSER_PRINT_URL}/available`, {targetAddressSpace: 'local'});
     if (!printerRes.ok) throw new Error('Browser Print /available gaf geen geldige response');
 
     const printerData = await printerRes.json();
@@ -1618,15 +1751,15 @@ async function printCustomLabel(barcodeValue) {
     }
 
     const safe = zplSafe(barcode);
-    const zpl = `^XA^MMT^PW400^LL200^LS0^FO85,10^BY5^BCN,70,Y,N,N^FD${safe}^FS^FO0,150^FB400,1,0,C,0^A0N,28,28^FD${safe}^FS^XZ`;
+    const zpl = `^XA^MMT^PW400^LL200^LS0^FO65,10^BY2^BCN,60,Y,N,N^FD${safe}^FS^FO0,150^FB400,1,0,C,0^A0N,28,28^FDCustom Label^FS^XZ`;
 
-    const writeRes = await fetch(`${BROWSER_PRINT_URL}/write`, {
-      method: 'POST',
-      headers: {'Content-Type': 'application/json'},
-      body: JSON.stringify({device: printer, data: zpl})
-    });
-
-    if (!writeRes.ok) throw new Error('Browser Print /write gaf geen geldige response');
+    for(let i = 0; i < aantal; i++) {
+      await fetch(`${BROWSER_PRINT_URL}/write`, {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({device: printer, data: zpl})
+      });
+    }
 
     hideAllModals();
     showSync('ok', t('labelPrintDone'));
@@ -1763,6 +1896,15 @@ function verbergMismatch() {
   document.getElementById('mismatch-panel').style.display = 'none';
 }
 
+function toonProductNaam(found) {
+  // Naam wordt getoond in showGradePanel via fbSub — niet apart tonen
+}
+
+function verbergProductNaam() {
+  const el = document.getElementById('product-naam-display');
+  if (el) el.style.display = 'none';
+}
+
 function toonNaaMismatch(found, barcode) {
   // Toon grading of groen scherm na mismatch keuze
   const isGrading = !!(found && (found.tags||'').toLowerCase().includes('grading'));
@@ -1782,6 +1924,9 @@ let isScanning = false;
 async function handleScan(barcode){
   const code=barcode.trim();
   if(!code) return;
+  if(code.length < 4) return;
+  if(code.length > 50) return; // te lang voor een barcode
+  if(/\s/.test(code)) return;  // spaties = geen barcode
   if(gradePanel.style.display==='flex'||subPanel.style.display==='flex') return;
   if(isScanning) return;
 
@@ -1819,6 +1964,13 @@ async function handleScan(barcode){
   };
   pendingGrade = null;
 
+  // Categorieën check op productnaam
+  verbergCatNotificatie();
+  if (found && found.name) {
+    const cat = checkCategorie(found.name);
+    if (cat) toonCatNotificatie(cat, found.name);
+  }
+
   if(found && productHasTag(found, 'Alarmproduct')){
     await showAlarmProductWarning(code);
   }
@@ -1838,6 +1990,7 @@ async function handleScan(barcode){
     showGreen();
     showGradePanel();
   }
+  toonProductNaam(found);
 }
 
 bInput.addEventListener('keydown',e=>{ if(e.key==='Enter') handleScan(bInput.value); });
@@ -1863,7 +2016,9 @@ document.addEventListener('keydown',e=>{
 
   if(gradePanel.style.display==='flex'){
     const map={'1':'A','2':'B','3':'B3','4':'C','5':'D-rep','6':'D-def'};
-    if(map[e.key]){e.preventDefault();handleGrade(map[e.key]);}
+    const printMenuOpen = document.getElementById('barcode-print-menu')?.style.display !== 'none' && document.getElementById('barcode-print-menu')?.style.display !== '';
+    const inAantalInput = document.activeElement?.id === 'barcode-print-aantal';
+    if(map[e.key] && !printMenuOpen && !inAantalInput){e.preventDefault();handleGrade(map[e.key]);}
     return;
   }
   if(subPanel.style.display==='flex'){
@@ -1921,7 +2076,13 @@ document.querySelectorAll('.label-lang-choice').forEach(btn=>{
 });
 
 document.getElementById('custom-label-print').addEventListener('click',()=>{
-  printCustomLabel(document.getElementById('custom-label-barcode').value);
+  const aantal = Math.min(99, Math.max(1, parseInt(document.getElementById('custom-label-aantal')?.value) || 1));
+  printCustomLabel(document.getElementById('custom-label-barcode').value, aantal);
+});
+
+document.getElementById('custom-label-aantal')?.addEventListener('input', function() {
+  if(parseInt(this.value) > 99) this.value = 99;
+  if(this.value !== '' && parseInt(this.value) < 1) this.value = 1;
 });
 
 document.getElementById('custom-label-barcode').addEventListener('keydown',e=>{
@@ -1967,7 +2128,50 @@ langInd.addEventListener('click',()=>{
   document.querySelectorAll('.lp').forEach(b=>b.classList.toggle('active', b.dataset.lang===activeLang));
 });
 
+// ── Categorieën ──────────────────────────────────────────
+let categorieen = [];
+
+async function laadCategorieen() {
+  try {
+    const res  = await fetch(`${FIREBASE_URL}/categorieen.json`);
+    const data = await res.json();
+    if (data) categorieen = Object.values(data);
+  } catch(err) {}
+}
+
+function checkCategorie(name) {
+  if (!name || !categorieen.length) return null;
+  const nameLower = name.toLowerCase();
+  for (const cat of categorieen) {
+    const woorden = (cat.woorden || '').split(',').map(w => w.trim().toLowerCase()).filter(Boolean);
+    if (woorden.some(w => w && nameLower.includes(w))) return cat;
+  }
+  return null;
+}
+
+function toonCatNotificatie(cat, productNaam) {
+  const bestaand = document.getElementById('cat-notif');
+  if (bestaand) bestaand.remove();
+  const box = document.createElement('div');
+  box.id = 'cat-notif';
+  box.innerHTML = `
+    <button onclick="document.getElementById('cat-notif').remove()" style="position:absolute;top:10px;right:10px;background:none;border:none;color:white;font-size:18px;cursor:pointer;opacity:.7">×</button>
+    ${cat.foto ? `<img src="${cat.foto}" style="width:100%;height:200px;object-fit:cover;border-radius:10px;margin-bottom:14px;display:block"/>` : ''}
+    <div style="font-size:11px;font-weight:800;letter-spacing:1px;text-transform:uppercase;opacity:.7;margin-bottom:8px">📂 ${cat.naam}</div>
+    ${productNaam ? `<div style="font-size:12px;color:rgba(255,255,255,.6);font-weight:600;margin-bottom:10px;line-height:1.4">${productNaam}</div>` : ''}
+    <div style="font-size:20px;font-weight:800;line-height:1.5">${cat.bericht}</div>
+  `;
+  box.style.cssText = `position:fixed;right:24px;top:50%;transform:translateY(-50%);background:rgba(28,42,26,.96);border:1px solid rgba(146,208,80,.4);border-left:4px solid var(--g1);color:white;border-radius:16px;padding:20px;width:260px;z-index:9998;box-shadow:0 8px 32px rgba(0,0,0,.5);font-family:'Montserrat',sans-serif;display:flex;flex-direction:column;gap:4px`;
+  document.body.appendChild(box);
+}
+
+function verbergCatNotificatie() {
+  const box = document.getElementById('cat-notif');
+  if (box) box.remove();
+}
+
 // Start app direct — geen CSV meer nodig
+laadCategorieen();
 initApp();
 </script>
 </body>
