@@ -420,6 +420,18 @@ body{font-family:'Montserrat','Segoe UI',Arial,sans-serif;min-height:100vh;displ
       </div>
       <button id="escape-btn">⎋ Terug</button>
     </div>
+
+    <!-- BARCODE PRINT PANEL -->
+    <div id="barcode-print-panel" style="display:none;flex-direction:column;align-items:center;gap:20px;width:min(400px,92vw)">
+      <div style="font-size:13px;font-weight:800;letter-spacing:2px;text-transform:uppercase;color:rgba(255,255,255,.5)">Product barcode (EAN) uitprinten</div>
+      <div id="barcode-print-code" style="font-size:22px;font-weight:800;color:white;letter-spacing:3px;text-align:center"></div>
+      <div style="display:flex;align-items:center;gap:12px">
+        <input id="barcode-print-aantal" type="number" min="1" max="99" value="1" style="width:80px;padding:12px;border:2px solid rgba(255,255,255,.3);border-radius:12px;background:rgba(255,255,255,.1);color:white;font-size:22px;font-weight:800;font-family:inherit;text-align:center;outline:none"/>
+        <span style="color:rgba(255,255,255,.5);font-size:14px;font-weight:600">× stuks</span>
+      </div>
+      <button onclick="doPrintProductBarcode()" style="padding:14px 36px;background:var(--g1);color:var(--dark);border:none;border-radius:50px;font-size:15px;font-weight:800;cursor:pointer;font-family:inherit;letter-spacing:.5px">🖨 Printen</button>
+      <button onclick="sluitBarcodePrintPanel()" style="padding:8px 20px;border:1px solid rgba(255,255,255,.2);border-radius:50px;background:transparent;color:rgba(255,255,255,.5);font-size:12px;font-weight:700;cursor:pointer;font-family:inherit">⎋ Terug naar grading</button>
+    </div>
     <div id="sub-panel">
       <div id="sub-question"></div>
       <div id="sub-row">
@@ -1296,7 +1308,7 @@ function showGradePanel(){
   custWrap.style.display='none';
   bInput.style.display='none';
   supplierBar.style.display='none';
-  // Verberg de losse productnaam onderaan (die staat nu in fbTitle)
+  // Verberg de losse productnaam onderaan
   verbergProductNaam();
   // Toon grading tekst groot, productnaam klein + print knop
   if(pendingScan) {
@@ -1314,7 +1326,7 @@ function showGradePanel(){
 
     // Kleine tekst = productnaam + print knop
     if(naam) {
-      fbSub.innerHTML = `${naam} <button onclick="printProductBarcode()" style="margin-left:10px;padding:4px 12px;border:1px solid rgba(255,255,255,.3);border-radius:20px;background:rgba(255,255,255,.1);color:white;font-size:11px;font-weight:700;cursor:pointer;font-family:inherit;vertical-align:middle">🖨 Barcode</button>`;
+      fbSub.innerHTML = `${naam} <button onclick="openBarcodePrintPanel()" style="margin-left:10px;padding:6px 16px;border:1px solid rgba(255,255,255,.35);border-radius:20px;background:rgba(255,255,255,.12);color:white;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;vertical-align:middle;letter-spacing:.3px">🖨 Product barcode (EAN) uitprinten</button>`;
       fbSub.style.display = 'block';
       fbSub.style.direction = 'ltr';
     } else {
@@ -1322,9 +1334,15 @@ function showGradePanel(){
     }
   }
   greenMsg.style.display = 'none';
+  // Toon barcode onderaan
+  if(pendingScan) {
+    bcDisp.textContent = pendingScan.barcode;
+    bcDisp.style.display = 'block';
+  }
 }
 function hideGradePanel(){
   gradePanel.style.display='none';
+  document.getElementById('barcode-print-panel').style.display='none';
   bInput.style.display='block';
   showSupBar();
 }
@@ -1552,7 +1570,40 @@ async function bevestig3deKansje(beschrijving, fotos) {
 }
 const BROWSER_PRINT_URL = 'http://localhost:9100';
 
-async function printProductBarcode() {
+function openBarcodePrintPanel() {
+  gradePanel.style.display = 'none';
+  document.getElementById('barcode-print-panel').style.display = 'flex';
+  document.getElementById('barcode-print-code').textContent = pendingScan ? pendingScan.barcode : '';
+  const inp = document.getElementById('barcode-print-aantal');
+  if(inp) {
+    inp.value = 1;
+    inp.focus();
+    inp.select();
+    inp.oninput = function() {
+      if(parseInt(this.value) > 99) this.value = 99;
+      if(this.value !== '' && parseInt(this.value) < 1) this.value = 1;
+    };
+    inp.onkeydown = function(e) {
+      if(e.key === 'Enter') doPrintProductBarcode();
+    };
+  }
+}
+
+function sluitBarcodePrintPanel() {
+  document.getElementById('barcode-print-panel').style.display = 'none';
+  gradePanel.style.display = 'flex';
+}
+
+function doPrintProductBarcode() {
+  const inp = document.getElementById('barcode-print-aantal');
+  let aantal = parseInt(inp ? inp.value : 1);
+  if(isNaN(aantal) || aantal < 1) aantal = 1;
+  if(aantal > 99) aantal = 99;
+  sluitBarcodePrintPanel();
+  printProductBarcodeAantal(aantal);
+}
+
+async function printProductBarcodeAantal(aantal) {
   if(!pendingScan) return;
   const barcode = pendingScan.barcode;
   const leverancier = pendingScan.product ? (pendingScan.product.leverancier || supplier) : supplier;
@@ -1565,18 +1616,20 @@ async function printProductBarcode() {
 
     const safe = zplSafe(barcode);
     const safeLev = zplSafe(leverancier);
-    const zpl = `^XA^MMT^PW400^LL200^LS0^FO65,10^BY2^BCN,60,Y,N,N^FD${safe}^FS^FO0,150^FB400,1,0,C,0^A0N,28,28^FD${safeLev}^FS^XZ`;
+    const zpl = `^XA^MMT^PW400^LL200^LS0^FO65,10^BY2^BCN,60,Y,N,N^FD${safe}^FS^FO0,150^FB400,1,0,C,0^A0N,28,28^FD${safeLev}^FS^XZ`.repeat(aantal);
 
     await fetch(`${BROWSER_PRINT_URL}/write`, {
       method: 'POST',
       headers: {'Content-Type': 'application/json'},
       body: JSON.stringify({device: printer, data: zpl})
     });
-    showSync('ok', '✓ Barcode geprint');
+    showSync('ok', `✓ ${aantal}× geprint`);
   } catch(err) {
     console.warn('Print fout:', err);
   }
 }
+
+async function printProductBarcode() { await printProductBarcodeAantal(1); }
 
 async function printSticker(scanId, initialen, grade) {
   try {
@@ -1958,7 +2011,9 @@ document.addEventListener('keydown',e=>{
 
   if(gradePanel.style.display==='flex'){
     const map={'1':'A','2':'B','3':'B3','4':'C','5':'D-rep','6':'D-def'};
-    if(map[e.key]){e.preventDefault();handleGrade(map[e.key]);}
+    const printMenuOpen = document.getElementById('barcode-print-menu')?.style.display !== 'none' && document.getElementById('barcode-print-menu')?.style.display !== '';
+    const inAantalInput = document.activeElement?.id === 'barcode-print-aantal';
+    if(map[e.key] && !printMenuOpen && !inAantalInput){e.preventDefault();handleGrade(map[e.key]);}
     return;
   }
   if(subPanel.style.display==='flex'){
