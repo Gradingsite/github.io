@@ -1329,14 +1329,14 @@ function showGradePanel(){
     fbTitle.style.display = 'block';
     fbTitle.style.fontSize = 'clamp(18px,3vw,38px)';
 
-    // Kleine tekst = productnaam + print knop
+    // Kleine tekst = productnaam + print knop of niet gevonden melding
     if(naam) {
       fbSub.innerHTML = `${naam} <button onclick="openBarcodePrintPanel()" style="margin-left:10px;padding:6px 16px;border:1px solid rgba(255,255,255,.35);border-radius:20px;background:rgba(255,255,255,.12);color:white;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;vertical-align:middle;letter-spacing:.3px">🖨 Product barcode (EAN) uitprinten</button>`;
-      fbSub.style.display = 'block';
-      fbSub.style.direction = 'ltr';
     } else {
-      fbSub.style.display = 'none';
+      fbSub.textContent = activeLang === 'en' ? 'Product not yet in our system' : activeLang === 'ar' ? 'المنتج غير موجود في نظامنا' : 'Product staat nog niet in ons systeem';
     }
+    fbSub.style.display = 'block';
+    fbSub.style.direction = activeLang==='ar'?'rtl':'ltr';
   }
   greenMsg.style.display = 'none';
   // Toon barcode onderaan
@@ -1387,7 +1387,8 @@ function showSubPanel(g){
 }
 
 document.getElementById('sub-already').addEventListener('click',()=>{
-  commitScan(pendingGrade, gradeWords[pendingGrade], 'already given');
+  const redenTekst = pendingGrade === 'D-rep' ? t('repGiven') : t('defGiven');
+  commitScan(pendingGrade, gradeWords[pendingGrade], redenTekst);
 });
 document.getElementById('sub-custom').addEventListener('click',()=>{
   custWrap.style.display='flex'; custInp.value=''; custInp.focus();
@@ -1614,14 +1615,14 @@ async function printProductBarcodeAantal(aantal) {
   const leverancier = pendingScan.product ? (pendingScan.product.leverancier || supplier) : supplier;
 
   try {
-    const printerRes = await fetch(`${BROWSER_PRINT_URL}/available`, {targetAddressSpace: 'local'});
+    const printerRes = await fetch(`${BROWSER_PRINT_URL}/available`, {targetAddressSpace: 'loopback'});
     const printerData = await printerRes.json();
     const printer = printerData.printer && printerData.printer[0];
     if (!printer) { console.warn('Geen printer gevonden'); return; }
 
     const safe = zplSafe(barcode);
     const safeLev = zplSafe(leverancier);
-    const zpl = `^XA^MMT^PW400^LL200^LS0^FO65,10^BY2^BCN,60,Y,N,N^FD${safe}^FS^FO0,150^FB400,1,0,C,0^A0N,28,28^FD${safeLev}^FS^XZ`;
+    const zpl = `^XA^MMT^PW400^LL200^LS0^FO65,10^by3^BCN,60,Y,N,N^FD${safe}^FS^FO0,150^FB400,1,0,C,0^A0N,28,28^FD${safeLev}^FS^XZ`;
 
     for(let i = 0; i < aantal; i++) {
       await fetch(`${BROWSER_PRINT_URL}/write`, {
@@ -1641,18 +1642,18 @@ async function printProductBarcode() { await printProductBarcodeAantal(1); }
 async function printSticker(scanId, initialen, grade) {
   try {
     // Haal standaard printer op
-    const printerRes = await fetch(`${BROWSER_PRINT_URL}/available`, {targetAddressSpace: 'local'});
+    const printerRes = await fetch(`${BROWSER_PRINT_URL}/available`, {targetAddressSpace: 'loopback'});
     const printerData = await printerRes.json();
     const printer = printerData.printer && printerData.printer[0];
     if (!printer) { console.warn('Geen printer gevonden'); return; }
 
     // ZPL label — 50mm × 25mm (400 dpi = ~800 × 400 dots)
-    const zpl = `^XA^MMT^PW400^LL200^LS0^FO65,10^BY2^BCN,60,Y,N,N^FD${scanId}^FS^FO0,150^FB400,1,0,C,0^A0N,28,28^FD${initialen} ${grade}^FS^XZ`.trim();
+    const zpl = `^XA^MMT^PW400^LL200^LS0^FO65,10^by3^BCN,60,Y,N,N^FD${scanId}^FS^FO0,150^FB400,1,0,C,0^A0N,28,28^FD${initialen} ${grade}^FS^XZ`.trim();
 
     // Stuur naar Browser Print
     await fetch(`${BROWSER_PRINT_URL}/write`, {
       method: 'POST',
-      targetAddressSpace: 'local',
+      targetAddressSpace: 'loopback',
       headers: {'Content-Type': 'application/json'},
       body: JSON.stringify({device: printer, data: zpl})
     });
@@ -1700,7 +1701,7 @@ function getGradeLabelsForLanguage(labelLang) {
 
 async function printGradeLabels(labelLang) {
   try {
-    const printerRes = await fetch(`${BROWSER_PRINT_URL}/available`, {targetAddressSpace: 'local'});
+    const printerRes = await fetch(`${BROWSER_PRINT_URL}/available`, {targetAddressSpace: 'loopback'});
     if (!printerRes.ok) throw new Error('Browser Print /available gaf geen geldige response');
 
     const printerData = await printerRes.json();
@@ -1717,7 +1718,7 @@ async function printGradeLabels(labelLang) {
 
     const writeRes = await fetch(`${BROWSER_PRINT_URL}/write`, {
       method: 'POST',
-      targetAddressSpace: 'local',
+      targetAddressSpace: 'loopback',
       headers: {'Content-Type': 'application/json'},
       body: JSON.stringify({device: printer, data: zpl})
     });
@@ -1738,7 +1739,7 @@ async function printCustomLabel(barcodeValue, aantal = 1) {
   if(!barcode){ alert(t('customLabelEmpty')); return; }
 
   try {
-    const printerRes = await fetch(`${BROWSER_PRINT_URL}/available`, {targetAddressSpace: 'local'});
+    const printerRes = await fetch(`${BROWSER_PRINT_URL}/available`, {targetAddressSpace: 'loopback'});
     if (!printerRes.ok) throw new Error('Browser Print /available gaf geen geldige response');
 
     const printerData = await printerRes.json();
@@ -1750,7 +1751,7 @@ async function printCustomLabel(barcodeValue, aantal = 1) {
     }
 
     const safe = zplSafe(barcode);
-    const zpl = `^XA^MMT^PW400^LL200^LS0^FO65,10^BY2^BCN,60,Y,N,N^FD${safe}^FS^FO0,150^FB400,1,0,C,0^A0N,28,28^FDCustom Label^FS^XZ`;
+    const zpl = `^XA^MMT^PW400^LL200^LS0^FO65,10^by3^BCN,60,Y,N,N^FD${safe}^FS^FO0,150^FB400,1,0,C,0^A0N,28,28^FDCustom Label^FS^XZ`;
 
     for(let i = 0; i < aantal; i++) {
       await fetch(`${BROWSER_PRINT_URL}/write`, {
@@ -1896,14 +1897,7 @@ function verbergMismatch() {
 }
 
 function toonProductNaam(found) {
-  const el = document.getElementById('product-naam-display');
-  if (!el) return;
-  if (found && found.name) {
-    el.textContent = found.name;
-  } else {
-    el.textContent = activeLang === 'en' ? 'Product not yet in our system' : activeLang === 'ar' ? 'المنتج غير موجود في نظامنا' : 'Product staat nog niet in ons systeem';
-  }
-  el.style.display = 'block';
+  // Naam wordt getoond in showGradePanel via fbSub — niet apart tonen
 }
 
 function verbergProductNaam() {
