@@ -240,6 +240,7 @@
       <div class="nav-section">BEHEER</div>
       <button class="nav-item" data-page="categorieen"><i class="ti ti-tag"></i>Categorieën</button>
       <button class="nav-item" data-page="accounts"><i class="ti ti-users"></i>Accounts</button>
+      <button class="nav-item" data-page="emails"><i class="ti ti-mail"></i>Rapport e-mails</button>
     </nav>
     <div class="sidebar-footer">
       <div class="user-pill">
@@ -457,20 +458,141 @@
       <!-- ACCOUNTS PAGE -->
       <!-- CATEGORIEËN PAGE -->
       <div class="page" id="page-categorieen">
-        <div class="card">
-          <div class="card-header">
+        <style>
+          .acc-card .card-header{cursor:pointer;user-select:none}
+          .acc-card .card-body{overflow:hidden}
+          .acc-card.collapsed .card-body{display:none}
+          .acc-chevron{margin-left:auto;transition:transform .2s;color:var(--muted);font-size:18px}
+          .acc-card.collapsed .acc-chevron{transform:rotate(-90deg)}
+        </style>
+
+        <div class="card acc-card collapsed">
+          <div class="card-header" onclick="toggleCard(this, event)">
             <div class="card-title"><i class="ti ti-tag"></i>Categorieën</div>
             <button id="cat-nieuw-btn" style="padding:7px 16px;background:var(--g1);color:var(--sidebar);border:none;border-radius:20px;font-size:12px;font-weight:800;cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:6px"><i class="ti ti-plus"></i> Nieuwe categorie</button>
+            <i class="ti ti-chevron-down acc-chevron"></i>
           </div>
-          <div id="cat-lijst" style="display:flex;flex-direction:column;gap:8px;padding:4px 0">
-            <div class="empty">Laden...</div>
+          <div class="card-body">
+            <div id="cat-lijst" style="display:flex;flex-direction:column;gap:8px;padding:4px 0">
+              <div class="empty">Laden...</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- TO DO CATEGORIEËN -->
+        <div class="card acc-card collapsed" style="margin-top:16px">
+          <div class="card-header" onclick="toggleCard(this, event)">
+            <div class="card-title"><i class="ti ti-checkbox"></i>To do categorieën</div>
+            <button id="todo-nieuw-btn" style="padding:7px 16px;background:#EF9F27;color:var(--sidebar);border:none;border-radius:20px;font-size:12px;font-weight:800;cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:6px"><i class="ti ti-plus"></i> Nieuwe to-do</button>
+            <i class="ti ti-chevron-down acc-chevron"></i>
+          </div>
+          <div class="card-body">
+            <div style="font-size:12px;color:var(--muted);padding:2px 0 10px;line-height:1.5">Producten waar nog een instructievideo over gemaakt moet worden. Op de scanner verschijnt een "let op"-pop-up. Bestaat er al een gewone categorie met hetzelfde zoekwoord, dan heeft die voorrang en wordt de to-do niet getoond.</div>
+            <div id="todo-lijst" style="display:flex;flex-direction:column;gap:8px;padding:4px 0">
+              <div class="empty">Laden...</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- RED ALERT PRODUCTS -->
+        <div class="card acc-card collapsed" style="margin-top:16px">
+          <div class="card-header" onclick="toggleCard(this, event)">
+            <div class="card-title" style="color:var(--red)"><i class="ti ti-alert-triangle"></i>Red alert products</div>
+            <i class="ti ti-chevron-down acc-chevron"></i>
+          </div>
+          <div class="card-body">
+            <div style="font-size:12px;color:var(--muted);padding:2px 0 10px;line-height:1.5">SKU's met een hoge kans op defect. Bij scannen verschijnt 5 sec een rood knipperend "RED ALERT"-scherm, daarna het normale (rode) gradingscherm met "hoge kans op defect". Matcht op SKU, maar ook op barcode/productcode.</div>
+            <div style="display:flex;gap:8px;flex-wrap:wrap">
+              <input id="red-input" type="text" placeholder="SKU / productcode..." style="flex:1;min-width:180px;padding:10px 14px;border:1px solid var(--border);border-radius:8px;font-size:14px;font-weight:600;font-family:inherit;outline:none"/>
+              <button onclick="voegSpecialToe('red')" style="padding:9px 18px;background:var(--red);color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:800;cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:6px"><i class="ti ti-plus"></i> Toevoegen</button>
+            </div>
+            <div id="red-lijst" style="display:flex;flex-wrap:wrap;gap:8px;padding:12px 0 0">
+              <div class="empty">Laden...</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- GOLDEN PRODUCTS -->
+        <div class="card acc-card collapsed" style="margin-top:16px">
+          <div class="card-header" onclick="toggleCard(this, event)">
+            <div class="card-title" style="color:#B8860B"><i class="ti ti-trophy"></i>Golden products</div>
+            <i class="ti ti-chevron-down acc-chevron"></i>
+          </div>
+          <div class="card-body">
+            <div style="font-size:12px;color:var(--muted);padding:2px 0 10px;line-height:1.5">SKU's die niet gegrade hoeven te worden. Bij scannen wordt het scherm goud met "Golden product — dit product hoef je niet te graden". Matcht op SKU, maar ook op barcode/productcode.</div>
+            <div style="display:flex;gap:8px;flex-wrap:wrap">
+              <input id="gold-input" type="text" placeholder="SKU / productcode..." style="flex:1;min-width:180px;padding:10px 14px;border:1px solid var(--border);border-radius:8px;font-size:14px;font-weight:600;font-family:inherit;outline:none"/>
+              <button onclick="voegSpecialToe('gold')" style="padding:9px 18px;background:#B8860B;color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:800;cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:6px"><i class="ti ti-plus"></i> Toevoegen</button>
+            </div>
+            <div id="gold-lijst" style="display:flex;flex-wrap:wrap;gap:8px;padding:12px 0 0">
+              <div class="empty">Laden...</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ONDERSCHEPTE ARTIKELEN -->
+        <div class="card acc-card collapsed" style="margin-top:16px">
+          <div class="card-header" onclick="toggleCard(this, event)">
+            <div class="card-title"><i class="ti ti-ban"></i>Onderschepte artikelen</div>
+            <i class="ti ti-chevron-down acc-chevron"></i>
+          </div>
+          <div class="card-body">
+            <div style="font-size:12px;color:var(--muted);padding:2px 0 10px;line-height:1.5">Tags van artikelen die <b>niet</b> opgeboekt of gegrade mogen worden. Heeft een gescand product zo'n tag, dan toont de scanner "Dit artikel mag niet opgeboekt worden en ook niet gegrade" en print automatisch een sticker met <b>18+ artikelen verzamelen</b> en de scan-ID als barcode.</div>
+            <div style="display:flex;gap:8px;flex-wrap:wrap">
+              <input id="onderschept-input" type="text" placeholder="Tag..." style="flex:1;min-width:180px;padding:10px 14px;border:1px solid var(--border);border-radius:8px;font-size:14px;font-weight:600;font-family:inherit;outline:none"/>
+              <button onclick="voegSpecialToe('onderschept')" style="padding:9px 18px;background:var(--sidebar);color:var(--g1);border:none;border-radius:8px;font-size:13px;font-weight:800;cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:6px"><i class="ti ti-plus"></i> Toevoegen</button>
+            </div>
+            <div id="onderschept-lijst" style="display:flex;flex-wrap:wrap;gap:8px;padding:12px 0 0">
+              <div class="empty">Laden...</div>
+            </div>
+
+            <div style="margin-top:16px;border-top:1px solid var(--border);padding-top:14px">
+              <label style="font-size:12px;font-weight:700;color:var(--muted);letter-spacing:.5px;text-transform:uppercase">Afbeelding URL <span style="font-weight:400;text-transform:none">(optioneel — getoond op de scanner)</span></label>
+              <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:6px">
+                <input id="onderschept-afb" type="url" placeholder="https://..." style="flex:1;min-width:180px;padding:10px 14px;border:1px solid var(--border);border-radius:8px;font-size:14px;font-weight:600;font-family:inherit;outline:none"/>
+                <button onclick="slaOnderscheptAfbeelding()" style="padding:9px 18px;background:var(--sidebar);color:var(--g1);border:none;border-radius:8px;font-size:13px;font-weight:800;cursor:pointer;font-family:inherit">Opslaan</button>
+              </div>
+              <div id="onderschept-afb-preview" style="margin-top:8px;display:none;position:relative;max-width:280px">
+                <img style="width:100%;max-height:160px;object-fit:cover;border-radius:8px;border:1px solid var(--border)"/>
+                <button onclick="wisOnderscheptAfbeelding()" title="Verwijderen" style="position:absolute;top:6px;right:6px;background:rgba(0,0,0,.6);border:none;border-radius:50%;width:24px;height:24px;color:white;font-size:14px;cursor:pointer">×</button>
+              </div>
+            </div>
           </div>
         </div>
       </div>
 
-      <!-- CATEGORIE MODAL -->
-      <div id="cat-modal-bg" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:9999;align-items:center;justify-content:center">
+      <!-- TO DO MODAL -->
+      <div id="todo-modal-bg" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:9999;align-items:center;justify-content:center">
         <div style="background:var(--white);border-radius:16px;padding:28px;width:min(520px,92vw);display:flex;flex-direction:column;gap:16px;box-shadow:0 8px 32px rgba(0,0,0,.15)">
+          <div style="display:flex;align-items:center;justify-content:space-between">
+            <h3 id="todo-modal-titel" style="font-size:16px;font-weight:800;color:var(--text)">Nieuwe to-do categorie</h3>
+            <button onclick="sluitTodoModal()" style="background:none;border:none;cursor:pointer;font-size:20px;color:var(--muted)">×</button>
+          </div>
+          <div>
+            <label style="font-size:12px;font-weight:700;color:var(--muted);letter-spacing:.5px;text-transform:uppercase">Naam <span style="font-weight:400;text-transform:none">(optioneel)</span></label>
+            <input id="todo-naam" type="text" placeholder="bijv. Heteluchtpistool" style="width:100%;margin-top:6px;padding:10px 14px;border:1px solid var(--border);border-radius:8px;font-size:14px;font-weight:600;font-family:inherit;outline:none"/>
+          </div>
+          <div>
+            <label style="font-size:12px;font-weight:700;color:var(--muted);letter-spacing:.5px;text-transform:uppercase">Zoekwoorden <span style="font-weight:400;text-transform:none">(komma gescheiden)</span></label>
+            <input id="todo-woorden" type="text" placeholder="heatgun, hetelucht, föhn" style="width:100%;margin-top:6px;padding:10px 14px;border:1px solid var(--border);border-radius:8px;font-size:14px;font-weight:600;font-family:inherit;outline:none"/>
+            <div style="font-size:11px;color:var(--muted);margin-top:4px">Wordt gematcht met de producttitel uit Picqer</div>
+          </div>
+          <div>
+            <label style="font-size:12px;font-weight:700;color:var(--muted);letter-spacing:.5px;text-transform:uppercase">Tekst in de pop-up <span style="font-weight:400;text-transform:none">(optioneel)</span></label>
+            <textarea id="todo-tekst" placeholder="Maak een video over hoe je dit product moet graden. Zie je deze pop-up? Neem dan contact op met je leidinggevende." style="width:100%;margin-top:6px;padding:10px 14px;border:1px solid var(--border);border-radius:8px;font-size:14px;font-family:inherit;outline:none;resize:vertical;height:90px"></textarea>
+            <div style="font-size:11px;color:var(--muted);margin-top:4px">Leeg laten = standaardtekst. De titel ("Let op") wordt automatisch in de gekozen taal getoond.</div>
+          </div>
+          <div style="display:flex;gap:10px;justify-content:flex-end">
+            <button onclick="sluitTodoModal()" style="padding:9px 18px;border:1px solid var(--border);border-radius:20px;background:var(--white);font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;color:var(--muted)">Annuleren</button>
+            <button id="todo-opslaan-btn" onclick="slaTodoOp()" style="padding:9px 20px;background:#EF9F27;color:var(--sidebar);border:none;border-radius:20px;font-size:13px;font-weight:800;cursor:pointer;font-family:inherit">Opslaan</button>
+          </div>
+          <div id="todo-modal-hint" style="font-size:12px;color:var(--red);text-align:center;display:none"></div>
+        </div>
+      </div>
+
+      <!-- CATEGORIE MODAL -->
+      <div id="cat-modal-bg" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:9999;align-items:center;justify-content:center;padding:16px;overflow-y:auto">
+        <div style="background:var(--white);border-radius:16px;padding:28px;width:min(520px,92vw);max-height:90vh;overflow-y:auto;display:flex;flex-direction:column;gap:16px;box-shadow:0 8px 32px rgba(0,0,0,.15)">
           <div style="display:flex;align-items:center;justify-content:space-between">
             <h3 id="cat-modal-titel" style="font-size:16px;font-weight:800;color:var(--text)">Nieuwe categorie</h3>
             <button onclick="sluitCatModal()" style="background:none;border:none;cursor:pointer;font-size:20px;color:var(--muted)">×</button>
@@ -518,6 +640,24 @@
         </div>
       </div>
 
+      <div class="page" id="page-emails">
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title"><i class="ti ti-mail"></i>Rapport e-mails</div>
+          </div>
+          <p style="color:var(--muted);font-size:13px;margin:0 0 14px">De dagelijkse en handmatige rapporten worden naar deze adressen verstuurd.</p>
+          <div style="display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap">
+            <input class="modal-input" id="email-input" type="email" placeholder="naam@bedrijf.nl" autocomplete="off" style="flex:1;min-width:220px"/>
+            <button class="add-acc-btn" id="email-add-btn"><i class="ti ti-plus"></i>Toevoegen</button>
+          </div>
+          <div class="modal-error" id="email-error" style="margin-bottom:10px;display:none"></div>
+          <table class="acc-table">
+            <thead><tr><th>E-mailadres</th><th style="width:120px">Acties</th></tr></thead>
+            <tbody id="email-tbody"></tbody>
+          </table>
+        </div>
+      </div>
+
     </div>
   </div>
 </div>
@@ -556,7 +696,7 @@
 <div id="jsonp-container" style="display:none"></div>
 
 <script>
-const SCANS_URL  = 'https://script.google.com/macros/s/AKfycbxub5myYuJOE6jF5LIFRZRmOgY0v0L0dzpAX88MGcw4RqqGalo7i6QnCZoqQDZMu4pq/exec';
+const SCANS_URL  = 'https://script.google.com/macros/s/AKfycbwvWOIsoDWxeB5PZmNldly6GgcWSrf4Zj82zpdcsHCl8Pa4U6P6JOiCbAQaxh07S8nE/exec';
 const SHEET_ID   = '1Bke9Hu4xqrRGhewjrBPO5CrJznugsBecth6QYIwn25M';
 const SHEET_TAB  = 'Scans';
 const FIREBASE_URL = 'https://gradingsitedata-default-rtdb.europe-west1.firebasedatabase.app';
@@ -846,6 +986,215 @@ async function verwijderCategorie(id) {
   laadCategorieen();
 }
 
+// ── To do categorieën ────────────────────────────────────
+const TODO_URL = FIREBASE_URL + '/todo_categorieen.json';
+const TODO_DEFAULT_TEKST = 'Maak een video over hoe je dit product moet graden. Zie je deze pop-up? Neem dan contact op met je leidinggevende.';
+let bewerkTodoId = null;
+
+// Verzamelt alle zoekwoorden van de gewone categorieën (lowercase),
+// zodat we kunnen markeren welke to-do's al door een echte categorie gedekt zijn.
+async function haalCategorieWoorden() {
+  try {
+    const res  = await fetch(CAT_URL);
+    const data = await res.json();
+    const set  = new Set();
+    if (data) Object.values(data).forEach(cat =>
+      (cat.woorden || '').split(',').map(w => w.trim().toLowerCase()).filter(Boolean).forEach(w => set.add(w)));
+    return set;
+  } catch(err) { return new Set(); }
+}
+
+async function laadTodos() {
+  const container = document.getElementById('todo-lijst');
+  container.innerHTML = '<div class="empty">Laden...</div>';
+  try {
+    const [res, catWoorden] = await Promise.all([fetch(TODO_URL), haalCategorieWoorden()]);
+    const data = await res.json();
+    if (!data) {
+      container.innerHTML = '<div class="empty">Nog geen to-do categorieën</div>';
+      return;
+    }
+    const todos = Object.entries(data).sort((a,b) => (a[1].naam||'').localeCompare(b[1].naam||''));
+    container.innerHTML = todos.map(([id, todo]) => {
+      const woorden = (todo.woorden||'').split(',').map(w=>w.trim()).filter(Boolean);
+      // gedekt = zoekwoord bestaat al in een gewone categorie (die heeft voorrang)
+      const gedekt = woorden.filter(w => catWoorden.has(w.toLowerCase()));
+      const woordenHTML = woorden.map(w => {
+        const isGedekt = catWoorden.has(w.toLowerCase());
+        return `<span style="background:${isGedekt ? '#e5e7eb' : 'var(--bg)'};color:${isGedekt ? '#9ca3af' : 'var(--text)'};padding:2px 8px;border-radius:20px;margin-right:4px;display:inline-block;${isGedekt ? 'text-decoration:line-through' : ''}">${escHTML(w)}</span>`;
+      }).join('');
+      return `
+      <div style="display:flex;align-items:center;gap:12px;padding:12px 16px;border:1px solid var(--border);border-radius:10px;background:var(--white)">
+        <div style="flex:1">
+          <div style="font-size:14px;font-weight:700;color:var(--text)">${escHTML(todo.naam||'Naamloos')}</div>
+          <div style="font-size:12px;color:var(--muted);margin-top:4px">${woordenHTML}</div>
+          <div style="font-size:12px;color:var(--text);margin-top:6px;font-style:italic">"${escHTML(todo.tekst||TODO_DEFAULT_TEKST)}"</div>
+          ${gedekt.length ? `<div style="font-size:11px;color:#EF9F27;margin-top:6px"><i class="ti ti-alert-triangle"></i> ${gedekt.length} zoekwoord${gedekt.length===1?'':'en'} al gedekt door een categorie — die heeft voorrang</div>` : ''}
+        </div>
+        <button onclick="bewerkTodo('${id}')" style="padding:6px 14px;border:1px solid var(--border);border-radius:20px;background:var(--white);font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;color:var(--muted)"><i class="ti ti-edit"></i> Bewerken</button>
+        <button onclick="verwijderTodo('${id}')" style="padding:6px 12px;border:1px solid rgba(232,76,61,.3);border-radius:20px;background:transparent;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;color:var(--red)"><i class="ti ti-trash"></i></button>
+      </div>`;
+    }).join('');
+  } catch(err) {
+    container.innerHTML = '<div class="empty" style="color:var(--red)">Fout bij laden</div>';
+  }
+}
+
+function openTodoModal(id, todo) {
+  bewerkTodoId = id || null;
+  document.getElementById('todo-modal-titel').textContent = id ? 'To-do categorie bewerken' : 'Nieuwe to-do categorie';
+  document.getElementById('todo-naam').value    = todo ? (todo.naam || '')    : '';
+  document.getElementById('todo-woorden').value = todo ? (todo.woorden || '') : '';
+  document.getElementById('todo-tekst').value   = todo ? (todo.tekst || '')   : '';
+  document.getElementById('todo-modal-hint').style.display = 'none';
+  document.getElementById('todo-modal-bg').style.display = 'flex';
+  setTimeout(() => document.getElementById('todo-woorden').focus(), 100);
+}
+
+function sluitTodoModal() {
+  document.getElementById('todo-modal-bg').style.display = 'none';
+  bewerkTodoId = null;
+}
+
+async function slaTodoOp() {
+  const naam    = document.getElementById('todo-naam').value.trim();
+  const woorden = document.getElementById('todo-woorden').value.trim();
+  const tekst   = document.getElementById('todo-tekst').value.trim();
+  const hint    = document.getElementById('todo-modal-hint');
+
+  if (!woorden) { hint.textContent = 'Vul minimaal één zoekwoord in'; hint.style.display = 'block'; return; }
+
+  const btn = document.getElementById('todo-opslaan-btn');
+  btn.textContent = 'Opslaan...'; btn.disabled = true;
+
+  const todo = { naam, woorden, tekst, aangemaakt: new Date().toISOString() };
+  // id: op naam, anders op het eerste zoekwoord
+  const basis = (naam || woorden.split(',')[0] || 'todo').toLowerCase();
+  const id  = bewerkTodoId || ('td_' + basis.replace(/[^a-z0-9]/g, '_').replace(/_+/g, '_'));
+
+  try {
+    await fetch(`${FIREBASE_URL}/todo_categorieen/${id}.json`, { method: 'PUT', body: JSON.stringify(todo), headers: {'Content-Type':'application/json'} });
+    sluitTodoModal();
+    laadTodos();
+  } catch(err) {
+    hint.textContent = 'Opslaan mislukt'; hint.style.display = 'block';
+  }
+  btn.textContent = 'Opslaan'; btn.disabled = false;
+}
+
+async function bewerkTodo(id) {
+  const res  = await fetch(`${FIREBASE_URL}/todo_categorieen/${id}.json`);
+  const todo = await res.json();
+  openTodoModal(id, todo);
+}
+
+async function verwijderTodo(id) {
+  if (!confirm('To-do categorie verwijderen?')) return;
+  await fetch(`${FIREBASE_URL}/todo_categorieen/${id}.json`, { method: 'DELETE' });
+  laadTodos();
+}
+
+// ── Inklapbare kaarten (accordion) ────────────────────────
+// Klik op de kop klapt de inhoud uit/in. Klikken op een knop of
+// invoerveld in de kop laat de kaart met rust.
+function toggleCard(headerEl, ev){
+  if (ev && ev.target.closest('button, input, a')) return;
+  headerEl.closest('.acc-card').classList.toggle('collapsed');
+}
+
+// ── Speciale lijsten: Red alert / Golden (SKU) + Onderschept (tag) ──
+function specialPad(type){
+  return type === 'red'        ? 'red_alert_products'
+       : type === 'gold'       ? 'golden_products'
+       : /* onderschept */       'onderschept_tags';
+}
+function specialKleur(type){
+  return type === 'red' ? 'var(--red)' : type === 'gold' ? '#B8860B' : 'var(--sidebar)';
+}
+function specialLeeg(type){
+  return type === 'onderschept' ? 'Nog geen tags toegevoegd' : 'Nog geen SKU\'s toegevoegd';
+}
+// id-veilige sleutel (Firebase verbiedt . # $ [ ] /)
+function specialId(sku){ return 's_' + sku.toLowerCase().replace(/[.#$\[\]/\s]/g, '_').replace(/_+/g, '_'); }
+
+async function laadSpecial(type){
+  const container = document.getElementById(type + '-lijst');
+  const kleur = specialKleur(type);
+  container.innerHTML = '<div class="empty">Laden...</div>';
+  try {
+    const res  = await fetch(`${FIREBASE_URL}/${specialPad(type)}.json`);
+    const data = await res.json();
+    if (!data) { container.innerHTML = `<div class="empty">${specialLeeg(type)}</div>`; return; }
+    const items = Object.entries(data).sort((a,b) => String((a[1].sku||a[1])).localeCompare(String(b[1].sku||b[1])));
+    container.innerHTML = items.map(([id, val]) => {
+      const sku = (val && val.sku) || val;
+      return `<span style="display:inline-flex;align-items:center;gap:8px;padding:6px 10px 6px 14px;border:1px solid ${kleur};border-radius:20px;font-size:13px;font-weight:700;color:var(--text);background:var(--white)">
+        ${escHTML(String(sku))}
+        <button onclick="verwijderSpecial('${type}','${id}')" title="Verwijderen" style="background:none;border:none;cursor:pointer;color:var(--red);font-size:15px;line-height:1;padding:0">×</button>
+      </span>`;
+    }).join('');
+  } catch(err) {
+    container.innerHTML = '<div class="empty" style="color:var(--red)">Fout bij laden</div>';
+  }
+}
+
+async function voegSpecialToe(type){
+  const input = document.getElementById(type + '-input');
+  const sku = input.value.trim();
+  if (!sku) { input.focus(); return; }
+  const id = specialId(sku);
+  try {
+    await fetch(`${FIREBASE_URL}/${specialPad(type)}/${id}.json`, {
+      method: 'PUT',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({ sku, aangemaakt: new Date().toISOString() })
+    });
+    input.value = '';
+    input.focus();
+    laadSpecial(type);
+  } catch(err) {
+    alert('Opslaan mislukt — controleer de Firebase-regels voor "' + specialPad(type) + '".');
+  }
+}
+
+async function verwijderSpecial(type, id){
+  await fetch(`${FIREBASE_URL}/${specialPad(type)}/${id}.json`, { method: 'DELETE' });
+  laadSpecial(type);
+}
+
+// ── Onderschept: afbeelding voor het scanner-scherm ──────
+function toonOnderscheptPreview(url){
+  const prev = document.getElementById('onderschept-afb-preview');
+  if (url) { prev.style.display = 'block'; prev.querySelector('img').src = url; }
+  else prev.style.display = 'none';
+}
+async function laadOnderscheptConfig(){
+  try {
+    const res  = await fetch(`${FIREBASE_URL}/onderschept_config.json`);
+    const data = await res.json();
+    const url  = (data && data.afbeelding) || '';
+    document.getElementById('onderschept-afb').value = url;
+    toonOnderscheptPreview(url);
+  } catch(err) {}
+}
+async function slaOnderscheptAfbeelding(){
+  const url = document.getElementById('onderschept-afb').value.trim();
+  if (url && !isVeiligeUrl(url)) { alert('Ongeldige URL — gebruik http(s)://'); return; }
+  try {
+    await fetch(`${FIREBASE_URL}/onderschept_config.json`, {
+      method: 'PUT', headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({ afbeelding: url })
+    });
+    toonOnderscheptPreview(url);
+  } catch(err) {
+    alert('Opslaan mislukt — controleer de Firebase-regels voor "onderschept_config".');
+  }
+}
+function wisOnderscheptAfbeelding(){
+  document.getElementById('onderschept-afb').value = '';
+  slaOnderscheptAfbeelding();
+}
+
 // ── Media editor (binnen categorie-modal) ─────────────────
 function voegMediaItemToe(type){
   mediaItems.push({ id: genMediaId(), type, url:'', titel:'', beschrijving:'', aangemaakt: new Date().toISOString() });
@@ -916,6 +1265,13 @@ document.getElementById('cat-nieuw-btn').addEventListener('click', () => openCat
 document.getElementById('cat-modal-bg').addEventListener('click', e => {
   if (e.target === document.getElementById('cat-modal-bg')) sluitCatModal();
 });
+document.getElementById('todo-nieuw-btn').addEventListener('click', () => openTodoModal(null, null));
+document.getElementById('todo-modal-bg').addEventListener('click', e => {
+  if (e.target === document.getElementById('todo-modal-bg')) sluitTodoModal();
+});
+document.getElementById('red-input').addEventListener('keydown', e => { if (e.key === 'Enter') voegSpecialToe('red'); });
+document.getElementById('gold-input').addEventListener('keydown', e => { if (e.key === 'Enter') voegSpecialToe('gold'); });
+document.getElementById('onderschept-input').addEventListener('keydown', e => { if (e.key === 'Enter') voegSpecialToe('onderschept'); });
 
 document.getElementById('logout-btn').addEventListener('click', () => {
   localStorage.removeItem('adminId');
@@ -939,11 +1295,18 @@ document.querySelectorAll('.nav-item[data-page]').forEach(btn => {
     const tbRight = document.querySelector('.tb-right');
     if (tbRight) tbRight.style.display = 'flex';
 
-    if (btn.dataset.page === 'leveranciers') {
-      // Sla huidige periode op
-      savedPeriode = huidigePeriode;
-      savedCustomVan = customVan;
-      savedCustomTot = customTot;
+    // Pagina's die de centrale datumfilter op "Alles" forceren en de vorige
+    // keuze onthouden: Leveranciers + alle BEHEER-pagina's.
+    const ALLES_PAGINAS = ['leveranciers', 'categorieen', 'accounts', 'emails'];
+
+    if (ALLES_PAGINAS.includes(btn.dataset.page)) {
+      // Sla de echte periode alleen op bij de eerste overgang vanaf een
+      // data-pagina (zodat wisselen tússen deze pagina's 'm niet overschrijft).
+      if (savedPeriode === null) {
+        savedPeriode   = huidigePeriode;
+        savedCustomVan = customVan;
+        savedCustomTot = customTot;
+      }
       // Zet centrale filter automatisch op Alles
       huidigePeriode = 'all';
       customVan = null; customTot = null;
@@ -951,10 +1314,12 @@ document.querySelectorAll('.nav-item[data-page]').forEach(btn => {
       document.querySelector('.period-btn[data-period="all"]').classList.add('active');
       document.getElementById('custom-period-btn').textContent = '📅 Periode';
       document.getElementById('date-picker-bar').style.display = 'none';
-      renderLeveranciersList();
-      document.getElementById('lev-dropdown').style.display = 'block';
+      if (btn.dataset.page === 'leveranciers') {
+        renderLeveranciersList();
+        document.getElementById('lev-dropdown').style.display = 'block';
+      }
     } else {
-      // Herstel opgeslagen periode als we van leveranciers komen
+      // Terug naar een data-pagina → herstel de opgeslagen periode
       if (savedPeriode && savedPeriode !== huidigePeriode) {
         huidigePeriode = savedPeriode;
         customVan = savedCustomVan;
@@ -966,15 +1331,17 @@ document.querySelectorAll('.nav-item[data-page]').forEach(btn => {
           document.getElementById('custom-period-btn').textContent =
             `📅 ${savedCustomVan.slice(8,10)}-${savedCustomVan.slice(5,7)}-${savedCustomVan.slice(0,4)} → ${savedCustomTot.slice(8,10)}-${savedCustomTot.slice(5,7)}-${savedCustomTot.slice(0,4)}`;
         }
-        savedPeriode = null;
       }
-      if (btn.dataset.page !== 'accounts') laadData();
+      savedPeriode = null;
+      laadData();
     }
 
-    const titels = {overview:'Dashboard', medewerkers:'Medewerkers', leveranciers:'Leveranciers', scans:'Alle scans', categorieen:'Categorieën', accounts:'Accounts'};
+    const titels = {overview:'Dashboard', medewerkers:'Medewerkers', leveranciers:'Leveranciers', scans:'Alle scans', categorieen:'Categorieën', accounts:'Accounts', emails:'Rapport e-mails'};
     document.getElementById('topbar-title').textContent = titels[btn.dataset.page] || '';
-    if (btn.dataset.page === 'categorieen') laadCategorieen();
+    if (btn.dataset.page === 'categorieen') { laadCategorieen(); laadTodos(); laadSpecial('red'); laadSpecial('gold'); laadSpecial('onderschept'); laadOnderscheptConfig(); }
     if (btn.dataset.page === 'medewerkers') { toonMdwLijst(); renderMedewerkers(); }
+    if (btn.dataset.page === 'accounts') laadAccountsBeheer();
+    if (btn.dataset.page === 'emails') laadEmails();
   });
 });
 
@@ -1757,10 +2124,19 @@ function toonMdwDetail(naam) {
 
 // ── Accounts beheer ──────────────────────────────────────
 async function laadAccountsBeheer() {
-  const data = await apiFetch({actie: 'adminGetAccounts', adminId, adminWw});
-  if (data.status !== 'ok') return;
-
   const tbody = document.getElementById('acc-tbody');
+  let data;
+  try {
+    data = await apiFetch({actie: 'adminGetAccounts', adminId, adminWw});
+  } catch (e) {
+    tbody.innerHTML = `<tr><td colspan="6" style="text-align:center;color:#ff6b6b;padding:20px">Verbindingsfout bij het laden van accounts. Probeer te verversen.</td></tr>`;
+    return;
+  }
+  if (!data || data.status !== 'ok') {
+    tbody.innerHTML = `<tr><td colspan="6" style="text-align:center;color:#ff6b6b;padding:20px">Accounts laden mislukt: ${(data && data.message) || 'geen toegang'} — <a href="#" style="color:var(--g1);font-weight:700" onclick="adminOpnieuwInloggen();return false;">opnieuw inloggen</a></td></tr>`;
+    return;
+  }
+
   tbody.innerHTML = data.accounts.map(acc => `
     <tr data-id="${acc.id}" data-naam="${acc.naam}">
       <td><b>${acc.naam}</b></td>
@@ -1775,6 +2151,51 @@ async function laadAccountsBeheer() {
     </tr>
   `).join('');
 }
+
+function adminOpnieuwInloggen() {
+  ['adminId','adminWw','adminNaam','adminInit'].forEach(k => localStorage.removeItem(k));
+  location.reload();
+}
+
+// ── Rapport e-mails beheer ───────────────────────────────
+async function laadEmails() {
+  const tbody = document.getElementById('email-tbody');
+  tbody.innerHTML = '<tr><td colspan="2" style="color:var(--muted);padding:12px">Laden…</td></tr>';
+  let data;
+  try { data = await apiFetch({actie: 'adminGetEmails', adminId, adminWw}); }
+  catch (e) { tbody.innerHTML = '<tr><td colspan="2" style="color:#ff6b6b;padding:12px">Verbindingsfout</td></tr>'; return; }
+  if (!data || data.status !== 'ok') {
+    tbody.innerHTML = `<tr><td colspan="2" style="color:#ff6b6b;padding:12px">Laden mislukt: ${(data && data.message) || 'geen toegang'} — <a href="#" style="color:var(--g1);font-weight:700" onclick="adminOpnieuwInloggen();return false;">opnieuw inloggen</a></td></tr>`;
+    return;
+  }
+  renderEmails(data.emails || []);
+}
+function renderEmails(emails) {
+  const tbody = document.getElementById('email-tbody');
+  if (!emails.length) { tbody.innerHTML = '<tr><td colspan="2" style="color:var(--muted);padding:12px">Nog geen adressen</td></tr>'; return; }
+  tbody.innerHTML = emails.map(e => `
+    <tr><td>${e}</td>
+    <td><button class="action-btn danger" onclick="verwijderEmail('${String(e).replace(/'/g,"\\'")}')">🗑 Verwijder</button></td></tr>
+  `).join('');
+}
+async function voegEmailToe() {
+  const inp = document.getElementById('email-input');
+  const err = document.getElementById('email-error');
+  const email = inp.value.trim();
+  err.style.display = 'none';
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { err.textContent = 'Ongeldig e-mailadres'; err.style.display = 'block'; return; }
+  const data = await apiFetch({actie: 'adminAddEmail', email, adminId, adminWw});
+  if (!data || data.status !== 'ok') { err.textContent = (data && data.message) || 'Toevoegen mislukt'; err.style.display = 'block'; return; }
+  inp.value = '';
+  renderEmails(data.emails || []);
+}
+async function verwijderEmail(email) {
+  if (!confirm(`"${email}" verwijderen uit de rapport-ontvangers?`)) return;
+  const data = await apiFetch({actie: 'adminVerwijderEmail', email, adminId, adminWw});
+  if (data && data.status === 'ok') renderEmails(data.emails || []);
+}
+document.getElementById('email-add-btn').addEventListener('click', voegEmailToe);
+document.getElementById('email-input').addEventListener('keydown', e => { if (e.key === 'Enter') voegEmailToe(); });
 
 function formatDatum(iso) {
   if (!iso) return '—';
