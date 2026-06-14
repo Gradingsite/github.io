@@ -489,11 +489,12 @@
             <textarea id="cat-bericht" placeholder="bijv. Let op: verwijder alle data voor grading!" style="width:100%;margin-top:6px;padding:10px 14px;border:1px solid var(--border);border-radius:8px;font-size:14px;font-family:inherit;outline:none;resize:vertical;height:90px"></textarea>
           </div>
           <div>
-            <label style="font-size:12px;font-weight:700;color:var(--muted);letter-spacing:.5px;text-transform:uppercase">Afbeelding URL <span style="font-weight:400;text-transform:none">(optioneel)</span></label>
-            <input id="cat-foto" type="url" placeholder="https://..." style="width:100%;margin-top:6px;padding:10px 14px;border:1px solid var(--border);border-radius:8px;font-size:14px;font-weight:600;font-family:inherit;outline:none"/>
-            <div id="cat-foto-preview" style="margin-top:8px;display:none;position:relative">
-              <img style="width:100%;max-height:140px;object-fit:cover;border-radius:8px;border:1px solid var(--border)"/>
-              <button onclick="verwijderCatFoto()" style="position:absolute;top:6px;right:6px;background:rgba(0,0,0,.6);border:none;border-radius:50%;width:24px;height:24px;color:white;font-size:14px;cursor:pointer">×</button>
+            <label style="font-size:12px;font-weight:700;color:var(--muted);letter-spacing:.5px;text-transform:uppercase">Media <span style="font-weight:400;text-transform:none">(afbeeldingen, video's &amp; links — optioneel)</span></label>
+            <div id="cat-media-lijst" style="margin-top:8px;display:flex;flex-direction:column;gap:10px"></div>
+            <div style="display:flex;gap:8px;margin-top:8px;flex-wrap:wrap">
+              <button type="button" onclick="voegMediaItemToe('image')" style="padding:7px 12px;border:1px solid var(--border);border-radius:20px;background:var(--white);font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;color:var(--text);display:flex;align-items:center;gap:5px"><i class="ti ti-photo"></i> Afbeelding</button>
+              <button type="button" onclick="voegMediaItemToe('video')" style="padding:7px 12px;border:1px solid var(--border);border-radius:20px;background:var(--white);font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;color:var(--text);display:flex;align-items:center;gap:5px"><i class="ti ti-video"></i> Video</button>
+              <button type="button" onclick="voegMediaItemToe('link')" style="padding:7px 12px;border:1px solid var(--border);border-radius:20px;background:var(--white);font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;color:var(--text);display:flex;align-items:center;gap:5px"><i class="ti ti-link"></i> Link</button>
             </div>
           </div>
           <div style="display:flex;gap:10px;justify-content:flex-end">
@@ -694,6 +695,34 @@ function openDashboard() {
 // ── Categorieën ──────────────────────────────────────────
 const CAT_URL = FIREBASE_URL + '/categorieen.json';
 let bewerkCatId = null;
+let mediaItems  = []; // media van de categorie die nu bewerkt wordt
+
+// ── Media helpers (gedeeld met index.html) ────────────────
+// XSS-veilig: escape alles dat als tekst getoond wordt
+function escHTML(s){
+  return String(s == null ? '' : s).replace(/[&<>"']/g, c => (
+    {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]
+  ));
+}
+// Sta alleen http(s)-urls toe — voorkomt javascript:/data: injectie
+function isVeiligeUrl(u){
+  try { const p = new URL(u); return p.protocol === 'http:' || p.protocol === 'https:'; }
+  catch(e) { return false; }
+}
+// Herkent en valideert YouTube / Vimeo / directe video-urls
+function videoInfo(url){
+  if (!isVeiligeUrl(url)) return null;
+  let m;
+  m = url.match(/youtube\.com\/shorts\/([A-Za-z0-9_-]{11})/);
+  if (m) return { soort:'youtube', kort:true, embed:`https://www.youtube.com/embed/${m[1]}`, thumb:`https://img.youtube.com/vi/${m[1]}/hqdefault.jpg`, link:url };
+  m = url.match(/(?:youtube\.com\/(?:watch\?(?:.*&)?v=|embed\/)|youtu\.be\/)([A-Za-z0-9_-]{11})/);
+  if (m) return { soort:'youtube', embed:`https://www.youtube.com/embed/${m[1]}`, thumb:`https://img.youtube.com/vi/${m[1]}/hqdefault.jpg`, link:url };
+  m = url.match(/vimeo\.com\/(?:video\/)?(\d+)/);
+  if (m) return { soort:'vimeo', embed:`https://player.vimeo.com/video/${m[1]}`, thumb:null, link:url };
+  if (/\.(mp4|webm|ogg)(\?.*)?$/i.test(url)) return { soort:'direct', embed:url, thumb:null, link:url };
+  return null;
+}
+function genMediaId(){ return 'm' + Date.now().toString(36) + Math.floor(Math.random()*1e4).toString(36); }
 
 async function laadCategorieen() {
   const container = document.getElementById('cat-lijst');
@@ -711,7 +740,8 @@ async function laadCategorieen() {
         <div style="flex:1">
           <div style="font-size:14px;font-weight:700;color:var(--text)">${cat.naam||'Naamloos'}</div>
           <div style="font-size:12px;color:var(--muted);margin-top:2px">${(cat.woorden||'').split(',').filter(Boolean).map(w=>`<span style="background:var(--bg);padding:2px 8px;border-radius:20px;margin-right:4px;display:inline-block">${w.trim()}</span>`).join('')}</div>
-          <div style="font-size:12px;color:var(--text);margin-top:6px;font-style:italic">"${cat.bericht||''}"</div>
+          <div style="font-size:12px;color:var(--text);margin-top:6px;font-style:italic">"${escHTML(cat.bericht||'')}"</div>
+          ${(() => { const n = Array.isArray(cat.media) ? cat.media.length : (cat.foto ? 1 : 0); return n ? `<div style="font-size:11px;color:var(--muted);margin-top:6px"><i class="ti ti-photo"></i> ${n} media-item${n===1?'':'s'}</div>` : ''; })()}
         </div>
         <button onclick="bewerkCategorie('${id}')" style="padding:6px 14px;border:1px solid var(--border);border-radius:20px;background:var(--white);font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;color:var(--muted)"><i class="ti ti-edit"></i> Bewerken</button>
         <button onclick="verwijderCategorie('${id}')" style="padding:6px 12px;border:1px solid rgba(232,76,61,.3);border-radius:20px;background:transparent;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;color:var(--red)"><i class="ti ti-trash"></i></button>
@@ -728,14 +758,23 @@ function openCatModal(id, cat) {
   document.getElementById('cat-naam').value    = cat ? cat.naam    : '';
   document.getElementById('cat-woorden').value = cat ? cat.woorden : '';
   document.getElementById('cat-bericht').value = cat ? cat.bericht : '';
-  document.getElementById('cat-foto').value    = cat ? (cat.foto || '') : '';
-  const preview = document.getElementById('cat-foto-preview');
-  if (cat && cat.foto) {
-    preview.style.display = 'block';
-    preview.querySelector('img').src = cat.foto;
-  } else {
-    preview.style.display = 'none';
+
+  // Media inladen — nieuw model (cat.media[]) + backward-compat met losse cat.foto
+  mediaItems = [];
+  if (cat && Array.isArray(cat.media)) {
+    mediaItems = cat.media.map(it => ({
+      id: it.id || genMediaId(),
+      type: it.type || 'image',
+      url: it.url || '',
+      titel: it.titel || '',
+      beschrijving: it.beschrijving || '',
+      aangemaakt: it.aangemaakt || new Date().toISOString()
+    }));
+  } else if (cat && cat.foto) {
+    mediaItems = [{ id: genMediaId(), type:'image', url: cat.foto, titel: cat.naam || '', beschrijving:'', aangemaakt: new Date().toISOString() }];
   }
+  renderMediaItems();
+
   document.getElementById('cat-modal-hint').style.display = 'none';
   document.getElementById('cat-modal-bg').style.display = 'flex';
   setTimeout(() => document.getElementById('cat-naam').focus(), 100);
@@ -756,11 +795,32 @@ async function slaCategorieeOp() {
   if (!woorden) { hint.textContent = 'Vul minimaal één zoekwoord in'; hint.style.display = 'block'; return; }
   if (!bericht) { hint.textContent = 'Vul een bericht in'; hint.style.display = 'block'; return; }
 
+  // Media valideren en schoonmaken
+  const media = [];
+  for (const it of mediaItems) {
+    const u = (it.url || '').trim();
+    if (!u) continue; // lege rij overslaan
+    if (!isVeiligeUrl(u)) { hint.textContent = `Ongeldige URL (alleen http/https): ${u}`; hint.style.display = 'block'; return; }
+    if (it.type === 'video' && !videoInfo(u)) {
+      hint.textContent = 'Ongeldige videolink. Gebruik YouTube, Vimeo of een directe .mp4/.webm/.ogg url.';
+      hint.style.display = 'block'; return;
+    }
+    media.push({
+      id: it.id || genMediaId(),
+      type: it.type,
+      url: u,
+      titel: (it.titel || '').trim(),
+      beschrijving: (it.beschrijving || '').trim(),
+      aangemaakt: it.aangemaakt || new Date().toISOString()
+    });
+  }
+
   const btn = document.getElementById('cat-opslaan-btn');
   btn.textContent = 'Opslaan...'; btn.disabled = true;
 
-  const foto = document.getElementById('cat-foto').value.trim();
-  const cat = { naam, woorden, bericht, foto };
+  // foto = eerste afbeelding, voor backward-compat met oudere clients
+  const foto = (media.find(m => m.type === 'image') || {}).url || '';
+  const cat = { naam, woorden, bericht, foto, media };
   const id  = bewerkCatId || cat.naam.toLowerCase().replace(/[^a-z0-9]/g, '_').replace(/_+/g, '_');
   const url = `${FIREBASE_URL}/categorieen/${id}.json`;
 
@@ -786,21 +846,71 @@ async function verwijderCategorie(id) {
   laadCategorieen();
 }
 
-function verwijderCatFoto() {
-  document.getElementById('cat-foto').value = '';
-  document.getElementById('cat-foto-preview').style.display = 'none';
+// ── Media editor (binnen categorie-modal) ─────────────────
+function voegMediaItemToe(type){
+  mediaItems.push({ id: genMediaId(), type, url:'', titel:'', beschrijving:'', aangemaakt: new Date().toISOString() });
+  renderMediaItems();
+}
+function verwijderMediaItem(id){
+  mediaItems = mediaItems.filter(m => m.id !== id);
+  renderMediaItems();
+}
+// Live binding van een veld naar de mediaItems-array
+function updateMediaItem(id, veld, waarde){
+  const it = mediaItems.find(m => m.id === id);
+  if (!it) return;
+  it[veld] = waarde;
+  if (veld === 'url') updateMediaPreview(id);
+}
+function mediaTypeLabel(t){ return t === 'image' ? '🖼 Afbeelding' : t === 'video' ? '🎬 Video' : '🔗 Link'; }
+
+// Bouwt de preview voor één media-rij (afbeelding / video-thumbnail / link-kaart)
+function mediaPreviewHTML(it){
+  const u = (it.url || '').trim();
+  if (!u) return '';
+  if (!isVeiligeUrl(u)) return '<div style="font-size:11px;color:var(--red)">Ongeldige of onveilige URL</div>';
+  if (it.type === 'image') {
+    return `<img src="${escHTML(u)}" style="max-width:100%;max-height:120px;border-radius:8px;border:1px solid var(--border)" onerror="this.style.display='none'"/>`;
+  }
+  if (it.type === 'video') {
+    const v = videoInfo(u);
+    if (!v) return '<div style="font-size:11px;color:var(--red)">Geen geldige videolink (YouTube/Vimeo/.mp4)</div>';
+    if (v.thumb) return `<img src="${escHTML(v.thumb)}" style="max-width:100%;max-height:120px;border-radius:8px;border:1px solid var(--border)"/>`;
+    return `<div style="font-size:11px;color:var(--muted)"><i class="ti ti-video"></i> ${escHTML(v.soort)} video herkend</div>`;
+  }
+  // link
+  return `<div style="font-size:11px;color:var(--muted)"><i class="ti ti-link"></i> ${escHTML(u)}</div>`;
+}
+function updateMediaPreview(id){
+  const it = mediaItems.find(m => m.id === id);
+  const el = document.getElementById('media-prev-' + id);
+  if (it && el) el.innerHTML = mediaPreviewHTML(it);
 }
 
-document.getElementById('cat-foto').addEventListener('input', e => {
-  const url = e.target.value.trim();
-  const preview = document.getElementById('cat-foto-preview');
-  if (url) {
-    preview.style.display = 'block';
-    preview.querySelector('img').src = url;
-  } else {
-    preview.style.display = 'none';
+function renderMediaItems(){
+  const wrap = document.getElementById('cat-media-lijst');
+  if (!wrap) return;
+  if (!mediaItems.length) {
+    wrap.innerHTML = '<div style="font-size:12px;color:var(--muted)">Nog geen media toegevoegd</div>';
+    return;
   }
-});
+  wrap.innerHTML = mediaItems.map(it => {
+    const ph = it.type === 'image' ? 'https://... (afbeelding .jpg/.png)'
+             : it.type === 'video' ? 'YouTube / Vimeo / directe .mp4-url'
+             : 'https://... (externe link)';
+    return `
+    <div style="border:1px solid var(--border);border-radius:10px;padding:12px;background:var(--bg);display:flex;flex-direction:column;gap:8px">
+      <div style="display:flex;align-items:center;justify-content:space-between">
+        <span style="font-size:11px;font-weight:800;letter-spacing:.5px;color:var(--muted)">${mediaTypeLabel(it.type)}</span>
+        <button type="button" onclick="verwijderMediaItem('${it.id}')" style="background:none;border:none;cursor:pointer;color:var(--red);font-size:16px" title="Verwijderen">×</button>
+      </div>
+      <input type="text" value="${escHTML(it.titel)}" oninput="updateMediaItem('${it.id}','titel',this.value)" placeholder="Titel" style="width:100%;padding:8px 12px;border:1px solid var(--border);border-radius:8px;font-size:13px;font-weight:600;font-family:inherit;outline:none"/>
+      <input type="url" value="${escHTML(it.url)}" oninput="updateMediaItem('${it.id}','url',this.value)" placeholder="${ph}" style="width:100%;padding:8px 12px;border:1px solid var(--border);border-radius:8px;font-size:13px;font-family:inherit;outline:none"/>
+      <textarea oninput="updateMediaItem('${it.id}','beschrijving',this.value)" placeholder="Beschrijving (optioneel)" style="width:100%;padding:8px 12px;border:1px solid var(--border);border-radius:8px;font-size:13px;font-family:inherit;outline:none;resize:vertical;height:54px">${escHTML(it.beschrijving)}</textarea>
+      <div id="media-prev-${it.id}">${mediaPreviewHTML(it)}</div>
+    </div>`;
+  }).join('');
+}
 
 document.getElementById('cat-nieuw-btn').addEventListener('click', () => openCatModal(null, null));
 document.getElementById('cat-modal-bg').addEventListener('click', e => {
