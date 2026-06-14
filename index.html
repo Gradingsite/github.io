@@ -414,6 +414,7 @@ body{font-family:'Montserrat','Segoe UI',Arial,sans-serif;min-height:100vh;displ
       <div id="green-msg"></div>
       <div id="feedback-title"></div>
       <div id="feedback-subtitle"></div>
+      <img id="onderschept-img" alt="" style="display:none;max-width:min(420px,90vw);max-height:40vh;border-radius:12px;border:2px solid rgba(255,255,255,.3);margin-top:6px;object-fit:contain"/>
     </div>
 
     <!-- Mismatch panel -->
@@ -550,6 +551,9 @@ const T = {
     labelPrintError:"Printen mislukt. Controleer of Zebra Browser Print actief is.",
     labelPrintDone:"✓ Labels geprint",customLabelEmpty:"Vul eerst een barcode in",
     goldProductTitle:"Goud product",alarmProductTitle:"Alarmproduct",
+    todoLetOp:"⚠ Let op",todoBericht:"Maak een video over hoe je dit product moet graden. Zie je deze pop-up? Neem dan contact op met je leidinggevende.",
+    redAlertTitle:"RED ALERT",redAlertSub:"Hoge kans op defect",goldenSub:"Dit product hoef je niet te graden",
+    onderscheptTitle:"⛔ Onderschept artikel",onderscheptSub:"Dit artikel mag niet opgeboekt worden en ook niet gegrade.",onderscheptSticker:"Sticker '18+ artikelen verzamelen' geprint",
   },
   en:{
     nameQ:"What is your name?",namePh:"Enter your name...",
@@ -583,6 +587,9 @@ const T = {
     labelPrintError:"Printing failed. Check whether Zebra Browser Print is running.",
     labelPrintDone:"✓ Labels printed",customLabelEmpty:"Enter a barcode first",
     goldProductTitle:"Gold product",alarmProductTitle:"Alarm product",
+    todoLetOp:"⚠ Watch out",todoBericht:"An instruction video still needs to be made for grading this product. If you see this pop-up, contact your supervisor.",
+    redAlertTitle:"RED ALERT",redAlertSub:"High chance of defect",goldenSub:"You don't need to grade this product",
+    onderscheptTitle:"⛔ Intercepted item",onderscheptSub:"This item must not be booked in or graded.",onderscheptSticker:"'18+ items collect' sticker printed",
   },
   ar:{
     nameQ:"ما اسمك؟",namePh:"أدخل اسمك...",
@@ -616,6 +623,9 @@ const T = {
     labelPrintError:"فشلت الطباعة. تحقق من تشغيل Zebra Browser Print.",
     labelPrintDone:"✓ تمت طباعة الملصقات",customLabelEmpty:"أدخل الباركود أولاً",
     goldProductTitle:"منتج ذهبي",alarmProductTitle:"منتج إنذار",
+    todoLetOp:"⚠ تنبيه",todoBericht:"يجب إنشاء فيديو إرشادي حول كيفية تصنيف هذا المنتج. إذا رأيت هذه النافذة المنبثقة، يرجى التواصل مع المشرف.",
+    redAlertTitle:"تنبيه أحمر",redAlertSub:"احتمال كبير للعطل",goldenSub:"لا حاجة لتصنيف هذا المنتج",
+    onderscheptTitle:"⛔ مادة محتجزة",onderscheptSub:"لا يجوز تسجيل هذه المادة أو تصنيفها.",onderscheptSticker:"تمت طباعة ملصق '18+ artikelen verzamelen'",
   }
 };
 
@@ -742,6 +752,7 @@ function applyLang(){
   document.getElementById('mpl-en').textContent = t('labelEnglish');
   document.getElementById('mpl-ar').textContent = t('labelArabic');
   document.getElementById('mpl-cancel').textContent = t('labelCancel');
+  document.getElementById('mm-escape').textContent = '⎋ ' + t('labelCancel');
   // Account modals teksten
   document.getElementById('mac-title').textContent = activeLang==='ar' ? 'اختر حسابك' : activeLang==='en' ? 'Choose your account' : 'Kies je account';
   const accSearch = document.getElementById('acc-search');
@@ -1346,12 +1357,99 @@ async function showAlarmProductWarning(barcode){
   await wait(5000);
   overlay.classList.remove('alarm-blink');
 }
+
+// Red alert: 5 sec rood knipperend scherm met "RED ALERT — hoge kans op defect"
+async function flashRedAlert(code){
+  overlay.className='red alarm-blink';
+  document.getElementById('main-logo').style.display='none';
+  greenMsg.style.display='none';
+  fbTitle.textContent = '🚨 ' + t('redAlertTitle');
+  fbTitle.style.display='block';
+  fbSub.textContent = t('redAlertSub');
+  fbSub.style.display='block';
+  fbSub.style.direction = activeLang==='ar' ? 'rtl' : 'ltr';
+  bcDisp.style.display='none';
+  scanHintEl.style.display='none';
+  await wait(5000);
+  overlay.classList.remove('alarm-blink');
+}
+
+// Red alert eindscherm: blijft rood + "hoge kans op defect".
+// Grading-item → toon ook de grading-redenen. Geen grading-item → toon de
+// normale "je kunt gewoon graden zoals je normaal doet"-boodschap, maar rood.
+function showRedAlert(product, code, isGrading){
+  overlay.className='red';
+  document.getElementById('main-logo').style.display='none';
+  greenMsg.style.display='none';
+  fbTitle.textContent = '🚨 ' + t('redAlertTitle');
+  fbTitle.style.display='block';
+  let sub = t('redAlertSub');
+  if (isGrading){
+    const rz = buildRedenZin(product);
+    if (rz) sub += '\n' + rz;
+  } else {
+    sub += '\n' + t('green');
+  }
+  fbSub.textContent = sub;
+  fbSub.style.display='block';
+  fbSub.style.direction = activeLang==='ar' ? 'rtl' : 'ltr';
+  bcDisp.textContent = code; bcDisp.style.display='block';
+  scanHintEl.style.display='none';
+}
+
+// Golden product (SKU-niveau): goud scherm + "hoef je niet te graden"
+function showGoldenProduct(code){
+  overlay.className='gold';
+  document.getElementById('main-logo').style.display='none';
+  greenMsg.style.display='none';
+  fbTitle.textContent = '🏆 ' + t('goldProductTitle');
+  fbTitle.style.display='block';
+  fbSub.textContent = t('goldenSub');
+  fbSub.style.display='block';
+  fbSub.style.direction = activeLang==='ar' ? 'rtl' : 'ltr';
+  bcDisp.textContent = code; bcDisp.style.display='block';
+  scanHintEl.style.display='none';
+}
+
+// Onderschept artikel: mag niet opgeboekt/gegrade worden. Toont een
+// blokkerend scherm en print automatisch een "Weggegooid"-sticker.
+function showOnderschept(code, scanId){
+  overlay.className='red';
+  document.getElementById('main-logo').style.display='none';
+  greenMsg.style.display='none';
+  fbTitle.textContent = t('onderscheptTitle');
+  fbTitle.style.display='block';
+  fbSub.textContent = t('onderscheptSub') + '\n' + t('onderscheptSticker');
+  fbSub.style.display='block';
+  fbSub.style.direction = activeLang==='ar' ? 'rtl' : 'ltr';
+  bcDisp.textContent = scanId; bcDisp.style.display='block';
+  scanHintEl.style.display='none';
+  const img = document.getElementById('onderschept-img');
+  if (img) {
+    if (onderscheptAfbeelding && isVeiligeUrl(onderscheptAfbeelding)) {
+      img.src = onderscheptAfbeelding; img.style.display='block';
+    } else {
+      img.style.display='none';
+    }
+  }
+}
+
+// Sticker: titel "18+ artikelen" + "verzamelen", barcode = scanId.
+async function printOnderscheptSticker(scanId){
+  const sid = zplSafe(scanId);
+  const zpl = `^XA^MMT^PW400^LL200^LS0^FO65,10^BY2^BCN,50,Y,N,N^FD${sid}^FS^FO0,120^FB400,1,0,C,0^A0N,28,28^FD18+ artikelen^FS^FO0,158^FB400,1,0,C,0^A0N,26,26^FDverzamelen^FS^XZ`;
+  const r = await printZPL(zpl, 1);
+  if (!r.ok) console.warn('Onderschept-sticker print fout:', r.reason, r.error || '');
+  return r.ok;
+}
 function showRed(product, barcode){
   overlay.className='red';
   document.getElementById('main-logo').style.display='none';
   // Mismatch waarschuwing heeft prioriteit
   if(product.mismatch){
-    fbTitle.textContent = `⚠️ Let op: dit product hoort bij ${product.leverancier}`;
+    fbTitle.textContent = activeLang==='en' ? `⚠️ Warning: this product belongs to ${product.leverancier}`
+      : activeLang==='ar' ? `⚠️ تنبيه: هذا المنتج يخص ${product.leverancier}`
+      : `⚠️ Let op: dit product hoort bij ${product.leverancier}`;
     fbTitle.style.display='block';
   } else {
     fbTitle.textContent = product.tags || '';
@@ -2075,28 +2173,42 @@ function toonMismatch(found, barcode) {
   scanHintEl.style.display = 'none';
   gradePanel.style.display = 'none';
 
+  // Vertaalhelper: kies tekst op basis van actieve taal
+  const L = (nl,en,ar)=> activeLang==='en' ? en : activeLang==='ar' ? ar : nl;
+
   document.getElementById('mm-title').textContent =
-    `⚠️ Let op! Dit product hoort bij:\n${gevondenLev}`;
+    L(`⚠️ Let op! Dit product hoort bij:\n${gevondenLev}`,
+      `⚠️ Warning! This product belongs to:\n${gevondenLev}`,
+      `⚠️ تنبيه! هذا المنتج يخص:\n${gevondenLev}`);
   document.getElementById('mm-sub').textContent =
-    `Jij werkt nu voor: ${gekozenLev}`;
+    L(`Jij werkt nu voor: ${gekozenLev}`,
+      `You are currently working for: ${gekozenLev}`,
+      `أنت تعمل الآن لصالح: ${gekozenLev}`);
 
   // Knop 1 — doorgaan met gekozen leverancier
   document.getElementById('mm-klopt-label').textContent =
-    `Doorgaan met ${gekozenLev}`;
+    L(`Doorgaan met ${gekozenLev}`, `Continue with ${gekozenLev}`, `المتابعة مع ${gekozenLev}`);
   document.getElementById('mm-klopt-hint').textContent =
-    `Product zit in mijn huidige batch — melding negeren`;
+    L(`Product zit in mijn huidige batch — melding negeren`,
+      `Product is in my current batch — ignore warning`,
+      `المنتج ضمن دفعتي الحالية — تجاهل التنبيه`);
 
   // Knop 2 — alleen deze scan onder gevonden leverancier
   document.getElementById('mm-wissel-scan-label').textContent =
-    `Eenmalig scannen onder ${gevondenLev}`;
+    L(`Eenmalig scannen onder ${gevondenLev}`, `Scan once under ${gevondenLev}`, `مسح لمرة واحدة تحت ${gevondenLev}`);
   document.getElementById('mm-wissel-scan-hint').textContent =
-    `Alleen deze scan onder ${gevondenLev} — daarna terug naar ${gekozenLev}`;
+    L(`Alleen deze scan onder ${gevondenLev} — daarna terug naar ${gekozenLev}`,
+      `Only this scan under ${gevondenLev} — then back to ${gekozenLev}`,
+      `هذا المسح فقط تحت ${gevondenLev} — ثم العودة إلى ${gekozenLev}`);
 
   // Knop 3 — overstappen naar gevonden leverancier
   document.getElementById('mm-wissel-std-label').textContent =
-    `Overstappen naar ${gevondenLev}`;
+    L(`Overstappen naar ${gevondenLev}`, `Switch to ${gevondenLev}`, `التبديل إلى ${gevondenLev}`);
   document.getElementById('mm-wissel-std-hint').textContent =
-    `Zelfde als op "Wissel leverancier" klikken`;
+    L(`Zelfde als op "Wissel leverancier" klikken`,
+      `Same as clicking "Switch supplier"`,
+      `مثل النقر على "تبديل المورد"`);
+  document.getElementById('mismatch-panel').style.direction = activeLang==='ar' ? 'rtl' : 'ltr';
 
   document.getElementById('mismatch-panel').style.display = 'flex';
 
@@ -2184,6 +2296,7 @@ async function handleScan(barcode){
   fbSub.style.display='none';
   scanHintEl.style.display='none';
   bcDisp.style.display='none';
+  { const oi = document.getElementById('onderschept-img'); if (oi) oi.style.display='none'; }
   document.getElementById('scan-loading').style.display='flex';
 
   const found = await findProduct(code, supplier);
@@ -2207,27 +2320,52 @@ async function handleScan(barcode){
   };
   pendingGrade = null;
 
-  // Categorieën check op productnaam
+  // Onderschept artikel — hoogste prioriteit: niet opboeken, niet graden.
+  // Toon blokkerend scherm + print automatisch een "Weggegooid"-sticker.
   verbergCatNotificatie();
-  if (found && found.name) {
-    const cat = checkCategorie(found.name);
-    if (cat) toonCatNotificatie(cat, found.name);
+  if (isOnderschept(found)) {
+    const scanId = genScanId();
+    showOnderschept(code, scanId);
+    await printOnderscheptSticker(scanId);
+    pendingScan = null;
+    focusInput();
+    return;
   }
 
-  if(found && productHasTag(found, 'Alarmproduct')){
+  // Categorieën check op productnaam
+  if (found && found.name) {
+    const cat = checkCategorie(found.name);
+    if (cat) {
+      toonCatNotificatie(cat, found.name);
+    } else {
+      // Geen gewone categorie → eventueel een "to do" categorie tonen
+      const todo = checkTodoCategorie(found.name);
+      if (todo) toonTodoNotificatie(todo, found.name);
+    }
+  }
+
+  // Speciale producten op SKU-niveau (matcht ook op barcode/productcode)
+  const isRedAlert = matchSpecialeProduct(redAlertProducts, found, code);
+  const isGolden   = matchSpecialeProduct(goldenProducts, found, code);
+
+  // 5 sec rode flits vooraf — red alert of het bestaande Alarmproduct
+  if (isRedAlert) {
+    await flashRedAlert(code);
+  } else if (found && productHasTag(found, 'Alarmproduct')) {
     await showAlarmProductWarning(code);
   }
 
   if (found && mismatch) {
     toonMismatch(found, code);
-  } else if (found && productHasTag(found, 'Goud')) {
-    showGoldProduct(found, code);
+  } else if (isGolden || (found && productHasTag(found, 'Goud'))) {
+    if (isGolden) showGoldenProduct(code);
+    else showGoldProduct(found, code);
+    showGradePanel();
+  } else if (isRedAlert) {
+    showRedAlert(found, code, isGrading);
     showGradePanel();
   } else if (found && isGrading) {
     showRed(found, code);
-    showGradePanel();
-  } else if (!found) {
-    showGreen();
     showGradePanel();
   } else {
     showGreen();
@@ -2375,6 +2513,7 @@ langInd.addEventListener('click',()=>{
 
 // ── Categorieën ──────────────────────────────────────────
 let categorieen = [];
+let todoCategorieen = []; // "to do" categorieën: nog instructievideo nodig
 
 async function laadCategorieen() {
   try {
@@ -2382,6 +2521,62 @@ async function laadCategorieen() {
     const data = await res.json();
     if (data) categorieen = Object.values(data);
   } catch(err) {}
+}
+
+async function laadTodoCategorieen() {
+  try {
+    const res  = await fetch(`${FIREBASE_URL}/todo_categorieen.json`);
+    const data = await res.json();
+    todoCategorieen = data ? Object.values(data) : [];
+  } catch(err) {}
+}
+
+// ── Speciale producten op SKU-niveau (Red alert / Golden) ──
+let redAlertProducts = []; // lijst SKU's
+let goldenProducts   = []; // lijst SKU's
+
+let onderscheptTags  = []; // tags die een artikel "onderschept" maken
+let onderscheptAfbeelding = ''; // optionele afbeelding op het onderschept-scherm
+
+async function laadSpecialeProducten() {
+  try {
+    const [r1, r2, r3, r4] = await Promise.all([
+      fetch(`${FIREBASE_URL}/red_alert_products.json`),
+      fetch(`${FIREBASE_URL}/golden_products.json`),
+      fetch(`${FIREBASE_URL}/onderschept_tags.json`),
+      fetch(`${FIREBASE_URL}/onderschept_config.json`)
+    ]);
+    const d1 = await r1.json();
+    const d2 = await r2.json();
+    const d3 = await r3.json();
+    const d4 = await r4.json();
+    redAlertProducts = d1 ? Object.values(d1).map(x => (x && x.sku) || x).filter(Boolean) : [];
+    goldenProducts   = d2 ? Object.values(d2).map(x => (x && x.sku) || x).filter(Boolean) : [];
+    onderscheptTags  = d3 ? Object.values(d3).map(x => (x && x.sku) || x).filter(Boolean) : [];
+    onderscheptAfbeelding = (d4 && d4.afbeelding) ? String(d4.afbeelding) : '';
+  } catch(err) {}
+}
+
+// Onderschept = het gevonden product heeft een tag die in de lijst staat.
+function isOnderschept(found){
+  if (!found || !onderscheptTags.length) return false;
+  return onderscheptTags.some(tag => productHasTag(found, tag));
+}
+
+function normSku(s){ return String(s == null ? '' : s).trim().toLowerCase(); }
+
+// Matcht een gescande code/product tegen een SKU-lijst. Vergelijkt zowel de
+// ruwe gescande code als de productcode én barcode van het gevonden product —
+// zo werkt het ook als iemand een barcode invult waar de productcode hoort (of andersom).
+function matchSpecialeProduct(lijst, found, code){
+  if (!lijst || !lijst.length) return false;
+  const ids = new Set();
+  if (code) ids.add(normSku(code));
+  if (found){
+    if (found.productcode) ids.add(normSku(found.productcode));
+    if (found.barcode)     ids.add(normSku(found.barcode));
+  }
+  return lijst.some(sku => ids.has(normSku(sku)));
 }
 
 // ── Media helpers (gedeeld met dashboard.html) ────────────
@@ -2501,6 +2696,39 @@ function verbergCatNotificatie() {
   if (box) box.remove();
 }
 
+// "To do" categorie matchen op productnaam.
+// Let op: gewone categorieën hebben voorrang — deze check wordt alleen
+// uitgevoerd als checkCategorie() niets oplevert (zie handleScan).
+function checkTodoCategorie(name) {
+  if (!name || !todoCategorieen.length) return null;
+  const nameLower = name.toLowerCase();
+  for (const todo of todoCategorieen) {
+    const woorden = (todo.woorden || '').split(',').map(w => w.trim().toLowerCase()).filter(Boolean);
+    if (woorden.some(w => w && nameLower.includes(w))) return todo;
+  }
+  return null;
+}
+
+// Pop-up voor een "to do" categorie: dit product heeft nog een instructievideo
+// nodig. Titel afhankelijk van de gekozen taal (Let op / Watch out / تنبيه).
+function toonTodoNotificatie(todo, productNaam) {
+  const bestaand = document.getElementById('cat-notif');
+  if (bestaand) bestaand.remove();
+  const tekst = (todo.tekst || '').trim() || t('todoBericht');
+  const rtl   = activeLang === 'ar';
+  const box = document.createElement('div');
+  box.id = 'cat-notif';
+  box.innerHTML = `
+    <button onclick="document.getElementById('cat-notif').remove()" style="position:absolute;top:10px;right:10px;background:none;border:none;color:white;font-size:18px;cursor:pointer;opacity:.7">×</button>
+    <div style="font-size:14px;font-weight:800;letter-spacing:.5px;text-transform:uppercase;margin-bottom:10px">${escHTML(t('todoLetOp'))}</div>
+    ${todo.naam ? `<div style="font-size:11px;font-weight:700;opacity:.7;text-transform:uppercase;letter-spacing:1px;margin-bottom:6px">${escHTML(todo.naam)}</div>` : ''}
+    ${productNaam ? `<div style="font-size:12px;color:rgba(255,255,255,.6);font-weight:600;margin-bottom:10px;line-height:1.4">${escHTML(productNaam)}</div>` : ''}
+    <div style="font-size:16px;font-weight:700;line-height:1.5">${escHTML(tekst)}</div>
+  `;
+  box.style.cssText = `position:fixed;right:24px;top:50%;transform:translateY(-50%);background:rgba(28,42,26,.96);border:1px solid rgba(239,159,39,.5);border-left:4px solid #EF9F27;color:white;border-radius:16px;padding:20px;width:min(320px,92vw);max-height:90vh;overflow-y:auto;z-index:9998;box-shadow:0 8px 32px rgba(0,0,0,.5);font-family:'Montserrat',sans-serif;display:flex;flex-direction:column;gap:4px;direction:${rtl ? 'rtl' : 'ltr'};text-align:${rtl ? 'right' : 'left'}`;
+  document.body.appendChild(box);
+}
+
 // Leveranciers live laden uit Firebase (/leveranciers), met terugval op
 // de ingebouwde lijst als het ophalen mislukt of leeg is.
 async function laadLeveranciers() {
@@ -2524,6 +2752,8 @@ async function laadLeveranciers() {
 
 // Start app direct — geen CSV meer nodig
 laadCategorieen();
+laadTodoCategorieen();
+laadSpecialeProducten();
 laadLeveranciers();
 initApp();
 </script>
