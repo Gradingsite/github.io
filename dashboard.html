@@ -194,6 +194,11 @@
   .stats-grid{grid-template-columns:repeat(2,1fr)}
   .cards-row,.cards-row-3{grid-template-columns:1fr}
 }
+/* Dunne laadbalk bovenaan tijdens het inladen van scans */
+#loading-bar{position:fixed;top:0;left:0;right:0;height:3px;z-index:9999;background:transparent;overflow:hidden;display:none}
+#loading-bar.active{display:block}
+#loading-bar::before{content:"";position:absolute;top:0;height:100%;width:35%;border-radius:0 3px 3px 0;background:var(--g1,#3b82f6);animation:loadingbar 1.1s infinite ease-in-out}
+@keyframes loadingbar{0%{left:-35%}50%{left:50%}100%{left:100%}}
 </style>
 </head>
 <body>
@@ -222,6 +227,7 @@
 </div>
 
 <!-- DASHBOARD -->
+<div id="loading-bar"></div>
 <div id="dashboard" style="display:none">
   <div class="sidebar">
     <div class="sidebar-logo">
@@ -670,7 +676,7 @@
     <div><div class="modal-label">Initialen</div><input class="modal-input" id="m-init" type="text" maxlength="4" placeholder="JD" autocomplete="off" style="text-transform:uppercase"/></div>
     <div><div class="modal-label">Wachtwoord</div><input class="modal-input" id="m-pw" type="password" placeholder="Min. 6 tekens + 1 cijfer" autocomplete="off"/></div>
     <div><div class="modal-label">Rol</div>
-      <select class="modal-input" id="m-rol"><option value="user">Medewerker</option><option value="admin">Admin</option></select>
+      <select class="modal-input" id="m-rol"><option value="user">Medewerker</option><option value="admin">Admin</option><option value="testaccount">Testaccount</option></select>
     </div>
     <div class="modal-error" id="m-error"></div>
     <div class="modal-btns">
@@ -1494,6 +1500,8 @@ function apiFetch(params) {
 async function laadData() {
   const tbRight = document.querySelector('.tb-right');
   if (tbRight) tbRight.style.display = 'flex';
+  const balk = document.getElementById('loading-bar');
+  if (balk) balk.classList.add('active');
   try {
     const alleRijen = await haalScansOp();
     alleRijenCache = alleRijen;
@@ -1503,6 +1511,8 @@ async function laadData() {
     renderAlleScans();
   } catch(err) {
     console.error('Data laad fout:', err);
+  } finally {
+    if (balk) balk.classList.remove('active');
   }
 }
 
@@ -2098,7 +2108,7 @@ async function laadAccountsBeheer() {
     <tr data-id="${acc.id}" data-naam="${acc.naam}">
       <td><b>${acc.naam}</b></td>
       <td>${acc.initialen}</td>
-      <td><span class="rol-badge ${acc.rol==='admin'?'rol-admin':'rol-user'}">${acc.rol==='admin'?'Admin':'Medewerker'}</span></td>
+      <td><span class="rol-badge ${acc.rol==='admin'?'rol-admin':'rol-user'}">${acc.rol==='admin'?'Admin':acc.rol==='testaccount'?'Testaccount':'Medewerker'}</span></td>
       <td>${formatDatum(acc.aangemaakt)}</td>
       <td>${formatDatum(acc.laatstLogin)}</td>
       <td>
