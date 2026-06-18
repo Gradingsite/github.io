@@ -723,23 +723,9 @@ if (adminId && adminWw) {
 // ── Login flow ───────────────────────────────────────────
 let alleAccounts = [];
 
-async function haalAccountsOp() {
-  const url = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json&sheet=Accounts`;
-  const res  = await fetch(url);
-  const text = await res.text();
-  const json = JSON.parse(text.replace(/^[^{]*/, '').replace(/[^}]*$/, ''));
-  const cols = json.table.cols.map(c => c.label);
-  return json.table.rows.map(r => {
-    const obj = {};
-    r.c.forEach((cell, i) => { obj[cols[i]] = cell ? String(cell.v || '') : ''; });
-    return obj;
-  });
-}
-
-async function sha256(str) {
-  const buf  = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(str));
-  return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2,'0')).join('');
-}
+// (verwijderd) haalAccountsOp + client-side sha256 — lazen het Accounts-tabblad
+// rechtstreeks via de publieke gviz-URL en waren dode code. Login en de
+// adminlijst gaan via de server-side endpoints (actie=accounts / actie=login).
 
 async function laadAccounts() {
   try {
@@ -1428,47 +1414,18 @@ document.getElementById('refresh-btn').addEventListener('click', () => {
   herlaadHuidigePagina(); btn.classList.remove('spin');
 });
 
-// ── Sheets data ophalen ──────────────────────────────────
+// ── Scans ophalen via de beveiligde admin-endpoint ───────────
+// Voorheen las dit de sheet rechtstreeks via de publieke gviz-URL, waardoor
+// de sheet openbaar moest staan = iedereen met de SHEET_ID kon alle scans
+// lezen. Nu via adminGetScans (server-side, achter admin-check) → de sheet
+// kan/blijft PRIVÉ. periode 'all' = alle rijen, het dashboard filtert zelf.
 async function haalScansOp() {
-  const url = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json&sheet=${encodeURIComponent(SHEET_TAB)}`;
-  const res  = await fetch(url);
-  const text = await res.text();
-  const json = JSON.parse(text.replace(/^[^{]*/, '').replace(/[^}]*$/, ''));
-  const cols = json.table.cols.map(c => c.label);
-  console.log('Kolommen:', cols);
-  const rows = json.table.rows.map(r => {
-    const obj = {};
-    r.c.forEach((cell, i) => {
-      if (!cell || cell.v === null || cell.v === undefined) {
-        obj[cols[i]] = '';
-        return;
-      }
-      const val = String(cell.v);
-      // Datum: Date(2026,4,30) → 30-05-2026
-      if (val.startsWith('Date(') && cols[i] === 'Datum') {
-        const parts = val.replace('Date(','').replace(')','').split(',');
-        const jaar  = parts[0];
-        const maand = String(parseInt(parts[1]) + 1).padStart(2,'0');
-        const dag   = String(parts[2]).padStart(2,'0');
-        obj[cols[i]] = `${dag}-${maand}-${jaar}`;
-        return;
-      }
-      // Tijd: Date(1899,11,30,17,27,46) → 17:27:46
-      if (val.startsWith('Date(') && cols[i] === 'Tijd') {
-        const parts = val.replace('Date(','').replace(')','').split(',');
-        const uur   = String(parts[3]||0).padStart(2,'0');
-        const min   = String(parts[4]||0).padStart(2,'0');
-        const sec   = String(parts[5]||0).padStart(2,'0');
-        obj[cols[i]] = `${uur}:${min}:${sec}`;
-        return;
-      }
-      obj[cols[i]] = val;
-    });
-    return obj;
-  });
-  console.log('Eerste rij:', rows[0]);
-  console.log('Totaal rijen:', rows.length);
-  return rows;
+  const data = await apiFetch({ actie: 'adminGetScans', adminId, adminWw, periode: 'all' });
+  if (!data || data.status !== 'ok') {
+    throw new Error(data && data.message ? data.message : 'Kon scans niet laden');
+  }
+  console.log('Scans geladen via adminGetScans:', (data.scans || []).length);
+  return data.scans || [];
 }
 
 function filterScansOpPeriode(scans, periode) {
