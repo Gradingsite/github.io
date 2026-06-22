@@ -226,59 +226,76 @@ body{font-family:'Montserrat','Segoe UI',Arial,sans-serif;min-height:100vh;displ
   <div class="cam-box">
     <div class="modal-logo"><img src="NRlogo.png" alt="2de Kansje logo"/></div>
     <h2>3de Kansje — Schade vastleggen</h2>
+    <div id="cam-batch-status" style="display:none;font-size:13px;font-weight:800;color:var(--dark);background:var(--g1);padding:6px 16px;border-radius:50px"></div>
+    <button id="cam-batch-annuleer" style="display:none;padding:8px 18px;border:1px solid rgba(255,255,255,.3);border-radius:50px;background:rgba(232,76,61,.2);color:white;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit">⎋ Annuleer deze 3de kans</button>
+
+    <div id="cam-aantal-wrap" style="display:flex;align-items:center;justify-content:center;gap:10px">
+      <span style="font-size:13px;font-weight:700;color:rgba(255,255,255,.8)">Aantal identiek:</span>
+      <input id="cam-aantal" type="number" min="1" max="999" value="1" style="width:84px;padding:8px;border:2px solid rgba(255,255,255,.3);border-radius:12px;background:rgba(255,255,255,.12);color:white;font-size:20px;font-weight:800;font-family:inherit;text-align:center;outline:none"/>
+    </div>
 
     <!-- Stap 1: Beschrijving -->
     <div id="cam-stap1-wrap" style="width:100%">
       <div class="cam-stap-label">Stap 1 — Beschrijf de schade</div>
       <textarea id="cam-beschrijving" placeholder="Wat is er beschadigd? Waar zit de schade?"></textarea>
+      <div style="margin-top:10px;display:flex;gap:10px;justify-content:center;flex-wrap:wrap">
+        <button class="cam-btn cam-btn-wit" id="cam-fotos-toevoegen" disabled>📷 Foto's toevoegen</button>
+        <button class="cam-btn cam-btn-groen" id="cam-direct-opslaan" disabled>✓ Opslaan</button>
+      </div>
       <div style="margin-top:10px;text-align:center">
-        <button class="cam-btn cam-btn-groen" id="cam-stap1-verder" disabled>Verder → Foto's maken</button>
+        <button class="cam-btn cam-btn-rood" id="cam-annuleer-btn">⎋ Annuleren</button>
       </div>
     </div>
 
     <!-- Stap 2: Fotos (verschijnt na stap 1) -->
     <div id="cam-stap2" style="display:none;width:100%;flex-direction:column;align-items:center;gap:12px">
-      <div class="cam-stap-label">Stap 2 — Maak foto's (min. 1, max. 3)</div>
+      <div class="cam-stap-label">Stap 2 — Maak foto's (max. 3)</div>
       <video id="cam-preview" autoplay playsinline></video>
       <canvas id="cam-canvas" style="display:none"></canvas>
       <div class="cam-fotos" id="cam-fotos"></div>
       <div id="cam-foto-teller">0 / 3 foto's</div>
-      <div class="cam-hint" id="cam-hint">Maak minimaal 1 foto</div>
+      <div class="cam-hint" id="cam-hint">Foto's zijn optioneel (max 3)</div>
       <button class="cam-btn cam-btn-wit" id="cam-foto-btn">📷 Foto maken</button>
+      <div class="cam-btns" style="margin-top:4px">
+        <button class="cam-btn cam-btn-groen" id="cam-bevestig-btn">✓ Bevestigen</button>
+        <button class="cam-btn cam-btn-wit" id="cam-terug-btn">← Terug</button>
+      </div>
     </div>
+  </div>
+</div>
 
-    <div class="cam-btns">
-      <button class="cam-btn cam-btn-groen" id="cam-bevestig-btn" disabled style="display:none">✓ Bevestigen</button>
-      <button class="cam-btn cam-btn-rood" id="cam-annuleer-btn">⎋ Annuleren</button>
+<!-- BATCH: annuleer / andere grade keuze -->
+<div class="modal" id="m-batch-regrade" style="display:none">
+  <div class="modal-box">
+    <div class="modal-logo"><img src="NRlogo.png" alt="2de Kansje logo"/></div>
+    <h2 id="mbr-title">Dit item</h2>
+    <div id="mbr-keuze" style="display:flex;flex-direction:column;gap:10px;width:100%">
+      <button class="m-btn m-btn-secondary" id="mbr-annuleer">Annuleren (overslaan)</button>
+      <button class="m-btn" id="mbr-andere">Andere grade geven →</button>
     </div>
+    <div id="mbr-grades" style="display:none;flex-direction:column;gap:8px;width:100%">
+      <div style="font-size:12px;color:rgba(255,255,255,.6);text-align:center;font-weight:600">Kies de nieuwe grade</div>
+      <button class="m-btn" data-rg="A">Perfect</button>
+      <button class="m-btn" data-rg="B">2dekans</button>
+      <button class="m-btn" data-rg="B3">3dekans</button>
+      <button class="m-btn" data-rg="C">Schoonmaak</button>
+      <button class="m-btn" data-rg="D-rep">Reparatie</button>
+      <button class="m-btn" data-rg="D-def">Defect</button>
+    </div>
+    <button id="mbr-terug" style="background:none;border:none;color:rgba(255,255,255,.4);font-size:12px;cursor:pointer;font-family:inherit;margin-top:4px">⎋ Terug</button>
   </div>
 </div>
 
 <!-- MODALS -->
-<!-- Zebra Browser Print waarschuwing -->
-<div class="modal" id="m-zebra" style="display:none">
-  <div class="modal-box">
-    <div class="modal-logo"><img src="NRlogo.png" alt="2de Kansje logo"/></div>
-    <div style="font-size:32px">🦓</div>
-    <h2 id="mz-warn"></h2>
-    <button class="m-btn" id="mz-ok"></button>
-    <button id="mz-help-btn" style="background:none;border:none;color:rgba(255,255,255,.5);font-size:13px;cursor:pointer;font-family:inherit;text-decoration:underline"></button>
-    <div id="mz-help" style="display:none;width:100%;text-align:center">
-      <p id="mz-help-txt" style="color:rgba(255,255,255,.7);font-size:13px;margin-bottom:10px"></p>
-      <img src="uitlegzebraprint.png" alt="Zebra uitleg" style="width:100%;border-radius:10px;border:1px solid rgba(255,255,255,.2)"/>
-      <img src="grotereafbeeldingzebraprinter.png" alt="Zebra printer afbeelding" style="width:100%;border-radius:10px;border:1px solid rgba(255,255,255,.2);margin-top:8px"/>
-    </div>
-  </div>
-</div>
 
 <div class="modal" id="m-lang" style="display:none">
   <div class="modal-box">
     <div class="modal-logo"><img src="NRlogo.png" alt="2de Kansje logo"/></div>
-    <h2>Choose your language / Kies je taal</h2>
+    <h2>Choose your language / Kies je taal / اختر لغتك</h2>
     <div class="lang-grid">
-      <button class="lp" data-lang="nl">🇳🇱 NL</button>
-      <button class="lp" data-lang="en">🇬🇧 EN</button>
-      <button class="lp" data-lang="ar">🇸🇦 AR</button>
+      <button class="lp" data-lang="nl" style="display:inline-flex;align-items:center;gap:6px;padding:9px 14px"><svg width="18" height="12" viewBox="0 0 9 6" style="border-radius:2px;flex-shrink:0"><rect width="9" height="6" fill="#21468B"/><rect width="9" height="4" fill="#fff"/><rect width="9" height="2" fill="#AE1C28"/></svg>NL</button>
+      <button class="lp" data-lang="en" style="display:inline-flex;align-items:center;gap:6px;padding:9px 14px"><svg width="18" height="12" viewBox="0 0 60 30" style="border-radius:2px;flex-shrink:0"><clipPath id="uk"><rect width="60" height="30"/></clipPath><g clip-path="url(#uk)"><rect width="60" height="30" fill="#012169"/><path d="M0,0 60,30 M60,0 0,30" stroke="#fff" stroke-width="6"/><path d="M0,0 60,30 M60,0 0,30" stroke="#C8102E" stroke-width="4"/><path d="M30,0 V30 M0,15 H60" stroke="#fff" stroke-width="10"/><path d="M30,0 V30 M0,15 H60" stroke="#C8102E" stroke-width="6"/></g></svg>EN</button>
+      <button class="lp" data-lang="ar" style="display:inline-flex;align-items:center;gap:6px;padding:9px 14px"><svg width="18" height="12" viewBox="0 0 9 6" style="border-radius:2px;flex-shrink:0"><rect width="9" height="6" fill="#006C35"/><rect x="1" y="4.5" width="7" height="0.6" fill="#fff"/></svg>AR</button>
     </div>
     <button class="m-btn" id="ml-confirm">Confirm</button>
   </div>
@@ -367,21 +384,44 @@ body{font-family:'Montserrat','Segoe UI',Arial,sans-serif;min-height:100vh;displ
   </div>
 </div>
 
+<!-- Leverdatum (verplicht per leverancier) -->
+<div class="modal" id="m-delivery" style="display:none">
+  <div class="modal-box">
+    <div class="modal-logo"><img src="NRlogo.png" alt="2de Kansje logo"/></div>
+    <h2>Leverdatum</h2>
+    <div id="md-supplier" style="color:rgba(255,255,255,.6);font-size:13px;font-weight:700"></div>
+    <input class="m-input" id="delivery-input" type="date" style="color:var(--dark);text-align:center"/>
+    <div class="pw-hint" id="delivery-hint" style="display:none;color:#ff6b6b">Kies een leverdatum of "Geen specifieke zending"</div>
+    <button class="m-btn" id="delivery-ok">Verder →</button>
+    <button class="m-btn m-btn-secondary" id="delivery-exception">Geen specifieke zending</button>
+  </div>
+</div>
+
+<!-- 2950 onbekend product — info vastleggen -->
+<div class="modal" id="m-2950" style="display:none">
+  <div class="modal-box">
+    <div class="modal-logo"><img src="NRlogo.png" alt="2de Kansje logo"/></div>
+    <h2>Onbekend 2950-product</h2>
+    <div id="m2950-code" style="font-size:20px;font-weight:800;color:var(--g1);letter-spacing:2px"></div>
+    <div style="font-size:12px;color:rgba(255,255,255,.5);text-align:center;font-weight:500">Vul minimaal één veld in</div>
+    <input class="m-input" id="m2950-titel" type="text" placeholder="Wat is dit item / titel" autocomplete="off"/>
+    <input class="m-input" id="m2950-barcode" type="text" placeholder="Barcode" autocomplete="off"/>
+    <input class="m-input" id="m2950-productcode" type="text" placeholder="Productcode" autocomplete="off"/>
+    <div class="pw-hint" id="m2950-hint" style="display:none;color:#ff6b6b">Vul minimaal één veld in</div>
+    <button class="m-btn" id="m2950-opslaan">Opslaan → graden</button>
+  </div>
+</div>
+
 <!-- Printer-instellingen -->
 <div class="modal" id="m-printer" style="display:none">
   <div class="modal-box" style="width:min(460px,96vw)">
     <div class="modal-logo"><img src="NRlogo.png" alt="2de Kansje logo"/></div>
     <h2>Printer instellingen</h2>
     <div style="font-size:12px;color:rgba(255,255,255,.5);text-align:center;font-weight:500">Geldt alleen voor deze werkplek</div>
-
-    <!-- Modus kiezen -->
-    <div style="display:flex;gap:10px;width:100%">
-      <button class="lp pm-opt" data-pm="browserprint" style="flex:1">Browser Print</button>
-      <button class="lp pm-opt" data-pm="printnode" style="flex:1">PrintNode</button>
-    </div>
+    <div style="font-size:13px;font-weight:700;color:#EF9F27;text-align:center;line-height:1.4">⚠️ Werkt de printer niet? Vergeet PrintNode niet op te starten.</div>
 
     <!-- PrintNode printerkeuze -->
-    <div id="pm-printnode-wrap" style="display:none;flex-direction:column;gap:10px;width:100%">
+    <div id="pm-printnode-wrap" style="display:flex;flex-direction:column;gap:10px;width:100%">
       <input id="pm-zoek" type="text" placeholder="Zoek printer..." autocomplete="off" spellcheck="false" style="width:100%;padding:12px 16px;font-size:15px;border-radius:12px;border:2px solid transparent;outline:none;font-weight:600;font-family:inherit"/>
       <div id="pm-list" style="width:100%;max-height:220px;overflow-y:auto;display:flex;flex-direction:column;gap:6px"></div>
       <div id="pm-huidig" style="font-size:12px;color:rgba(255,255,255,.6);text-align:center;font-weight:600"></div>
@@ -401,6 +441,7 @@ body{font-family:'Montserrat','Segoe UI',Arial,sans-serif;min-height:100vh;displ
 <button id="fullscreen-btn" title="Volledig scherm (F11)" style="position:fixed;bottom:16px;left:16px;padding:9px 16px;border:none;border-radius:50px;font-weight:800;cursor:pointer;z-index:9999;font-size:12px;letter-spacing:.5px;font-family:inherit;background:rgba(255,255,255,.06);color:rgba(255,255,255,.5);border:1px solid rgba(255,255,255,.12)">⛶ Volledig scherm</button>
 
 <div id="overlay">
+  <img id="product-foto" alt="" style="display:none;position:fixed;left:48px;top:50%;transform:translateY(-50%);max-width:min(230px,20vw);max-height:52vh;object-fit:contain;background:#fff;padding:8px;border:3px solid var(--g1);border-radius:18px;box-shadow:0 12px 38px rgba(0,0,0,.55),0 0 0 1px rgba(0,0,0,.25);z-index:40"/>
   <div id="scanner-box">
     <img src="NRlogo.png" alt="2de Kansje" id="main-logo" style="width:72px;height:72px;border-radius:50%;border:3px solid var(--g2);object-fit:cover;margin-bottom:4px"/>
     <div id="station-label">Grading Check Station</div>
@@ -414,7 +455,6 @@ body{font-family:'Montserrat','Segoe UI',Arial,sans-serif;min-height:100vh;displ
       <div id="green-msg"></div>
       <div id="feedback-title"></div>
       <div id="feedback-subtitle"></div>
-      <img id="onderschept-img" alt="" style="display:none;max-width:min(420px,90vw);max-height:40vh;border-radius:12px;border:2px solid rgba(255,255,255,.3);margin-top:6px;object-fit:contain"/>
     </div>
 
     <!-- Mismatch panel -->
@@ -455,7 +495,32 @@ body{font-family:'Montserrat','Segoe UI',Arial,sans-serif;min-height:100vh;displ
         <button class="g-btn" data-g="D-rep"><span class="sc">5</span><span id="gl-D"></span></button>
         <button class="g-btn" data-g="D-def"><span class="sc">6</span><span id="gl-E"></span></button>
       </div>
+      <button id="batch-start-btn" style="margin-top:6px;padding:12px 22px;border:2px solid var(--g1);border-radius:14px;background:rgba(146,208,80,.15);color:white;font-size:15px;font-weight:800;cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:8px">📦 Batch — meerdere dezelfde</button>
       <button id="escape-btn">⎋ Terug</button>
+    </div>
+
+    <!-- BATCH: aantal invoeren -->
+    <div id="batch-aantal-panel" style="display:none;flex-direction:column;align-items:center;gap:18px;width:min(440px,92vw)">
+      <div style="font-size:13px;font-weight:800;letter-spacing:2px;text-transform:uppercase;color:rgba(255,255,255,.55)">📦 Batch</div>
+      <div style="font-size:clamp(18px,3vw,26px);font-weight:800;color:white;text-align:center">Hoeveel dezelfde items heb je?</div>
+      <div id="batch-aantal-barcode" style="font-size:12px;color:rgba(255,255,255,.45);font-weight:600"></div>
+      <input id="batch-aantal-input" type="number" min="1" max="999" value="" placeholder="bijv. 12" style="width:160px;padding:14px;border:2px solid rgba(255,255,255,.3);border-radius:14px;background:rgba(255,255,255,.1);color:white;font-size:28px;font-weight:800;font-family:inherit;text-align:center;outline:none"/>
+      <button id="batch-aantal-ok" style="padding:14px 36px;background:var(--g1);color:var(--dark);border:none;border-radius:50px;font-size:15px;font-weight:800;cursor:pointer;font-family:inherit;letter-spacing:.5px">Verder →</button>
+      <button id="batch-aantal-terug" style="padding:8px 20px;border:1px solid rgba(255,255,255,.2);border-radius:50px;background:transparent;color:rgba(255,255,255,.55);font-size:12px;font-weight:700;cursor:pointer;font-family:inherit">⎋ Terug</button>
+    </div>
+
+    <!-- BATCH: grades verdelen -->
+    <div id="batch-alloc-panel" style="display:none;flex-direction:column;align-items:center;gap:14px;width:min(620px,94vw)">
+      <div style="font-size:13px;font-weight:800;letter-spacing:2px;text-transform:uppercase;color:rgba(255,255,255,.55)">📦 Verdeel de grades</div>
+      <div id="batch-alloc-teller" style="font-size:clamp(16px,2.5vw,22px);font-weight:800;color:white">0 / 0 toegewezen</div>
+      <div id="batch-alloc-rows" style="display:flex;flex-direction:column;gap:8px;width:100%"></div>
+      <button id="batch-verwerk-btn" disabled style="padding:14px 36px;background:var(--g1);color:var(--dark);border:none;border-radius:50px;font-size:15px;font-weight:800;cursor:pointer;font-family:inherit;letter-spacing:.5px;opacity:.5">Verwerken →</button>
+      <button id="batch-alloc-terug" style="padding:8px 20px;border:1px solid rgba(255,255,255,.2);border-radius:50px;background:transparent;color:rgba(255,255,255,.55);font-size:12px;font-weight:700;cursor:pointer;font-family:inherit">⎋ Batch annuleren</button>
+    </div>
+
+    <!-- BATCH: status-balk tijdens sequentieel verwerken (3dekans / reden) -->
+    <div id="batch-status-bar" style="display:none;flex-direction:column;align-items:center;gap:6px;width:100%;margin-bottom:6px">
+      <div id="batch-status-text" style="font-size:14px;font-weight:800;color:white;background:rgba(146,208,80,.2);border:1px solid rgba(146,208,80,.4);padding:8px 18px;border-radius:50px"></div>
     </div>
 
     <!-- BARCODE PRINT PANEL -->
@@ -470,6 +535,7 @@ body{font-family:'Montserrat','Segoe UI',Arial,sans-serif;min-height:100vh;displ
       <button onclick="sluitBarcodePrintPanel()" style="padding:8px 20px;border:1px solid rgba(255,255,255,.2);border-radius:50px;background:transparent;color:rgba(255,255,255,.5);font-size:12px;font-weight:700;cursor:pointer;font-family:inherit">⎋ Terug naar grading</button>
     </div>
     <div id="sub-panel">
+      <div id="sub-batch-status" style="display:none;font-size:13px;font-weight:800;color:var(--dark);background:var(--g1);padding:6px 16px;border-radius:50px;margin-bottom:4px"></div>
       <div id="sub-question"></div>
       <div id="reden-list"></div>
       <div id="reden-none" style="display:none;color:rgba(255,255,255,.5);font-size:13px;font-weight:500;text-align:center"></div>
@@ -479,7 +545,12 @@ body{font-family:'Montserrat','Segoe UI',Arial,sans-serif;min-height:100vh;displ
         <button id="custom-confirm"></button>
       </div>
       <div id="sub-hint" style="display:none;color:#ff6b6b;font-size:12px;font-weight:700;text-align:center"></div>
+      <div id="sub-aantal-wrap" style="display:flex;align-items:center;justify-content:center;gap:10px;width:100%">
+        <span id="sub-aantal-lbl" style="font-size:13px;font-weight:700;color:rgba(255,255,255,.7)">Aantal met deze reden:</span>
+        <input id="sub-aantal" type="number" min="1" max="999" value="1" style="width:84px;padding:10px;border:2px solid rgba(255,255,255,.3);border-radius:12px;background:rgba(255,255,255,.1);color:white;font-size:20px;font-weight:800;font-family:inherit;text-align:center;outline:none"/>
+      </div>
       <button class="m-btn" id="sub-confirm" style="width:100%"></button>
+      <button id="sub-batch-annuleer" style="display:none;padding:8px 18px;border:1px solid rgba(255,255,255,.3);border-radius:50px;background:rgba(232,76,61,.2);color:white;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit">⎋ Annuleer dit item</button>
       <button id="escape-btn-sub">⎋ Terug</button>
     </div>
     <div id="barcode-display"></div>
@@ -539,21 +610,14 @@ const T = {
     back:"⎋ Terug",
     syncOk:"✓ Opgeslagen",syncErr:"✗ Fout",syncing:"⟳ Opslaan...",
     resetBtn:"Nieuwe sessie",closeBtn:"Afsluiten",
-    zebraWarn:"Let op: start voor de sessie Zebra Browser Print op.",
-    zebraBtn:"Ik kan hem niet vinden, wat nu?",
-    zebraOk:"Begrepen, doorgaan →",
-    zebraHelp:"Klik op de zwart-witte Zebra icon onder in je taakbalk.",
     printLabelsBtn:"Labels printen",
     printLabelsTitle:"Labels printen",
     scanLabelsOpt:"Scan labels",customLabelsOpt:"Custom",printCustomLabel:"Print",customBarcodePh:"Barcode...",labelBack:"Terug",
     labelDutch:"Nederlands",labelEnglish:"Engels",labelArabic:"Arabisch",labelCancel:"Annuleren",
-    labelPrintNoPrinter:"Geen Zebra-printer gevonden. Controleer Zebra Browser Print.",
-    labelPrintError:"Printen mislukt. Controleer of Zebra Browser Print actief is.",
+    labelPrintNoPrinter:"Geen printer gekozen. Kies een PrintNode-printer via de Printer-knop.",
+    labelPrintError:"Printen mislukt. Vergeet PrintNode niet op te starten.",
     labelPrintDone:"✓ Labels geprint",customLabelEmpty:"Vul eerst een barcode in",
     goldProductTitle:"Goud product",alarmProductTitle:"Alarmproduct",
-    todoLetOp:"⚠ Let op",todoBericht:"Maak een video over hoe je dit product moet graden. Zie je deze pop-up? Neem dan contact op met je leidinggevende.",
-    redAlertTitle:"RED ALERT",redAlertSub:"Hoge kans op defect",goldenSub:"Dit product hoef je niet te graden",
-    onderscheptTitle:"⛔ Onderschept artikel",onderscheptSub:"Dit artikel mag niet opgeboekt worden en ook niet gegrade.",onderscheptSticker:"Sticker '18+ artikelen verzamelen' geprint",
   },
   en:{
     nameQ:"What is your name?",namePh:"Enter your name...",
@@ -574,22 +638,15 @@ const T = {
     resetConfirm:"Start new session?",closeConfirm:"Close?",
     back:"⎋ Back",
     syncOk:"✓ Saved",syncErr:"✗ Error",syncing:"⟳ Saving...",
-    zebraWarn:"Warning: start Zebra Browser Print before your session.",
-    zebraBtn:"I can't find it, what now?",
-    zebraOk:"Got it, continue →",
-    zebraHelp:"Click the black and white Zebra icon in your taskbar.",
     resetBtn:"New session",closeBtn:"Close",
     printLabelsBtn:"Print labels",
     printLabelsTitle:"Print labels",
     scanLabelsOpt:"Scan labels",customLabelsOpt:"Custom",printCustomLabel:"Print",customBarcodePh:"Barcode...",labelBack:"Back",
     labelDutch:"Dutch",labelEnglish:"English",labelArabic:"Arabic",labelCancel:"Cancel",
-    labelPrintNoPrinter:"No Zebra printer found. Check Zebra Browser Print.",
-    labelPrintError:"Printing failed. Check whether Zebra Browser Print is running.",
+    labelPrintNoPrinter:"No printer selected. Choose a PrintNode printer via the Printer button.",
+    labelPrintError:"Printing failed. Don't forget to start PrintNode.",
     labelPrintDone:"✓ Labels printed",customLabelEmpty:"Enter a barcode first",
     goldProductTitle:"Gold product",alarmProductTitle:"Alarm product",
-    todoLetOp:"⚠ Watch out",todoBericht:"An instruction video still needs to be made for grading this product. If you see this pop-up, contact your supervisor.",
-    redAlertTitle:"RED ALERT",redAlertSub:"High chance of defect",goldenSub:"You don't need to grade this product",
-    onderscheptTitle:"⛔ Intercepted item",onderscheptSub:"This item must not be booked in or graded.",onderscheptSticker:"'18+ items collect' sticker printed",
   },
   ar:{
     nameQ:"ما اسمك؟",namePh:"أدخل اسمك...",
@@ -610,22 +667,15 @@ const T = {
     resetConfirm:"بدء جلسة جديدة؟",closeConfirm:"إغلاق؟",
     back:"⎋ رجوع",
     syncOk:"✓ تم الحفظ",syncErr:"✗ خطأ",syncing:"⟳ جارٍ الحفظ...",
-    zebraWarn:"تنبيه: شغّل Zebra Browser Print قبل بدء الجلسة.",
-    zebraBtn:"لا أجده، ماذا أفعل؟",
-    zebraOk:"حسناً، متابعة →",
-    zebraHelp:"انقر على أيقونة Zebra بالأبيض والأسود في شريط المهام.",
     resetBtn:"جلسة جديدة",closeBtn:"إغلاق",
     printLabelsBtn:"طباعة الملصقات",
     printLabelsTitle:"طباعة الملصقات",
     scanLabelsOpt:"ملصقات المسح",customLabelsOpt:"مخصص",printCustomLabel:"طباعة",customBarcodePh:"الباركود...",labelBack:"رجوع",
     labelDutch:"الهولندية",labelEnglish:"الإنجليزية",labelArabic:"العربية",labelCancel:"إلغاء",
-    labelPrintNoPrinter:"لم يتم العثور على طابعة Zebra. تحقق من Zebra Browser Print.",
-    labelPrintError:"فشلت الطباعة. تحقق من تشغيل Zebra Browser Print.",
+    labelPrintNoPrinter:"لم يتم اختيار طابعة. اختر طابعة PrintNode عبر زر الطابعة.",
+    labelPrintError:"فشلت الطباعة. لا تنسَ تشغيل PrintNode.",
     labelPrintDone:"✓ تمت طباعة الملصقات",customLabelEmpty:"أدخل الباركود أولاً",
     goldProductTitle:"منتج ذهبي",alarmProductTitle:"منتج إنذار",
-    todoLetOp:"⚠ تنبيه",todoBericht:"يجب إنشاء فيديو إرشادي حول كيفية تصنيف هذا المنتج. إذا رأيت هذه النافذة المنبثقة، يرجى التواصل مع المشرف.",
-    redAlertTitle:"تنبيه أحمر",redAlertSub:"احتمال كبير للعطل",goldenSub:"لا حاجة لتصنيف هذا المنتج",
-    onderscheptTitle:"⛔ مادة محتجزة",onderscheptSub:"لا يجوز تسجيل هذه المادة أو تصنيفها.",onderscheptSticker:"تمت طباعة ملصق '18+ artikelen verzamelen'",
   }
 };
 
@@ -642,6 +692,7 @@ let activeLang   = localStorage.getItem('activeLang') || '';
 let userName     = localStorage.getItem('userName') || '';
 let userInit     = localStorage.getItem('userInit') || '';
 let userId       = localStorage.getItem('userId') || '';
+let userRol      = localStorage.getItem('userRol') || '';
 let supplier     = localStorage.getItem('supplier') || '';
 let sessionId    = localStorage.getItem('sessionId') || genId();
 let totalScans   = parseInt(localStorage.getItem('totalScans'))||0;
@@ -650,7 +701,6 @@ let pendingScan  = null;
 let pendingGrade = null;
 let geselecteerdAccount = null; // tijdelijk tijdens login flow
 let accountsCache = [];
-let zebraAfterAccount = false;
 
 localStorage.setItem('sessionId', sessionId);
 
@@ -715,9 +765,9 @@ function t(k){ return (T[activeLang||'nl']||T['nl'])[k]||''; }
 // ── i18n apply ────────────────────────────────────────────
 function applyLang(){
   if(!activeLang) activeLang='nl';
-  const vlag = activeLang==='nl' ? '🇳🇱' : activeLang==='en' ? '🇬🇧' : activeLang==='ar' ? '🇸🇦' : '';
+  const taalNaam = activeLang==='nl' ? 'Nederlands' : activeLang==='en' ? 'English' : activeLang==='ar' ? 'العربية' : '';
   const wijzigTekst = activeLang==='en' ? 'Change language' : activeLang==='ar' ? 'تغيير اللغة' : 'Taal wijzigen';
-  langInd.textContent = vlag ? `${wijzigTekst}  ${vlag}` : '🌐 Kies taal';
+  langInd.textContent = taalNaam ? `${wijzigTekst} · ${taalNaam}` : '🌐 Kies taal';
   document.querySelectorAll('.lp').forEach(b=>b.classList.toggle('active',b.dataset.lang===activeLang));
   document.getElementById('ms-title').textContent   = t('supQ');
   supSearch.placeholder = t('supPh');
@@ -752,7 +802,6 @@ function applyLang(){
   document.getElementById('mpl-en').textContent = t('labelEnglish');
   document.getElementById('mpl-ar').textContent = t('labelArabic');
   document.getElementById('mpl-cancel').textContent = t('labelCancel');
-  document.getElementById('mm-escape').textContent = '⎋ ' + t('labelCancel');
   // Account modals teksten
   document.getElementById('mac-title').textContent = activeLang==='ar' ? 'اختر حسابك' : activeLang==='en' ? 'Choose your account' : 'Kies je account';
   const accSearch = document.getElementById('acc-search');
@@ -765,7 +814,7 @@ function applyLang(){
 }
 
 // ── Modal flow ────────────────────────────────────────────
-const ALL_MODALS = ['m-lang','m-account','m-wachtwoord','m-nieuw-acc','m-sup','m-zebra','m-print-labels','m-printer'];
+const ALL_MODALS = ['m-lang','m-account','m-wachtwoord','m-nieuw-acc','m-sup','m-print-labels','m-printer','m-delivery','m-2950'];
 function showModal(id){ ALL_MODALS.forEach(m=>{ const el=document.getElementById(m); if(el) el.style.display=m===id?'flex':'none'; }); }
 function hideAllModals(){ ALL_MODALS.forEach(m=>{ const el=document.getElementById(m); if(el) el.style.display='none'; }); }
 
@@ -959,6 +1008,8 @@ document.getElementById('pw-confirm').addEventListener('click', async ()=>{
       localStorage.setItem('userName', userName);
       localStorage.setItem('userInit', userInit);
       localStorage.setItem('userId',   userId);
+      userRol = data.rol || 'user';
+      localStorage.setItem('userRol', userRol);
       document.getElementById('pw-hint').textContent = '✓';
       document.getElementById('pw-hint').className   = 'pw-hint ok';
       document.getElementById('pw-inp').className    = 'm-input-pw ok';
@@ -974,7 +1025,7 @@ document.getElementById('pw-confirm').addEventListener('click', async ()=>{
       }
 
       setTimeout(()=>{
-        toonZebraModal(true);
+        showModal('m-sup'); renderSupList(''); supSearch.value=''; supSearch.focus();
       }, 400);
     } else {
       document.getElementById('pw-hint').textContent = activeLang==='en'?'Incorrect password':activeLang==='ar'?'كلمة المرور غير صحيحة':'Wachtwoord onjuist';
@@ -1040,10 +1091,12 @@ document.getElementById('na-confirm').addEventListener('click', async ()=>{
       localStorage.setItem('userName', userName);
       localStorage.setItem('userInit', userInit);
       localStorage.setItem('userId',   userId);
+      userRol = data.rol || 'user';
+      localStorage.setItem('userRol', userRol);
       hint.textContent = '✓ Account aangemaakt!';
       hint.className   = 'pw-hint ok';
       setTimeout(()=>{
-        toonZebraModal(true);
+        showModal('m-sup'); renderSupList(''); supSearch.value=''; supSearch.focus();
       }, 600);
     } else {
       hint.textContent = data.message || 'Fout bij aanmaken';
@@ -1056,37 +1109,6 @@ document.getElementById('na-confirm').addEventListener('click', async ()=>{
 
   document.getElementById('na-confirm').textContent = 'Account aanmaken →';
   document.getElementById('na-confirm').disabled = false;
-});
-
-// ── Zebra Browser Print waarschuwing ─────────────────────
-function toonZebraModal(afterAccount = false){
-  zebraAfterAccount = !!afterAccount;
-  document.getElementById('mz-warn').textContent     = t('zebraWarn');
-  document.getElementById('mz-ok').textContent       = t('zebraOk');
-  document.getElementById('mz-help-btn').textContent = t('zebraBtn');
-  document.getElementById('mz-help-txt').textContent = t('zebraHelp');
-  document.getElementById('mz-help').style.display   = 'none';
-  showModal('m-zebra');
-}
-
-document.getElementById('mz-ok').addEventListener('click', ()=>{
-  hideAllModals();
-
-  if(zebraAfterAccount){
-    zebraAfterAccount = false;
-    showModal('m-sup');
-    renderSupList('');
-    supSearch.value = '';
-    supSearch.focus();
-    return;
-  }
-
-  focusInput();
-});
-
-document.getElementById('mz-help-btn').addEventListener('click', ()=>{
-  const help = document.getElementById('mz-help');
-  help.style.display = help.style.display === 'none' ? 'block' : 'none';
 });
 
 // ── Supplier ──────────────────────────────────────────────
@@ -1102,10 +1124,60 @@ function renderSupList(q){
     supList.appendChild(d);
   });
 }
+// ── Leverdatum per leverancier ────────────────────────────
+let deliveryDate      = localStorage.getItem('deliveryDate') || '';
+let deliveryException = localStorage.getItem('deliveryException') === '1';
+
+function deliveryKlaar(){ return deliveryException || !!deliveryDate; }
+function deliveryReset(){
+  deliveryDate=''; deliveryException=false;
+  localStorage.removeItem('deliveryDate');
+  localStorage.removeItem('deliveryException');
+}
+function openDeliveryPrompt(){
+  document.getElementById('md-supplier').textContent = supplier;
+  document.getElementById('delivery-input').value = deliveryException ? '' : (deliveryDate||'');
+  document.getElementById('delivery-hint').style.display='none';
+  showModal('m-delivery');
+  setTimeout(()=>document.getElementById('delivery-input').focus(),100);
+}
+// Actie die ná het invullen van de leverdatum moet draaien (bv. doorgaan met de
+// huidige scan na een leverancierswissel). Anders gewoon terug naar scannen.
+let deliveryAfterCallback = null;
+function afterDelivery(){
+  hideAllModals(); showSupBar();
+  if(deliveryAfterCallback){ const cb=deliveryAfterCallback; deliveryAfterCallback=null; cb(); }
+  else focusInput();
+}
+function deliveryBevestig(){
+  const v = document.getElementById('delivery-input').value;
+  if(!v){ document.getElementById('delivery-hint').style.display='block'; return; }
+  deliveryDate=v; deliveryException=false;
+  localStorage.setItem('deliveryDate',v);
+  localStorage.setItem('deliveryException','0');
+  afterDelivery();
+}
+function deliveryGeenZending(){
+  deliveryDate=''; deliveryException=true;
+  localStorage.setItem('deliveryDate','');
+  localStorage.setItem('deliveryException','1');
+  afterDelivery();
+}
+// Waarde voor de output: leeg bij exception (uitsluiten), anders de datum
+function deliveryOutput(){ return deliveryException ? '' : (deliveryDate||''); }
+
+document.getElementById('delivery-ok').addEventListener('click', deliveryBevestig);
+document.getElementById('delivery-exception').addEventListener('click', deliveryGeenZending);
+document.getElementById('delivery-input').addEventListener('keydown', e=>{ if(e.key==='Enter') deliveryBevestig(); });
+
 function selectSupplier(s){
+  const gewisseld = (s !== supplier);
   supplier=s; localStorage.setItem('supplier',supplier);
   hideAllModals();
   showSupBar();
+  // Bij wisselen (of nog geen datum) → leverdatum opnieuw verplicht vragen
+  if(gewisseld) deliveryReset();
+  if(!deliveryKlaar()){ openDeliveryPrompt(); return; }
   focusInput();
 }
 supSearch.addEventListener('input',()=>renderSupList(supSearch.value));
@@ -1116,7 +1188,7 @@ document.getElementById('change-sup-btn').addEventListener('click',()=>{
   showModal('m-sup'); renderSupList(''); supSearch.value=''; supSearch.focus();
 });
 function showSupBar(){
-  curSupEl.textContent=supplier;
+  curSupEl.textContent = supplier + (deliveryException ? '  ·  geen zending' : (deliveryDate ? '  ·  📦 '+deliveryDate : ''));
   supplierBar.style.display='flex';
   updateAccountInd();
 }
@@ -1135,7 +1207,8 @@ function updateAccountInd(){
 document.getElementById('account-ind').addEventListener('click', ()=>{
   const anyPanel = gradePanel.style.display==='flex' || subPanel.style.display==='flex';
   if(anyPanel) return;
-  userName=''; userInit=''; userId='';
+  userName=''; userInit=''; userId=''; userRol='';
+  localStorage.removeItem('userRol');
   localStorage.removeItem('userName');
   localStorage.removeItem('userInit');
   localStorage.removeItem('userId');
@@ -1201,7 +1274,8 @@ async function findProduct(barcode, supplier) {
       leverancier_correct: mismatch ? gevondenLev : '',
       tags:                data.tag  || '',
       grading:             data.gr   || '',
-      redenen:             data.redenen || null
+      redenen:             data.redenen || null,
+      fotos:               (data.fotos != null ? data.fotos : null)
     };
   } catch(err) {
     console.error('Firebase fout:', err);
@@ -1295,13 +1369,18 @@ function nowTime(){
   const d=new Date();
   return `${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}:${String(d.getSeconds()).padStart(2,'0')}`;
 }
+// HH:MM:SS uit een ms-timestamp (voor scan-/grade-tijd)
+function fmtKlokMs(ms){
+  const d=new Date(ms);
+  return `${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}:${String(d.getSeconds()).padStart(2,'0')}`;
+}
 function focusInput(){
   const anyModal=ALL_MODALS.some(id=>{ const el=document.getElementById(id); return el&&el.style.display!=='none'; });
   if(anyModal||gradePanel.style.display==='flex'||subPanel.style.display==='flex') return;
   bInput.focus();
 }
 function updateCounter(increment){
-  if(increment){ totalScans++; localStorage.setItem('totalScans',totalScans); }
+  if(increment){ totalScans += (typeof increment === 'number' ? increment : 1); localStorage.setItem('totalScans',totalScans); }
   scanCtr.textContent=`Scans: ${totalScans}`;
 }
 
@@ -1357,99 +1436,12 @@ async function showAlarmProductWarning(barcode){
   await wait(5000);
   overlay.classList.remove('alarm-blink');
 }
-
-// Red alert: 5 sec rood knipperend scherm met "RED ALERT — hoge kans op defect"
-async function flashRedAlert(code){
-  overlay.className='red alarm-blink';
-  document.getElementById('main-logo').style.display='none';
-  greenMsg.style.display='none';
-  fbTitle.textContent = '🚨 ' + t('redAlertTitle');
-  fbTitle.style.display='block';
-  fbSub.textContent = t('redAlertSub');
-  fbSub.style.display='block';
-  fbSub.style.direction = activeLang==='ar' ? 'rtl' : 'ltr';
-  bcDisp.style.display='none';
-  scanHintEl.style.display='none';
-  await wait(5000);
-  overlay.classList.remove('alarm-blink');
-}
-
-// Red alert eindscherm: blijft rood + "hoge kans op defect".
-// Grading-item → toon ook de grading-redenen. Geen grading-item → toon de
-// normale "je kunt gewoon graden zoals je normaal doet"-boodschap, maar rood.
-function showRedAlert(product, code, isGrading){
-  overlay.className='red';
-  document.getElementById('main-logo').style.display='none';
-  greenMsg.style.display='none';
-  fbTitle.textContent = '🚨 ' + t('redAlertTitle');
-  fbTitle.style.display='block';
-  let sub = t('redAlertSub');
-  if (isGrading){
-    const rz = buildRedenZin(product);
-    if (rz) sub += '\n' + rz;
-  } else {
-    sub += '\n' + t('green');
-  }
-  fbSub.textContent = sub;
-  fbSub.style.display='block';
-  fbSub.style.direction = activeLang==='ar' ? 'rtl' : 'ltr';
-  bcDisp.textContent = code; bcDisp.style.display='block';
-  scanHintEl.style.display='none';
-}
-
-// Golden product (SKU-niveau): goud scherm + "hoef je niet te graden"
-function showGoldenProduct(code){
-  overlay.className='gold';
-  document.getElementById('main-logo').style.display='none';
-  greenMsg.style.display='none';
-  fbTitle.textContent = '🏆 ' + t('goldProductTitle');
-  fbTitle.style.display='block';
-  fbSub.textContent = t('goldenSub');
-  fbSub.style.display='block';
-  fbSub.style.direction = activeLang==='ar' ? 'rtl' : 'ltr';
-  bcDisp.textContent = code; bcDisp.style.display='block';
-  scanHintEl.style.display='none';
-}
-
-// Onderschept artikel: mag niet opgeboekt/gegrade worden. Toont een
-// blokkerend scherm en print automatisch een "Weggegooid"-sticker.
-function showOnderschept(code, scanId){
-  overlay.className='red';
-  document.getElementById('main-logo').style.display='none';
-  greenMsg.style.display='none';
-  fbTitle.textContent = t('onderscheptTitle');
-  fbTitle.style.display='block';
-  fbSub.textContent = t('onderscheptSub') + '\n' + t('onderscheptSticker');
-  fbSub.style.display='block';
-  fbSub.style.direction = activeLang==='ar' ? 'rtl' : 'ltr';
-  bcDisp.textContent = scanId; bcDisp.style.display='block';
-  scanHintEl.style.display='none';
-  const img = document.getElementById('onderschept-img');
-  if (img) {
-    if (onderscheptAfbeelding && isVeiligeUrl(onderscheptAfbeelding)) {
-      img.src = onderscheptAfbeelding; img.style.display='block';
-    } else {
-      img.style.display='none';
-    }
-  }
-}
-
-// Sticker: titel "18+ artikelen" + "verzamelen", barcode = scanId.
-async function printOnderscheptSticker(scanId){
-  const sid = zplSafe(scanId);
-  const zpl = `^XA^MMT^PW400^LL200^LS0^FO65,10^BY2^BCN,50,Y,N,N^FD${sid}^FS^FO0,120^FB400,1,0,C,0^A0N,28,28^FD18+ artikelen^FS^FO0,158^FB400,1,0,C,0^A0N,26,26^FDverzamelen^FS^XZ`;
-  const r = await printZPL(zpl, 1);
-  if (!r.ok) console.warn('Onderschept-sticker print fout:', r.reason, r.error || '');
-  return r.ok;
-}
 function showRed(product, barcode){
   overlay.className='red';
   document.getElementById('main-logo').style.display='none';
   // Mismatch waarschuwing heeft prioriteit
   if(product.mismatch){
-    fbTitle.textContent = activeLang==='en' ? `⚠️ Warning: this product belongs to ${product.leverancier}`
-      : activeLang==='ar' ? `⚠️ تنبيه: هذا المنتج يخص ${product.leverancier}`
-      : `⚠️ Let op: dit product hoort bij ${product.leverancier}`;
+    fbTitle.textContent = `⚠️ Let op: dit product hoort bij ${product.leverancier}`;
     fbTitle.style.display='block';
   } else {
     fbTitle.textContent = product.tags || '';
@@ -1537,12 +1529,287 @@ function handleGrade(g){
       supplier: pendingScan.supplier_override || supplier,
       mismatch: pendingScan.mismatch,
       notFound: pendingScan.notFound,
-      leverancier_correct: pendingScan.leverancier_correct || ''
+      leverancier_correct: pendingScan.leverancier_correct || '',
+      scanStart: pendingScan.scanStart || Date.now()
     });
   } else {
     commitScan(g, gradeWords[g], '');
   }
 }
+
+// ═══════════════════════════════════════════════════════════
+// BATCH GRADING — meerdere identieke items in één keer
+// ═══════════════════════════════════════════════════════════
+let batch = null;
+const GEEN_REDEN = ['A','B','C']; // Perfect, 2dekans, Schoonmaak → direct printen
+
+function batchPanel(welke){
+  hideGradePanel();
+  subPanel.style.display='none';
+  // restanten van het gradescherm verbergen
+  fbTitle.style.display='none'; fbSub.style.display='none';
+  greenMsg.style.display='none'; bcDisp.style.display='none';
+  document.getElementById('batch-aantal-panel').style.display = welke==='aantal' ? 'flex' : 'none';
+  document.getElementById('batch-alloc-panel').style.display  = welke==='alloc'  ? 'flex' : 'none';
+}
+
+// Start batch vanuit het gradescherm (op het zojuist gescande product)
+function startBatch(){
+  if(!pendingScan) return;
+  batch = {
+    barcode: pendingScan.barcode,
+    supplier: pendingScan.supplier_override || supplier,
+    isGrading: pendingScan.isGrading,
+    mismatch: pendingScan.mismatch,
+    notFound: pendingScan.notFound,
+    leverancier_correct: pendingScan.leverancier_correct || '',
+    product: pendingScan.product,
+    scanStart: pendingScan.scanStart || Date.now(),
+    totaal: 0,
+    alloc: {A:0,B:0,C:0,B3:0,'D-rep':0,'D-def':0},
+    rijen: [],           // verzamelde rijen — pas aan einde versturen (gem. duur)
+    restB3:0, restRep:0, restDef:0,
+    fase: null
+  };
+  document.getElementById('batch-aantal-barcode').textContent = batch.barcode;
+  document.getElementById('batch-aantal-input').value='';
+  batchPanel('aantal');
+  setTimeout(()=>document.getElementById('batch-aantal-input').focus(),100);
+}
+
+function batchAantalOk(){
+  const n = parseInt(document.getElementById('batch-aantal-input').value);
+  if(!n || n<1){ document.getElementById('batch-aantal-input').focus(); return; }
+  batch.totaal = Math.min(999,n);
+  Object.keys(batch.alloc).forEach(k=>batch.alloc[k]=0);
+  renderAlloc();
+  batchPanel('alloc');
+}
+
+function batchToegewezen(){ return Object.values(batch.alloc).reduce((a,b)=>a+b,0); }
+
+function renderAlloc(){
+  const gl = t('grades'); // volgorde: Perfect,2dekans,3dekans,Schoonmaak,Reparatie,Defect
+  const map = [['A',gl[0]],['B',gl[1]],['B3',gl[2]],['C',gl[3]],['D-rep',gl[4]],['D-def',gl[5]]];
+  const btn = 'width:40px;height:40px;border-radius:10px;border:none;font-size:22px;font-weight:800;cursor:pointer;font-family:inherit';
+  document.getElementById('batch-alloc-rows').innerHTML = map.map(([g,lbl])=>`
+    <div style="display:flex;align-items:center;gap:12px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.15);border-radius:12px;padding:8px 14px">
+      <div style="flex:1;font-size:15px;font-weight:800;color:white;text-align:left">${escHTML(lbl)}</div>
+      <button class="ba-min" data-g="${g}" style="${btn};background:rgba(255,255,255,.12);color:white">−</button>
+      <div id="ba-cnt-${g}" style="min-width:32px;text-align:center;font-size:18px;font-weight:800;color:white">0</div>
+      <button class="ba-plus" data-g="${g}" style="${btn};background:var(--g1);color:var(--dark)">+</button>
+    </div>`).join('');
+  document.querySelectorAll('.ba-plus').forEach(b=>b.onclick=()=>allocChange(b.dataset.g,1));
+  document.querySelectorAll('.ba-min').forEach(b=>b.onclick=()=>allocChange(b.dataset.g,-1));
+  updateAllocTeller();
+}
+
+function allocChange(g,delta){
+  if(delta>0 && batchToegewezen()>=batch.totaal) return;
+  batch.alloc[g]=Math.max(0,batch.alloc[g]+delta);
+  document.getElementById('ba-cnt-'+g).textContent=batch.alloc[g];
+  updateAllocTeller();
+}
+
+function updateAllocTeller(){
+  const x=batchToegewezen();
+  document.getElementById('batch-alloc-teller').textContent = `${x} / ${batch.totaal} toegewezen`;
+  const klaar = x===batch.totaal && x>0;
+  const btn=document.getElementById('batch-verwerk-btn');
+  btn.disabled=!klaar; btn.style.opacity=klaar?'1':'.5';
+}
+
+function batchAnnuleren(){
+  batch=null;
+  document.getElementById('batch-aantal-panel').style.display='none';
+  document.getElementById('batch-alloc-panel').style.display='none';
+  pendingScan=null; pendingGrade=null;
+  showIdle(); focusInput();
+}
+
+// ── Rij bouwen + verzamelen (versturen gebeurt pas aan het einde) ──
+function batchVoegRijToe(g, statusWord, extraInfo, fotos, aantal){
+  aantal = Math.max(1, Math.min(999, parseInt(aantal,10) || 1));
+  const scanId = genScanId();
+  const is3 = g==='B3';
+  const row = {
+    scanId,
+    sessionId, userName, userInit,
+    rol: userRol,
+    supplier: is3 ? maak3deLeverancier(batch.supplier) : batch.supplier,
+    barcode: batch.barcode,
+    type: (is3 || batch.isGrading) ? 'Grading' : 'Normal',
+    Status_product_code: g,
+    Status_product_word: statusWord,
+    Info_reparatie: g==='D-rep' ? extraInfo : '',
+    Info_defect:    (g==='D-def' || is3) ? extraInfo : '',
+    mismatch: batch.mismatch ? 'Yes' : 'No',
+    not_found: batch.notFound ? 'Yes' : 'No',
+    leverancier_correct: batch.leverancier_correct || '',
+    date: nowDate(),
+    time: nowTime(),
+    scan_tijd: fmtKlokMs(batch.scanStart),
+    grade_tijd: fmtKlokMs(Date.now()),
+    delivery_date: deliveryOutput()
+  };
+  if (is3 && fotos && fotos.length) row.fotos = fotos;
+  row.aantal = aantal;                 // N identieke items → N rijen + N labels, zelfde scan-ID
+  batch.rijen.push(row);
+  updateCounter(aantal);
+  printSticker(scanId, userInit, statusWord, aantal); // N labels uit de printer
+  return row;
+}
+
+// ── Verwerken: fase A (bulk) → fase B (3dekans) → fase C (reden) ──
+function batchVerwerken(){
+  document.getElementById('batch-alloc-panel').style.display='none';
+  // Fase A — geen-reden grades: meteen loggen + printen
+  for(const g of GEEN_REDEN){
+    for(let i=0;i<batch.alloc[g];i++) batchVoegRijToe(g, gradeWords[g], '', null);
+  }
+  batch.restB3  = batch.alloc['B3'];
+  batch.restRep = batch.alloc['D-rep'];
+  batch.restDef = batch.alloc['D-def'];
+  batchVolgende();
+}
+
+// Volgende item dat interactie nodig heeft, of afronden
+function batchVolgende(){
+  if(batch.restB3>0){
+    batch.fase='B3';
+    document.getElementById('cam-batch-status').textContent = `Nog ${batch.restB3} × 3dekansje`;
+    document.getElementById('cam-batch-status').style.display='block';
+    document.getElementById('cam-batch-annuleer').style.display='block';
+    document.getElementById('cam-annuleer-btn').style.display='none';
+    openCamera({barcode:batch.barcode, supplier:batch.supplier, mismatch:batch.mismatch, notFound:batch.notFound, leverancier_correct:batch.leverancier_correct});
+    { const ca=document.getElementById('cam-aantal'); if(ca){ ca.max=batch.restB3; ca.value='1'; } }
+  } else if(batch.restRep>0 || batch.restDef>0){
+    const g = batch.restRep>0 ? 'D-rep' : 'D-def';
+    batch.fase = (g==='D-rep') ? 'rep' : 'def';
+    pendingGrade = g;
+    const rest = (g==='D-rep') ? batch.restRep : batch.restDef;
+    pendingScan = {product: batch.product, barcode: batch.barcode}; // voor de redenchips
+    showSubPanel(g);
+    { const sa=document.getElementById('sub-aantal'); if(sa){ sa.max=rest; sa.value='1'; } }
+    const st=document.getElementById('sub-batch-status');
+    st.textContent = `Nog ${rest} × ${g==='D-rep'?'reparatie':'defect'}`;
+    st.style.display='block';
+    document.getElementById('sub-batch-annuleer').style.display='block';
+    document.getElementById('escape-btn-sub').style.display='none';
+  } else {
+    batchAfronden();
+  }
+}
+
+// Bevestiging vanuit de camera (in batch-modus)
+async function batchB3Bevestig(beschrijving, fotos, aantal){
+  aantal = Math.max(1, Math.min(batch.restB3, parseInt(aantal,10) || 1));
+  batchVoegRijToe('B3','3dekans', beschrijving, fotos, aantal);
+  batch.restB3 -= aantal;
+  sluitCamera();
+  batchVolgende();
+}
+
+// Bevestiging vanuit het reden-panel (in batch-modus)
+function batchRedenBevestig(redenenTekst, aantal){
+  const g = (batch.fase==='rep') ? 'D-rep' : 'D-def';
+  const rest = (g==='D-rep') ? batch.restRep : batch.restDef;
+  aantal = Math.max(1, Math.min(rest, parseInt(aantal,10) || 1));
+  batchVoegRijToe(g, gradeWords[g], redenenTekst, null, aantal);
+  if(g==='D-rep') batch.restRep -= aantal; else batch.restDef -= aantal;
+  document.getElementById('sub-batch-status').style.display='none';
+  document.getElementById('sub-batch-annuleer').style.display='none';
+  document.getElementById('escape-btn-sub').style.display='';
+  subPanel.style.display='none';
+  batchVolgende();
+}
+
+// "Andere grade geven" → item meteen los afhandelen met nieuwe grade
+function batchHergradeer(nieuweG){
+  // huidige item uit de juiste wachtrij halen
+  if(batch.fase==='B3') batch.restB3--;
+  else if(batch.fase==='rep') batch.restRep--;
+  else if(batch.fase==='def') batch.restDef--;
+  // sluit huidige UI
+  sluitCamera();
+  document.getElementById('sub-batch-status').style.display='none';
+  document.getElementById('sub-batch-annuleer').style.display='none';
+  document.getElementById('escape-btn-sub').style.display='';
+  subPanel.style.display='none';
+  // direct verwerken volgens nieuwe grade
+  if(GEEN_REDEN.includes(nieuweG)){
+    batchVoegRijToe(nieuweG, gradeWords[nieuweG], '', null);
+    batchVolgende();
+  } else if(nieuweG==='B3'){
+    batch.restB3++; batchVolgende();
+  } else if(nieuweG==='D-rep'){
+    batch.restRep++; batchVolgende();
+  } else if(nieuweG==='D-def'){
+    batch.restDef++; batchVolgende();
+  }
+}
+
+// "Annuleren (overslaan)" → item valt weg uit de batch
+function batchItemOverslaan(){
+  if(batch.fase==='B3') batch.restB3--;
+  else if(batch.fase==='rep') batch.restRep--;
+  else if(batch.fase==='def') batch.restDef--;
+  sluitCamera();
+  document.getElementById('sub-batch-status').style.display='none';
+  document.getElementById('sub-batch-annuleer').style.display='none';
+  document.getElementById('escape-btn-sub').style.display='';
+  subPanel.style.display='none';
+  batchVolgende();
+}
+
+// Alles verwerkt → gemiddelde duur stempelen en versturen
+async function batchAfronden(){
+  document.getElementById('cam-batch-status').style.display='none';
+  document.getElementById('cam-batch-annuleer').style.display='none';
+  document.getElementById('cam-annuleer-btn').style.display='';
+  const totaalSec = (Date.now() - batch.scanStart)/1000;
+  const aantal = batch.rijen.reduce((s,r)=>s+(r.aantal||1),0) || 1;
+  const perItem = Math.round(totaalSec / aantal); // totale batchtijd / aantal producten
+  const rijen = batch.rijen.map(r => ({...r, duur_sec: perItem}));
+  batch = null;
+  pendingScan=null; pendingGrade=null;
+  showIdle(); focusInput();
+  showSync('syncing','⟳ Opslaan...');
+  let alleOk = true;
+  for(const row of rijen){
+    const ok = await sendToSheets(row);
+    if(!ok){ alleOk=false; offlineQueue.push(row); }
+  }
+  if(!alleOk){ localStorage.setItem('offlineQueue',JSON.stringify(offlineQueue)); updateQueueBadge(); }
+  else flushOfflineQueue();
+}
+
+// ── Knoppen bedraden ──
+document.getElementById('batch-start-btn').addEventListener('click', startBatch);
+document.getElementById('batch-aantal-ok').addEventListener('click', batchAantalOk);
+document.getElementById('batch-aantal-input').addEventListener('keydown', e=>{ if(e.key==='Enter') batchAantalOk(); });
+document.getElementById('batch-aantal-terug').addEventListener('click', ()=>{ batch=null; document.getElementById('batch-aantal-panel').style.display='none'; showGradePanel(); });
+document.getElementById('batch-verwerk-btn').addEventListener('click', batchVerwerken);
+document.getElementById('batch-alloc-terug').addEventListener('click', batchAnnuleren);
+
+// Regrade/annuleer-modal
+let regradeBron = null; // 'B3' | 'rep' | 'def'
+function openRegradeModal(){
+  regradeBron = batch && batch.fase;
+  document.getElementById('mbr-keuze').style.display='flex';
+  document.getElementById('mbr-grades').style.display='none';
+  document.getElementById('m-batch-regrade').style.display='flex';
+}
+function sluitRegradeModal(){ document.getElementById('m-batch-regrade').style.display='none'; }
+document.getElementById('cam-batch-annuleer').addEventListener('click', openRegradeModal);
+document.getElementById('sub-batch-annuleer').addEventListener('click', openRegradeModal);
+document.getElementById('mbr-annuleer').addEventListener('click', ()=>{ sluitRegradeModal(); batchItemOverslaan(); });
+document.getElementById('mbr-andere').addEventListener('click', ()=>{
+  document.getElementById('mbr-keuze').style.display='none';
+  document.getElementById('mbr-grades').style.display='flex';
+});
+document.querySelectorAll('#mbr-grades [data-rg]').forEach(b=>b.addEventListener('click', ()=>{ sluitRegradeModal(); batchHergradeer(b.dataset.rg); }));
+document.getElementById('mbr-terug').addEventListener('click', sluitRegradeModal);
 
 // ── Sub panel ─────────────────────────────────────────────
 let selectedRedenen = [];
@@ -1590,6 +1857,7 @@ function showSubPanel(g){
   document.getElementById('reden-add-lbl').textContent = t('redenAdd');
   document.getElementById('reden-none').textContent    = t('redenNone');
   document.getElementById('sub-confirm').textContent   = t('redenConfirm');
+  { const sa=document.getElementById('sub-aantal'); if(sa){ sa.value='1'; sa.max='999'; } }
   document.getElementById('sub-hint').textContent      = t('redenRequired');
   document.getElementById('sub-hint').style.display    = 'none';
   custConfirm.textContent = t('redenAddConfirm');
@@ -1642,7 +1910,12 @@ document.getElementById('sub-confirm').addEventListener('click',()=>{
     return; // minimaal 1 reden (gekozen of zelf toegevoegd) verplicht
   }
   const sep = activeLang==='ar' ? '، ' : ', ';
-  commitScan(pendingGrade, gradeWords[pendingGrade], selectedRedenen.join(sep));
+  const aantal = Math.max(1, parseInt(document.getElementById('sub-aantal').value,10) || 1);
+  if(batch && (batch.fase==='rep' || batch.fase==='def')){
+    batchRedenBevestig(selectedRedenen.join(sep), aantal);
+    return;
+  }
+  commitScan(pendingGrade, gradeWords[pendingGrade], selectedRedenen.join(sep), aantal);
 });
 
 // ── Camera (3de kansje) ───────────────────────────────────
@@ -1653,15 +1926,17 @@ let pending3deKansje = null;
 async function openCamera(scanData) {
   pending3deKansje = scanData;
   gemaakteFotos    = [];
+  { const ca=document.getElementById('cam-aantal'); if(ca){ ca.value='1'; ca.max='999'; } }
   document.getElementById('cam-beschrijving').value   = '';
   document.getElementById('cam-fotos').innerHTML      = '';
   document.getElementById('cam-foto-teller').textContent = '0 / 3 foto\'s';
-  document.getElementById('cam-bevestig-btn').disabled   = true;
+  document.getElementById('cam-bevestig-btn').disabled   = false;
   document.getElementById('cam-bevestig-btn').style.display = 'none';
-  document.getElementById('cam-hint').textContent        = 'Maak minimaal 1 foto';
+  document.getElementById('cam-hint').textContent        = "Foto's zijn optioneel (max 3)";
   document.getElementById('cam-stap2').style.display     = 'none';
   document.getElementById('cam-stap1-wrap').style.display = 'block';
-  document.getElementById('cam-stap1-verder').disabled   = true;
+  document.getElementById('cam-fotos-toevoegen').disabled = true;
+  document.getElementById('cam-direct-opslaan').disabled  = true;
   document.getElementById('m-camera').style.display      = 'flex';
   bInput.disabled = true;
   setTimeout(() => document.getElementById('cam-beschrijving').focus(), 300);
@@ -1716,16 +1991,11 @@ function updateFotoGrid() {
   fotoBtn.style.opacity = gemaakteFotos.length >= 3 ? '0.4' : '1';
 
   const bevestig = document.getElementById('cam-bevestig-btn');
-  if(gemaakteFotos.length > 0) {
-    bevestig.style.display = 'block';
-    bevestig.disabled = false;
-  } else {
-    bevestig.style.display = 'none';
-    bevestig.disabled = true;
-  }
+  bevestig.style.display = 'block';
+  bevestig.disabled = false;
 
   const hint = document.getElementById('cam-hint');
-  if(gemaakteFotos.length === 0)      hint.textContent = 'Minimaal 1 foto verplicht';
+  if(gemaakteFotos.length === 0)      hint.textContent = "Foto's zijn optioneel (max 3)";
   else if(gemaakteFotos.length < 3)   hint.textContent = `${3 - gemaakteFotos.length} foto's nog mogelijk`;
   else                                 hint.textContent = 'Maximum bereikt';
 }
@@ -1733,14 +2003,36 @@ function updateFotoGrid() {
 // Stap 1: beschrijving — activeer "Verder" knop
 document.getElementById('cam-beschrijving').addEventListener('input', () => {
   const beschr = document.getElementById('cam-beschrijving').value.trim();
-  document.getElementById('cam-stap1-verder').disabled = beschr.length === 0;
+  const leeg = beschr.length === 0;
+  document.getElementById('cam-fotos-toevoegen').disabled = leeg;
+  document.getElementById('cam-direct-opslaan').disabled  = leeg;
 });
 
 // Stap 1 → Stap 2: beschrijving opgeslagen, camera starten
-document.getElementById('cam-stap1-verder').addEventListener('click', async () => {
+// Direct opslaan zonder foto's
+document.getElementById('cam-direct-opslaan').addEventListener('click', async () => {
+  const beschrijving = document.getElementById('cam-beschrijving').value.trim();
+  if(!beschrijving) return;
+  const aantal = Math.max(1, parseInt(document.getElementById('cam-aantal').value,10) || 1);
+  if(batch && batch.fase==='B3'){
+    await batchB3Bevestig(beschrijving, gemaakteFotos, aantal);
+    return;
+  }
+  const btn = document.getElementById('cam-direct-opslaan');
+  btn.textContent = 'Opslaan...'; btn.disabled = true;
+  await bevestig3deKansje(beschrijving, gemaakteFotos, aantal);
+  sluitCamera();
+});
+
+// Foto's toevoegen → naar stap 2 (camera)
+document.getElementById('cam-fotos-toevoegen').addEventListener('click', async () => {
   document.getElementById('cam-stap1-wrap').style.display = 'none';
   const stap2 = document.getElementById('cam-stap2');
   stap2.style.display = 'flex';
+
+  // Foto's zijn optioneel: bevestigknop meteen beschikbaar
+  document.getElementById('cam-bevestig-btn').style.display = 'block';
+  document.getElementById('cam-bevestig-btn').disabled = false;
 
   // Start camera
   try {
@@ -1752,6 +2044,14 @@ document.getElementById('cam-stap1-verder').addEventListener('click', async () =
 });
 
 document.getElementById('cam-foto-btn').addEventListener('click', maakFoto);
+
+// Terug → camera stoppen, terug naar de tekstpagina (stap 1). Foto's blijven bewaard.
+document.getElementById('cam-terug-btn').addEventListener('click', () => {
+  if (cameraStream) { cameraStream.getTracks().forEach(t => t.stop()); cameraStream = null; }
+  document.getElementById('cam-stap2').style.display = 'none';
+  document.getElementById('cam-stap1-wrap').style.display = 'block';
+});
+
 document.getElementById('cam-annuleer-btn').addEventListener('click', () => {
   sluitCamera();
   cancelScan();
@@ -1759,12 +2059,19 @@ document.getElementById('cam-annuleer-btn').addEventListener('click', () => {
 
 document.getElementById('cam-bevestig-btn').addEventListener('click', async () => {
   const beschrijving = document.getElementById('cam-beschrijving').value.trim();
-  if(!beschrijving || gemaakteFotos.length === 0) return;
+  if(!beschrijving) return; // foto's optioneel, beschrijving blijft verplicht
+
+  const aantal = Math.max(1, parseInt(document.getElementById('cam-aantal').value,10) || 1);
+
+  if(batch && batch.fase==='B3'){
+    await batchB3Bevestig(beschrijving, gemaakteFotos, aantal);
+    return;
+  }
 
   document.getElementById('cam-bevestig-btn').textContent = 'Uploaden...';
   document.getElementById('cam-bevestig-btn').disabled = true;
 
-  await bevestig3deKansje(beschrijving, gemaakteFotos);
+  await bevestig3deKansje(beschrijving, gemaakteFotos, aantal);
   sluitCamera();
 });
 
@@ -1777,8 +2084,9 @@ function maak3deLeverancier(lev) {
   return '3' + lev;
 }
 
-async function bevestig3deKansje(beschrijving, fotos) {
+async function bevestig3deKansje(beschrijving, fotos, aantal) {
   if(!pending3deKansje) return;
+  aantal = Math.max(1, Math.min(99, parseInt(aantal,10) || 1));
 
   const scanId = genScanId();
 
@@ -1789,6 +2097,7 @@ async function bevestig3deKansje(beschrijving, fotos) {
   const row = {
     scanId,
     sessionId, userName, userInit,
+    rol: userRol,
     supplier: supplier3de,
     barcode:  pending3deKansje.barcode,
     type:     'Grading',
@@ -1801,13 +2110,18 @@ async function bevestig3deKansje(beschrijving, fotos) {
     leverancier_correct: pending3deKansje.leverancier_correct || '',
     fotos: fotos, // base64 array — Apps Script upload naar Picqer
     date: nowDate(),
-    time: nowTime()
+    time: nowTime(),
+    scan_tijd:  fmtKlokMs(pending3deKansje.scanStart || Date.now()),
+    grade_tijd: fmtKlokMs(Date.now()),
+    duur_sec:   Math.round((Date.now() - (pending3deKansje.scanStart || Date.now()))/1000),
+    delivery_date: deliveryOutput(),
+    aantal: aantal                          // 1 Picqer-product, N rijen + N labels (zelfde scan-ID)
   };
 
-  updateCounter(true);
+  updateCounter(aantal);
   showIdle();
   focusInput();
-  printSticker(scanId, userInit, '3dekans');
+  printSticker(scanId, userInit, '3dekans', aantal);
 
   const ok = await sendToSheets(row);
   if(!ok){
@@ -1818,76 +2132,32 @@ async function bevestig3deKansje(beschrijving, fotos) {
     flushOfflineQueue();
   }
 }
-const BROWSER_PRINT_URL = 'http://localhost:9100';
-
-// ── Print-routing: Browser Print (huidig) of PrintNode (migratie) ──
-// Per werkplek instelbaar via localStorage. Standaard = Browser Print,
-// zodat bestaande werkplekken ongewijzigd blijven werken tijdens de migratie.
-let printMode          = localStorage.getItem('printMode') || 'browserprint'; // 'browserprint' | 'printnode'
+// ── Printen via PrintNode (Apps Script-proxy; key staat server-side) ──
 let printNodePrinterId = localStorage.getItem('printNodePrinterId') || '';
 
-// Zet de printmodus voor deze werkplek (bv. vanuit een console of instellingen-UI):
-//   setPrintMode('printnode', 123456)  → PrintNode met printerId 123456
-//   setPrintMode('browserprint')       → terug naar Browser Print
-function setPrintMode(mode, printerId){
-  printMode = (mode === 'printnode') ? 'printnode' : 'browserprint';
-  localStorage.setItem('printMode', printMode);
-  if (printerId != null && printerId !== '') {
-    printNodePrinterId = String(printerId);
-    localStorage.setItem('printNodePrinterId', printNodePrinterId);
-  }
-  console.log('Printmodus:', printMode, printMode === 'printnode' ? '(printer ' + printNodePrinterId + ')' : '');
-}
-
-// Haalt de lokale Browser Print printer op
-async function bpGetPrinter(){
-  const res = await fetch(`${BROWSER_PRINT_URL}/available`, {targetAddressSpace:'loopback'});
-  if(!res.ok) throw new Error('Browser Print /available gaf geen geldige response');
-  const data = await res.json();
-  return data.printer && data.printer[0];
-}
-
-// Centrale printfunctie — stuurt ZPL `copies` keer naar de actieve printer.
+// Centrale printfunctie — stuurt ZPL `copies` keer naar de PrintNode-printer.
 // Retourneert {ok:true} of {ok:false, reason:'noPrinter'|'error', error}.
 async function printZPL(zpl, copies = 1){
   copies = Math.max(1, Math.min(99, parseInt(copies) || 1));
   try {
-    if (printMode === 'printnode'){
-      // Via de Apps Script-proxy — de PrintNode-key staat veilig op de server
-      if (!printNodePrinterId) return {ok:false, reason:'noPrinter'};
-      const url = `${SCANS_URL}?actie=print&printerId=${encodeURIComponent(printNodePrinterId)}`
-                + `&copies=${copies}&zpl=${encodeURIComponent(zpl)}`;
-      const res  = await fetch(url);
-      const data = await res.json();
-      return data.status === 'ok' ? {ok:true} : {ok:false, reason:'error', error:(data.message||data.result)};
-    }
-    // Standaard: Zebra Browser Print (lokaal)
-    const printer = await bpGetPrinter();
-    if (!printer) return {ok:false, reason:'noPrinter'};
-    for (let i=0;i<copies;i++){
-      await fetch(`${BROWSER_PRINT_URL}/write`, {
-        method:'POST', targetAddressSpace:'loopback',
-        headers:{'Content-Type':'application/json'},
-        body: JSON.stringify({device:printer, data:zpl})
-      });
-    }
-    return {ok:true};
+    if (!printNodePrinterId) return {ok:false, reason:'noPrinter'};
+    const url = `${SCANS_URL}?actie=print&printerId=${encodeURIComponent(printNodePrinterId)}`
+              + `&copies=${copies}&zpl=${encodeURIComponent(zpl)}`;
+    const res  = await fetch(url);
+    const data = await res.json();
+    return data.status === 'ok' ? {ok:true} : {ok:false, reason:'error', error:(data.message||data.result)};
   } catch(err){
     return {ok:false, reason:'error', error:err};
   }
 }
 
-// ── Printer-instellingen UI ───────────────────────────────
+// ── Printer-instellingen UI (PrintNode) ───────────────────
 let pmPrinters = [];           // gecachete printerlijst (via proxy)
-let pmGekozenMode = printMode; // tijdelijke keuze in de modal
 
 function openPrinterSettings(){
-  pmGekozenMode = printMode;
-  document.querySelectorAll('.pm-opt').forEach(b => b.classList.toggle('active', b.dataset.pm === pmGekozenMode));
-  document.getElementById('pm-printnode-wrap').style.display = pmGekozenMode === 'printnode' ? 'flex' : 'none';
   toonHuidigePrinter();
   showModal('m-printer');
-  if (pmGekozenMode === 'printnode' && !pmPrinters.length) haalPrintersOp();
+  if (!pmPrinters.length) haalPrintersOp();
 }
 
 function toonHuidigePrinter(){
@@ -1944,20 +2214,14 @@ function renderPrinterLijst(){
 document.getElementById('printer-settings-btn').addEventListener('click', openPrinterSettings);
 document.getElementById('pm-sluit').addEventListener('click', hideAllModals);
 document.getElementById('pm-zoek').addEventListener('input', renderPrinterLijst);
-document.querySelectorAll('.pm-opt').forEach(b => b.addEventListener('click', () => {
-  pmGekozenMode = b.dataset.pm;
-  document.querySelectorAll('.pm-opt').forEach(x => x.classList.toggle('active', x === b));
-  document.getElementById('pm-printnode-wrap').style.display = pmGekozenMode === 'printnode' ? 'flex' : 'none';
-  if (pmGekozenMode === 'printnode' && !pmPrinters.length) haalPrintersOp();
-}));
 document.getElementById('pm-opslaan').addEventListener('click', () => {
-  if (pmGekozenMode === 'printnode' && !printNodePrinterId){
+  if (!printNodePrinterId){
     alert('Kies eerst een printer.');
     return;
   }
-  setPrintMode(pmGekozenMode, printNodePrinterId);
+  localStorage.setItem('printNodePrinterId', printNodePrinterId);
   hideAllModals();
-  showSync('ok', pmGekozenMode === 'printnode' ? '✓ PrintNode actief' : '✓ Browser Print actief');
+  showSync('ok', '✓ Printer opgeslagen');
   focusInput();
 });
 
@@ -2011,12 +2275,12 @@ async function printProductBarcodeAantal(aantal) {
 
 async function printProductBarcode() { await printProductBarcodeAantal(1); }
 
-async function printSticker(scanId, initialen, grade) {
+async function printSticker(scanId, initialen, grade, copies = 1) {
   // ZPL label — 50mm × 25mm (400 dpi = ~800 × 400 dots)
   const x = centerX(scanId, 2);
   const zpl = `^XA^MMT^PW400^LL200^LS0^FO${x},10^BY2^BCN,60,Y,N,N,A^FD${scanId}^FS^FO0,150^FB400,1,0,C,0^A0N,28,28^FD${initialen} ${grade}^FS^XZ`.trim();
 
-  const r = await printZPL(zpl, 1);
+  const r = await printZPL(zpl, copies);
   if (r.ok) console.log('Sticker geprint!');
   else console.warn('Print fout:', r.reason, r.error || '');
 }
@@ -2112,19 +2376,23 @@ async function printCustomLabel(barcodeValue, aantal = 1) {
 }
 
 // ── Commit scan ───────────────────────────────────────────
-async function commitScan(statusCode, statusWord, extraInfo){
+async function commitScan(statusCode, statusWord, extraInfo, aantal){
   if(!pendingScan) return;
   const g = pendingGrade;
+  aantal = Math.max(1, Math.min(99, parseInt(aantal,10) || 1));
 
   // Gebruik supplier_override als die ingesteld is (wissel voor 1 scan)
   const gebruikteLeverancier = pendingScan.supplier_override || supplier;
 
   const scanId = genScanId();
+  const gradeMoment = Date.now();
+  const scanStart   = pendingScan.scanStart || gradeMoment;
 
   const row = {
     scanId,
     sessionId, userName, userInit,
     supplier: gebruikteLeverancier,
+    rol: userRol,
     barcode: pendingScan.barcode,
     type: pendingScan.isGrading ? 'Grading' : 'Normal',
     Status_product_code: statusCode,
@@ -2135,10 +2403,15 @@ async function commitScan(statusCode, statusWord, extraInfo){
     not_found: pendingScan.notFound ? 'Yes' : 'No',
     leverancier_correct: pendingScan.leverancier_correct || '',
     date: nowDate(),
-    time: nowTime()
+    time: nowTime(),
+    scan_tijd:  fmtKlokMs(scanStart),                       // tijd A
+    grade_tijd: fmtKlokMs(gradeMoment),                     // tijd B
+    duur_sec:   Math.round((gradeMoment - scanStart)/1000), // B − A in seconden
+    delivery_date: deliveryOutput(),                        // leeg bij "geen zending"
+    aantal: aantal                                          // N identieke items → N rijen, zelfde scan-ID
   };
 
-  updateCounter(true);
+  updateCounter(aantal);
   pendingScan=null; pendingGrade=null;
   subPanel.style.display='none';
   hideGradePanel();
@@ -2146,8 +2419,8 @@ async function commitScan(statusCode, statusWord, extraInfo){
   showIdle();
   focusInput();
 
-  // Print sticker
-  printSticker(scanId, userInit, statusWord);
+  // Print sticker — N keer (zelfde scan-ID)
+  printSticker(scanId, userInit, statusWord, aantal);
 
   const ok = await sendToSheets(row);
   if(!ok){
@@ -2173,42 +2446,28 @@ function toonMismatch(found, barcode) {
   scanHintEl.style.display = 'none';
   gradePanel.style.display = 'none';
 
-  // Vertaalhelper: kies tekst op basis van actieve taal
-  const L = (nl,en,ar)=> activeLang==='en' ? en : activeLang==='ar' ? ar : nl;
-
   document.getElementById('mm-title').textContent =
-    L(`⚠️ Let op! Dit product hoort bij:\n${gevondenLev}`,
-      `⚠️ Warning! This product belongs to:\n${gevondenLev}`,
-      `⚠️ تنبيه! هذا المنتج يخص:\n${gevondenLev}`);
+    `⚠️ Let op! Dit product hoort bij:\n${gevondenLev}`;
   document.getElementById('mm-sub').textContent =
-    L(`Jij werkt nu voor: ${gekozenLev}`,
-      `You are currently working for: ${gekozenLev}`,
-      `أنت تعمل الآن لصالح: ${gekozenLev}`);
+    `Jij werkt nu voor: ${gekozenLev}`;
 
   // Knop 1 — doorgaan met gekozen leverancier
   document.getElementById('mm-klopt-label').textContent =
-    L(`Doorgaan met ${gekozenLev}`, `Continue with ${gekozenLev}`, `المتابعة مع ${gekozenLev}`);
+    `Doorgaan met ${gekozenLev}`;
   document.getElementById('mm-klopt-hint').textContent =
-    L(`Product zit in mijn huidige batch — melding negeren`,
-      `Product is in my current batch — ignore warning`,
-      `المنتج ضمن دفعتي الحالية — تجاهل التنبيه`);
+    `Product zit in mijn huidige batch — melding negeren`;
 
   // Knop 2 — alleen deze scan onder gevonden leverancier
   document.getElementById('mm-wissel-scan-label').textContent =
-    L(`Eenmalig scannen onder ${gevondenLev}`, `Scan once under ${gevondenLev}`, `مسح لمرة واحدة تحت ${gevondenLev}`);
+    `Eenmalig scannen onder ${gevondenLev}`;
   document.getElementById('mm-wissel-scan-hint').textContent =
-    L(`Alleen deze scan onder ${gevondenLev} — daarna terug naar ${gekozenLev}`,
-      `Only this scan under ${gevondenLev} — then back to ${gekozenLev}`,
-      `هذا المسح فقط تحت ${gevondenLev} — ثم العودة إلى ${gekozenLev}`);
+    `Alleen deze scan onder ${gevondenLev} — daarna terug naar ${gekozenLev}`;
 
   // Knop 3 — overstappen naar gevonden leverancier
   document.getElementById('mm-wissel-std-label').textContent =
-    L(`Overstappen naar ${gevondenLev}`, `Switch to ${gevondenLev}`, `التبديل إلى ${gevondenLev}`);
+    `Overstappen naar ${gevondenLev}`;
   document.getElementById('mm-wissel-std-hint').textContent =
-    L(`Zelfde als op "Wissel leverancier" klikken`,
-      `Same as clicking "Switch supplier"`,
-      `مثل النقر على "تبديل المورد"`);
-  document.getElementById('mismatch-panel').style.direction = activeLang==='ar' ? 'rtl' : 'ltr';
+    `Zelfde als op "Wissel leverancier" klikken`;
 
   document.getElementById('mismatch-panel').style.display = 'flex';
 
@@ -2235,10 +2494,14 @@ function toonMismatch(found, barcode) {
     // Overstappen naar gevonden leverancier — mismatch NO
     supplier = gevondenLev;
     localStorage.setItem('supplier', supplier);
-    curSupEl.textContent = supplier;
     pendingScan.mismatch = false;
     pendingScan.leverancier_correct = '';
-    toonNaaMismatch(found, barcode);
+    // Nieuwe leverancier-context → leverdatum resetten en METEEN verplicht vragen,
+    // pas daarna doorgaan met het huidige product.
+    deliveryReset();
+    showSupBar();
+    deliveryAfterCallback = () => toonNaaMismatch(found, barcode);
+    openDeliveryPrompt();
   };
 
   document.getElementById('mm-escape').onclick = () => {
@@ -2253,11 +2516,57 @@ function verbergMismatch() {
 
 function toonProductNaam(found) {
   // Naam wordt getoond in showGradePanel via fbSub — niet apart tonen
+  toonProductFoto(found);
 }
 
 function verbergProductNaam() {
   const el = document.getElementById('product-naam-display');
   if (el) el.style.display = 'none';
+  const f = document.getElementById('product-foto');
+  if (f) { f.style.display = 'none'; f.src = ''; }
+}
+
+// ── Productfoto links in beeld (uit Firebase, lazy fallback uit Picqer) ──
+function jsonpScanner(params) {
+  return new Promise((resolve, reject) => {
+    const cb = '_scfoto_' + Date.now() + '_' + Math.random().toString(36).slice(2);
+    const p = new URLSearchParams(params); p.set('callback', cb);
+    const s = document.createElement('script');
+    const done = () => { delete window[cb]; if (s.parentNode) s.parentNode.removeChild(s); };
+    window[cb] = d => { done(); resolve(d); };
+    s.onerror = () => { done(); reject(new Error('net')); };
+    setTimeout(() => { if (window[cb]) { done(); reject(new Error('timeout')); } }, 20000);
+    s.src = SCANS_URL + '?' + p.toString();
+    document.body.appendChild(s);
+  });
+}
+
+async function toonProductFoto(found) {
+  const el = document.getElementById('product-foto');
+  if (!el) return;
+  el.style.display = 'none'; el.src = '';
+  if (!found || !found.barcode) return;
+
+  // 1) Direct uit Firebase: array met foto's → tonen
+  if (Array.isArray(found.fotos) && found.fotos.length) {
+    el.src = found.fotos[0]; el.style.display = 'block';
+    return;
+  }
+  // Bekend dat er geen foto is (sync schreef 'geen') → niet opnieuw live zoeken
+  if (found.fotos) return;
+  // 2) Nog niet gesynct → live uit Picqer ophalen, tonen én cachen in Firebase
+  try {
+    const data = await jsonpScanner({ actie: 'picqerFotos', barcode: found.barcode });
+    const urls = (data && data.status === 'ok' && Array.isArray(data.urls)) ? data.urls
+               : (data && data.url ? [data.url] : []);
+    if (!urls.length) return;
+    el.src = urls[0]; el.style.display = 'block';
+    found.fotos = urls;
+    const key = 'p_' + String(found.barcode).trim().replace(/[.#$[\]/]/g, '_');
+    fetch(`${FIREBASE_URL}/producten/${key}/fotos.json`, {
+      method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(urls)
+    }).catch(() => {});
+  } catch (e) { /* stil — foto is optioneel */ }
 }
 
 function toonNaaMismatch(found, barcode) {
@@ -2271,6 +2580,30 @@ function toonNaaMismatch(found, barcode) {
     showGreen();
   }
   showGradePanel();
+  // Productfoto + categorie-media opnieuw tonen — bleven anders weg na een
+  // leverancierswissel (showGradePanel verbergt de foto, en in dit pad werd
+  // toonProductNaam niet meer aangeroepen zoals in de normale scan-flow).
+  toonProductNaam(found);
+  if (found && found.name) {
+    const cat = checkCategorie(found.name);
+    if (cat) toonCatNotificatie(cat, found.name);
+  }
+}
+
+// Korte melding bij een ongeldige scan (geen productbarcode); keert na
+// een paar seconden automatisch terug naar het startscherm.
+function toonOngeldigeScan(msg){
+  overlay.className='orange';
+  document.getElementById('main-logo').style.display='none';
+  greenMsg.style.display='none';
+  fbSub.style.display='none';
+  bcDisp.style.display='none';
+  scanHintEl.style.display='none';
+  fbTitle.textContent = msg;
+  fbTitle.style.display='block';
+  fbTitle.style.direction = activeLang==='ar' ? 'rtl' : 'ltr';
+  bInput.value='';
+  setTimeout(()=>{ showIdle(); focusInput(); }, 2500);
 }
 
 // ── Scan handler ──────────────────────────────────────────
@@ -2282,8 +2615,30 @@ async function handleScan(barcode){
   if(code.length < 4) return;
   if(code.length > 50) return; // te lang voor een barcode
   if(/\s/.test(code)) return;  // spaties = geen barcode
+
+  // Een link is nooit een barcode — toon melding i.p.v. opslaan als 'niet gevonden'.
+  if(/^https?:\/\//i.test(code) || /^www\./i.test(code)){
+    if(isScanning) return;
+    toonOngeldigeScan(activeLang==='en' ? 'A link cannot be scanned'
+      : activeLang==='ar' ? 'لا يمكن مسح الرابط'
+      : 'Een link kan niet gescand worden');
+    return;
+  }
+
+  // 'Magazijn123.' is een magazijnsticker die per ongeluk vaak wordt gescand —
+  // geen productbarcode. Negeren met melding.
+  if(code === 'Magazijn123.'){
+    if(isScanning) return;
+    toonOngeldigeScan(activeLang==='en' ? 'This is not a product barcode'
+      : activeLang==='ar' ? 'هذا ليس باركود منتج'
+      : 'Dit is geen productbarcode');
+    return;
+  }
+
   if(gradePanel.style.display==='flex'||subPanel.style.display==='flex') return;
   if(isScanning) return;
+  // Leverdatum verplicht voor deze leverancier-context (tenzij "geen zending")
+  if(supplier && !deliveryKlaar()){ bInput.value=''; openDeliveryPrompt(); return; }
 
   isScanning = true;
   bInput.value='';
@@ -2296,7 +2651,6 @@ async function handleScan(barcode){
   fbSub.style.display='none';
   scanHintEl.style.display='none';
   bcDisp.style.display='none';
-  { const oi = document.getElementById('onderschept-img'); if (oi) oi.style.display='none'; }
   document.getElementById('scan-loading').style.display='flex';
 
   const found = await findProduct(code, supplier);
@@ -2316,56 +2670,38 @@ async function handleScan(barcode){
     notFound: !found,
     leverancier_correct: found ? (found.leverancier_correct||'') : '',
     leverancier: found ? (found.leverancier||'') : '',
-    product: found||null
+    product: found||null,
+    scanStart: Date.now()   // tijd A — moment van scannen
   };
   pendingGrade = null;
 
-  // Onderschept artikel — hoogste prioriteit: niet opboeken, niet graden.
-  // Toon blokkerend scherm + print automatisch een "Weggegooid"-sticker.
-  verbergCatNotificatie();
-  if (isOnderschept(found)) {
-    const scanId = genScanId();
-    showOnderschept(code, scanId);
-    await printOnderscheptSticker(scanId);
-    pendingScan = null;
-    focusInput();
+  // 2950-code die niet in Firebase staat → eerst info vastleggen, dan graden
+  if(!found && is2950(code)){
+    open2950Form(code);
     return;
   }
 
   // Categorieën check op productnaam
+  verbergCatNotificatie();
   if (found && found.name) {
     const cat = checkCategorie(found.name);
-    if (cat) {
-      toonCatNotificatie(cat, found.name);
-    } else {
-      // Geen gewone categorie → eventueel een "to do" categorie tonen
-      const todo = checkTodoCategorie(found.name);
-      if (todo) toonTodoNotificatie(todo, found.name);
-    }
+    if (cat) toonCatNotificatie(cat, found.name);
   }
 
-  // Speciale producten op SKU-niveau (matcht ook op barcode/productcode)
-  const isRedAlert = matchSpecialeProduct(redAlertProducts, found, code);
-  const isGolden   = matchSpecialeProduct(goldenProducts, found, code);
-
-  // 5 sec rode flits vooraf — red alert of het bestaande Alarmproduct
-  if (isRedAlert) {
-    await flashRedAlert(code);
-  } else if (found && productHasTag(found, 'Alarmproduct')) {
+  if(found && productHasTag(found, 'Alarmproduct')){
     await showAlarmProductWarning(code);
   }
 
   if (found && mismatch) {
     toonMismatch(found, code);
-  } else if (isGolden || (found && productHasTag(found, 'Goud'))) {
-    if (isGolden) showGoldenProduct(code);
-    else showGoldProduct(found, code);
-    showGradePanel();
-  } else if (isRedAlert) {
-    showRedAlert(found, code, isGrading);
+  } else if (found && productHasTag(found, 'Goud')) {
+    showGoldProduct(found, code);
     showGradePanel();
   } else if (found && isGrading) {
     showRed(found, code);
+    showGradePanel();
+  } else if (!found) {
+    showGreen();
     showGradePanel();
   } else {
     showGreen();
@@ -2374,13 +2710,59 @@ async function handleScan(barcode){
   toonProductNaam(found);
 }
 
+// ── 2950 onbekend product ─────────────────────────────────
+function is2950(code){ return /^2950/.test(String(code||'').trim()); }
+
+function open2950Form(code){
+  document.getElementById('m2950-code').textContent = code;
+  document.getElementById('m2950-titel').value = '';
+  document.getElementById('m2950-barcode').value = '';
+  document.getElementById('m2950-productcode').value = '';
+  document.getElementById('m2950-hint').style.display = 'none';
+  showModal('m-2950');
+  setTimeout(()=>document.getElementById('m2950-titel').focus(),100);
+}
+
+async function opslaan2950(){
+  const code        = document.getElementById('m2950-code').textContent;
+  const titel       = document.getElementById('m2950-titel').value.trim();
+  const barcode     = document.getElementById('m2950-barcode').value.trim();
+  const productcode = document.getElementById('m2950-productcode').value.trim();
+  if(!titel && !barcode && !productcode){
+    document.getElementById('m2950-hint').style.display = 'block';
+    return;
+  }
+  // Opslaan in het aparte 2950-tabblad (faalt stil → grading gaat altijd door)
+  const url = `${SCANS_URL}?actie=save2950`
+    + `&code=${encodeURIComponent(code)}`
+    + `&titel=${encodeURIComponent(titel)}`
+    + `&barcode=${encodeURIComponent(barcode)}`
+    + `&productcode=${encodeURIComponent(productcode)}`
+    + `&naam=${encodeURIComponent(userName||'')}`;
+  fetch(url).catch(()=>{});
+  showSync('ok','✓ 2950 info opgeslagen');
+  // Door naar graden (not-found product)
+  hideAllModals();
+  verbergCatNotificatie();
+  showGreen();
+  showGradePanel();
+}
+document.getElementById('m2950-opslaan').addEventListener('click', opslaan2950);
+
 bInput.addEventListener('keydown',e=>{ if(e.key==='Enter') handleScan(bInput.value); });
 bInput.addEventListener('change',()=>{ if(bInput.value.trim()) handleScan(bInput.value); });
 
 // ── Keyboard shortcuts ────────────────────────────────────
+function batchPanelActief(){
+  return document.getElementById('batch-aantal-panel').style.display==='flex'
+      || document.getElementById('batch-alloc-panel').style.display==='flex';
+}
+
 document.addEventListener('keydown',e=>{
   const anyModal=ALL_MODALS.some(id=>{ const el=document.getElementById(id); return el&&el.style.display!=='none'; });
   if(anyModal) return;
+  // Batch-invoer (aantal/verdelen): laat de scanbalk de focus niet stelen
+  if(batchPanelActief()) return;
 
   if(e.key==='Escape'){
     e.preventDefault();
@@ -2415,6 +2797,7 @@ document.addEventListener('keydown',e=>{
 document.addEventListener('click',e=>{
   if(!e.target.closest('.modal-box')&&!e.target.closest('.ctrl-btn')&&
      !e.target.closest('#grade-panel')&&!e.target.closest('#sub-panel')&&
+     !e.target.closest('#batch-aantal-panel')&&!e.target.closest('#batch-alloc-panel')&&
      !e.target.closest('#account-ind')) focusInput();
 });
 
@@ -2475,8 +2858,8 @@ document.getElementById('custom-label-barcode').addEventListener('keydown',e=>{
 // ── Reset ─────────────────────────────────────────────────
 function doReset(silent=false){
   sessionId=genId(); totalScans=0;
-  userName=''; userInit=''; userId=''; supplier=''; offlineQueue=[];
-  ['sessionId','totalScans','offlineQueue','userName','userInit','userId','supplier'].forEach(k=>localStorage.removeItem(k));
+  userName=''; userInit=''; userId=''; userRol=''; supplier=''; offlineQueue=[];
+  ['sessionId','totalScans','offlineQueue','userName','userInit','userId','userRol','supplier'].forEach(k=>localStorage.removeItem(k));
   localStorage.removeItem('activeLang');
   localStorage.setItem('sessionId',sessionId);
   localStorage.setItem('totalScans','0');
@@ -2513,7 +2896,6 @@ langInd.addEventListener('click',()=>{
 
 // ── Categorieën ──────────────────────────────────────────
 let categorieen = [];
-let todoCategorieen = []; // "to do" categorieën: nog instructievideo nodig
 
 async function laadCategorieen() {
   try {
@@ -2521,62 +2903,6 @@ async function laadCategorieen() {
     const data = await res.json();
     if (data) categorieen = Object.values(data);
   } catch(err) {}
-}
-
-async function laadTodoCategorieen() {
-  try {
-    const res  = await fetch(`${FIREBASE_URL}/todo_categorieen.json`);
-    const data = await res.json();
-    todoCategorieen = data ? Object.values(data) : [];
-  } catch(err) {}
-}
-
-// ── Speciale producten op SKU-niveau (Red alert / Golden) ──
-let redAlertProducts = []; // lijst SKU's
-let goldenProducts   = []; // lijst SKU's
-
-let onderscheptTags  = []; // tags die een artikel "onderschept" maken
-let onderscheptAfbeelding = ''; // optionele afbeelding op het onderschept-scherm
-
-async function laadSpecialeProducten() {
-  try {
-    const [r1, r2, r3, r4] = await Promise.all([
-      fetch(`${FIREBASE_URL}/red_alert_products.json`),
-      fetch(`${FIREBASE_URL}/golden_products.json`),
-      fetch(`${FIREBASE_URL}/onderschept_tags.json`),
-      fetch(`${FIREBASE_URL}/onderschept_config.json`)
-    ]);
-    const d1 = await r1.json();
-    const d2 = await r2.json();
-    const d3 = await r3.json();
-    const d4 = await r4.json();
-    redAlertProducts = d1 ? Object.values(d1).map(x => (x && x.sku) || x).filter(Boolean) : [];
-    goldenProducts   = d2 ? Object.values(d2).map(x => (x && x.sku) || x).filter(Boolean) : [];
-    onderscheptTags  = d3 ? Object.values(d3).map(x => (x && x.sku) || x).filter(Boolean) : [];
-    onderscheptAfbeelding = (d4 && d4.afbeelding) ? String(d4.afbeelding) : '';
-  } catch(err) {}
-}
-
-// Onderschept = het gevonden product heeft een tag die in de lijst staat.
-function isOnderschept(found){
-  if (!found || !onderscheptTags.length) return false;
-  return onderscheptTags.some(tag => productHasTag(found, tag));
-}
-
-function normSku(s){ return String(s == null ? '' : s).trim().toLowerCase(); }
-
-// Matcht een gescande code/product tegen een SKU-lijst. Vergelijkt zowel de
-// ruwe gescande code als de productcode én barcode van het gevonden product —
-// zo werkt het ook als iemand een barcode invult waar de productcode hoort (of andersom).
-function matchSpecialeProduct(lijst, found, code){
-  if (!lijst || !lijst.length) return false;
-  const ids = new Set();
-  if (code) ids.add(normSku(code));
-  if (found){
-    if (found.productcode) ids.add(normSku(found.productcode));
-    if (found.barcode)     ids.add(normSku(found.barcode));
-  }
-  return lijst.some(sku => ids.has(normSku(sku)));
 }
 
 // ── Media helpers (gedeeld met dashboard.html) ────────────
@@ -2696,39 +3022,6 @@ function verbergCatNotificatie() {
   if (box) box.remove();
 }
 
-// "To do" categorie matchen op productnaam.
-// Let op: gewone categorieën hebben voorrang — deze check wordt alleen
-// uitgevoerd als checkCategorie() niets oplevert (zie handleScan).
-function checkTodoCategorie(name) {
-  if (!name || !todoCategorieen.length) return null;
-  const nameLower = name.toLowerCase();
-  for (const todo of todoCategorieen) {
-    const woorden = (todo.woorden || '').split(',').map(w => w.trim().toLowerCase()).filter(Boolean);
-    if (woorden.some(w => w && nameLower.includes(w))) return todo;
-  }
-  return null;
-}
-
-// Pop-up voor een "to do" categorie: dit product heeft nog een instructievideo
-// nodig. Titel afhankelijk van de gekozen taal (Let op / Watch out / تنبيه).
-function toonTodoNotificatie(todo, productNaam) {
-  const bestaand = document.getElementById('cat-notif');
-  if (bestaand) bestaand.remove();
-  const tekst = (todo.tekst || '').trim() || t('todoBericht');
-  const rtl   = activeLang === 'ar';
-  const box = document.createElement('div');
-  box.id = 'cat-notif';
-  box.innerHTML = `
-    <button onclick="document.getElementById('cat-notif').remove()" style="position:absolute;top:10px;right:10px;background:none;border:none;color:white;font-size:18px;cursor:pointer;opacity:.7">×</button>
-    <div style="font-size:14px;font-weight:800;letter-spacing:.5px;text-transform:uppercase;margin-bottom:10px">${escHTML(t('todoLetOp'))}</div>
-    ${todo.naam ? `<div style="font-size:11px;font-weight:700;opacity:.7;text-transform:uppercase;letter-spacing:1px;margin-bottom:6px">${escHTML(todo.naam)}</div>` : ''}
-    ${productNaam ? `<div style="font-size:12px;color:rgba(255,255,255,.6);font-weight:600;margin-bottom:10px;line-height:1.4">${escHTML(productNaam)}</div>` : ''}
-    <div style="font-size:16px;font-weight:700;line-height:1.5">${escHTML(tekst)}</div>
-  `;
-  box.style.cssText = `position:fixed;right:24px;top:50%;transform:translateY(-50%);background:rgba(28,42,26,.96);border:1px solid rgba(239,159,39,.5);border-left:4px solid #EF9F27;color:white;border-radius:16px;padding:20px;width:min(320px,92vw);max-height:90vh;overflow-y:auto;z-index:9998;box-shadow:0 8px 32px rgba(0,0,0,.5);font-family:'Montserrat',sans-serif;display:flex;flex-direction:column;gap:4px;direction:${rtl ? 'rtl' : 'ltr'};text-align:${rtl ? 'right' : 'left'}`;
-  document.body.appendChild(box);
-}
-
 // Leveranciers live laden uit Firebase (/leveranciers), met terugval op
 // de ingebouwde lijst als het ophalen mislukt of leeg is.
 async function laadLeveranciers() {
@@ -2752,8 +3045,6 @@ async function laadLeveranciers() {
 
 // Start app direct — geen CSV meer nodig
 laadCategorieen();
-laadTodoCategorieen();
-laadSpecialeProducten();
 laadLeveranciers();
 initApp();
 </script>
