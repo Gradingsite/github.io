@@ -1468,7 +1468,21 @@ function filterScansOpPeriode(scans, periode) {
 }
 
 // ── JSONP voor admin acties (schrijven/accounts) ─────────
-function apiFetch(params) {
+// Wrapper met automatische retry: een trage/tijdelijk gefaalde script-load
+// (onerror/timeout) wordt tot 3x opnieuw geprobeerd met oplopende pauze.
+async function apiFetch(params, pogingen = 3) {
+  let laatsteFout;
+  for (let i = 0; i < pogingen; i++) {
+    try { return await apiFetchOnce(params); }
+    catch (err) {
+      laatsteFout = err;
+      if (i < pogingen - 1) await new Promise(r => setTimeout(r, 600 * (i + 1)));
+    }
+  }
+  throw laatsteFout;
+}
+
+function apiFetchOnce(params) {
   return new Promise((resolve, reject) => {
     const cbName = '_cb_' + Date.now() + '_' + Math.random().toString(36).slice(2);
     const p = Object.assign({}, params, {callback: cbName});
@@ -1488,11 +1502,13 @@ function apiFetch(params) {
     };
     setTimeout(function() {
       if (window[cbName]) {
-        delete window[cbName];
+        // Niet verwijderen maar vervangen door een no-op: een laat-binnenkomend
+        // antwoord roept dan een lege functie aan i.p.v. een ReferenceError.
+        window[cbName] = function(){ try { delete window[cbName]; } catch(e){} };
         if (script.parentNode) script.parentNode.removeChild(script);
         reject(new Error('Timeout'));
       }
-    }, 15000);
+    }, 45000);
     document.getElementById('jsonp-container').appendChild(script);
   });
 }
