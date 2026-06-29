@@ -209,6 +209,58 @@ body{font-family:'Montserrat','Segoe UI',Arial,sans-serif;min-height:100vh;displ
 .m-input-pw:focus{border-color:var(--g1)}
 .m-input-pw.err{border-color:#ff6b6b}
 .m-input-pw.ok{border-color:var(--g1)}
+/* ── Scan History ── */
+#history-btn{position:fixed;top:58px;right:16px;background:rgba(255,255,255,.08);color:rgba(255,255,255,.8);border:1px solid rgba(255,255,255,.18);padding:7px 14px;border-radius:50px;z-index:9999;font-size:12px;font-weight:800;letter-spacing:.5px;cursor:pointer;font-family:inherit}
+#history-btn:hover{background:rgba(255,255,255,.16);color:white}
+.hist-box{width:min(860px,96vw);max-height:88vh;align-items:stretch;gap:14px}
+.hist-head{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.hist-search{flex:1;padding:11px 16px;font-size:15px;border-radius:12px;border:2px solid rgba(255,255,255,.15);background:rgba(255,255,255,.06);color:white;outline:none;font-weight:600;font-family:inherit;text-align:left}
+.hist-search:focus{border-color:var(--g1)}
+.hist-search::placeholder{color:rgba(255,255,255,.4)}
+.hist-x{background:rgba(255,255,255,.08);color:rgba(255,255,255,.7);border:1px solid rgba(255,255,255,.16);border-radius:50px;width:34px;height:34px;font-size:16px;cursor:pointer;flex:none;font-family:inherit}
+.hist-x:hover{background:rgba(255,255,255,.16);color:white}
+.hist-list{overflow-y:auto;display:flex;flex-direction:column;gap:1px;background:rgba(255,255,255,.08);border-radius:12px;border:1px solid rgba(255,255,255,.1)}
+.hist-row{display:grid;grid-template-columns:1.05fr 1.05fr .8fr .95fr .8fr .5fr 78px;gap:10px;align-items:center;padding:12px 14px;background:var(--dark);font-size:13px;color:rgba(255,255,255,.85)}
+.hist-row-acties{display:flex;gap:6px;justify-self:end}
+.hist-row-pencil,.hist-row-print{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.16);color:rgba(255,255,255,.7);border-radius:9px;width:34px;height:34px;font-size:14px;cursor:pointer;font-family:inherit}
+.hist-row-pencil:hover,.hist-row-print:hover{background:var(--g1);color:var(--dark);border-color:var(--g1)}
+.hist-print-btn{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.16);color:rgba(255,255,255,.7);border-radius:9px;width:32px;height:32px;font-size:13px;cursor:pointer;font-family:inherit}
+.hist-print-btn:hover{background:var(--g1);color:var(--dark);border-color:var(--g1)}
+.hist-row:hover{background:rgba(255,255,255,.05)}
+.hist-row.head{cursor:default;font-size:11px;letter-spacing:1px;text-transform:uppercase;color:rgba(255,255,255,.45);font-weight:800;background:rgba(255,255,255,.03)}
+.hist-row .mono{font-family:ui-monospace,Menlo,Consolas,monospace;font-weight:700}
+.hist-badge{display:inline-block;padding:2px 9px;border-radius:50px;font-size:10px;font-weight:800;letter-spacing:.5px}
+.hist-badge.batch{background:rgba(146,208,80,.18);color:var(--g1);border:1px solid rgba(146,208,80,.4)}
+.hist-changed{color:var(--g1);font-weight:800}
+.hist-empty{padding:26px;text-align:center;color:rgba(255,255,255,.4);font-size:13px;font-weight:600;background:var(--dark)}
+.hist-more{padding:11px;background:rgba(255,255,255,.08);color:white;border:none;border-radius:12px;font-size:13px;font-weight:800;cursor:pointer;font-family:inherit;letter-spacing:.5px}
+.hist-more:hover{background:rgba(255,255,255,.16)}
+.hist-more:disabled{opacity:.4;cursor:default}
+/* detail */
+.hist-field{display:flex;align-items:center;gap:10px;padding:12px 14px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:12px}
+.hist-field .lbl{font-size:11px;text-transform:uppercase;letter-spacing:.5px;color:rgba(255,255,255,.45);font-weight:800;width:104px;flex:none;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.hist-field .val{flex:1;color:white;font-weight:700;font-size:15px;word-break:break-all}
+.hist-pencil{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.16);color:rgba(255,255,255,.7);border-radius:10px;width:36px;height:36px;font-size:15px;cursor:pointer;flex:none;font-family:inherit}
+.hist-pencil:hover{background:rgba(255,255,255,.16);color:white}
+.hist-edit{display:flex;flex-direction:column;gap:10px;flex:1}
+.hist-edit input,.hist-edit select{padding:10px 12px;font-size:15px;border-radius:10px;border:2px solid var(--g1);background:rgba(255,255,255,.08);color:white;outline:none;font-weight:700;font-family:inherit;width:100%}
+.hist-edit select option{background:var(--dark)}
+.hist-confirm{font-size:13px;color:rgba(255,255,255,.85);font-weight:700;text-align:center;line-height:1.5}
+.hist-confirm b{color:var(--g1)}
+.hist-confirm .old{color:#ff8f8f;text-decoration:line-through}
+.hist-edit-btns{display:flex;gap:8px}
+.hist-edit-btns button{flex:1;padding:9px;border-radius:10px;font-size:13px;font-weight:800;cursor:pointer;font-family:inherit;border:none}
+.hist-save{background:var(--g1);color:var(--dark)}
+.hist-cancel{background:rgba(255,255,255,.08);color:rgba(255,255,255,.7);border:1px solid rgba(255,255,255,.16)!important}
+.hist-prod{padding:12px 14px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:12px;display:flex;flex-direction:column;gap:10px}
+.hist-prod-top{display:flex;align-items:center;justify-content:space-between;gap:8px;font-size:12px;color:rgba(255,255,255,.55);font-weight:700}
+.hist-detail-body{overflow-y:auto;display:flex;flex-direction:column;gap:10px}
+.hist-back{align-self:flex-start;background:none;border:none;color:rgba(255,255,255,.6);font-size:13px;font-weight:800;cursor:pointer;font-family:inherit;padding:0}
+.hist-back:hover{color:white}
+.hist-delete{padding:11px;background:rgba(232,76,61,.15);color:#ff8f8f;border:1px solid rgba(232,76,61,.4);border-radius:12px;font-size:13px;font-weight:800;cursor:pointer;font-family:inherit;letter-spacing:.5px}
+.hist-delete:hover{background:var(--red);color:white}
+.hist-delete.confirm{background:var(--red);color:white}
+.hist-delete:disabled{opacity:.5;cursor:default}
 </style>
 </head>
 <body>
@@ -427,6 +479,7 @@ body{font-family:'Montserrat','Segoe UI',Arial,sans-serif;min-height:100vh;displ
       <div id="pm-huidig" style="font-size:12px;color:rgba(255,255,255,.6);text-align:center;font-weight:600"></div>
     </div>
 
+    <button class="m-btn m-btn-secondary" id="pm-uit-toggle" style="width:100%">🖨 Printer: aan</button>
     <button class="m-btn" id="pm-opslaan">Opslaan</button>
     <button class="m-btn m-btn-secondary" id="pm-sluit">Sluiten</button>
   </div>
@@ -436,9 +489,67 @@ body{font-family:'Montserrat','Segoe UI',Arial,sans-serif;min-height:100vh;displ
 <div id="lang-ind" title="Klik om taal te wijzigen" style="cursor:pointer">🌐 Kies taal</div>
 <div id="account-ind" title="Klik om van account te wisselen" style="cursor:pointer;position:fixed;top:52px;left:16px;color:rgba(255,255,255,.7);font-size:11px;font-weight:800;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.15);padding:6px 12px;border-radius:50px;z-index:9999;letter-spacing:.5px;display:none">👤 —</div>
 <div id="scan-counter">Scans: 0</div>
+<button id="history-btn">🕑 Scan History</button>
 <div id="sync-indicator">⟳ Syncing...</div>
 <div id="queue-badge">📤 <span id="queue-count">0</span> wachtend</div>
 <button id="fullscreen-btn" title="Volledig scherm (F11)" style="position:fixed;bottom:16px;left:16px;padding:9px 16px;border:none;border-radius:50px;font-weight:800;cursor:pointer;z-index:9999;font-size:12px;letter-spacing:.5px;font-family:inherit;background:rgba(255,255,255,.06);color:rgba(255,255,255,.5);border:1px solid rgba(255,255,255,.12)">⛶ Volledig scherm</button>
+
+<!-- Scan History — lijst -->
+<div class="modal" id="m-history" style="display:none">
+  <div class="modal-box hist-box">
+    <div class="hist-head">
+      <input class="hist-search" id="hist-search" type="text" placeholder="Zoek scan_id of barcode (alleen vandaag)…" autocomplete="off" spellcheck="false"/>
+      <button class="hist-x" id="hist-close" title="Sluiten">✕</button>
+    </div>
+    <div class="hist-list" id="hist-list">
+      <div class="hist-row head"><span>Scan ID</span><span>Barcode</span><span>Grade</span><span>Leverancier</span><span>Tijdstip</span><span>Changed</span><span></span></div>
+    </div>
+    <button class="hist-more" id="hist-more">+5 meer</button>
+  </div>
+</div>
+
+<!-- Scan History — detail (single + batch) -->
+<div class="modal" id="m-history-detail" style="display:none">
+  <div class="modal-box hist-box">
+    <button class="hist-back" id="hist-back">← Terug naar geschiedenis</button>
+    <h2 id="hist-detail-title">Scan</h2>
+    <div class="hist-detail-body" id="hist-detail-body"></div>
+    <button class="hist-delete" id="hist-delete">🗑 Scan verwijderen</button>
+  </div>
+</div>
+
+<!-- Scan History — reden kiezen bij grade-wijziging (reparatie/defect) -->
+<div class="modal" id="m-hist-reden" style="display:none">
+  <div class="modal-box hist-box" style="width:min(460px,96vw)">
+    <h2 id="hist-reden-title">Reden</h2>
+    <div id="hist-reden-list" style="display:flex;flex-direction:column;gap:8px;width:100%;max-height:46vh;overflow-y:auto"></div>
+    <div id="hist-reden-none" style="display:none;color:rgba(255,255,255,.5);font-size:13px;font-weight:500;text-align:center"></div>
+    <input class="m-input" id="hist-reden-add" type="text" placeholder="➕ Nieuwe reden toevoegen…" autocomplete="off" spellcheck="false" style="text-align:left"/>
+    <div id="hist-reden-hint" style="display:none;color:#ff8f8f;font-size:12px;font-weight:700;text-align:center"></div>
+    <div class="hist-edit-btns" style="width:100%">
+      <button class="hist-cancel" id="hist-reden-cancel">Annuleren</button>
+      <button class="hist-save"   id="hist-reden-ok">Bevestigen →</button>
+    </div>
+  </div>
+</div>
+
+<!-- Scan History — label printen (scan ID of barcode kiezen) -->
+<div class="modal" id="m-hist-print" style="display:none">
+  <div class="modal-box" style="width:min(380px,96vw);gap:14px">
+    <h2>Label printen</h2>
+    <div style="display:flex;flex-direction:column;gap:6px;width:100%;font-size:13px;color:rgba(255,255,255,.7);font-weight:700">
+      <div>Scan ID: <span class="mono" id="hist-print-scanid" style="color:white"></span></div>
+      <div>Barcode: <span class="mono" id="hist-print-barcode" style="color:white"></span></div>
+    </div>
+    <div style="display:flex;align-items:center;gap:12px;justify-content:center;width:100%">
+      <span style="font-size:13px;font-weight:700;color:rgba(255,255,255,.7)">Aantal:</span>
+      <input id="hist-print-aantal" type="number" min="1" max="99" value="1" style="width:90px;padding:10px;border:2px solid rgba(255,255,255,.3);border-radius:12px;background:rgba(255,255,255,.1);color:white;font-size:20px;font-weight:800;font-family:inherit;text-align:center;outline:none"/>
+    </div>
+    <button class="m-btn" id="hist-print-scanid-btn">🖨 Scan ID printen</button>
+    <button class="m-btn" id="hist-print-barcode-btn">🖨 Barcode printen</button>
+    <button class="m-btn m-btn-secondary" id="hist-print-cancel">Annuleren</button>
+  </div>
+</div>
 
 <div id="overlay">
   <img id="product-foto" alt="" style="display:none;position:fixed;left:48px;top:50%;transform:translateY(-50%);max-width:min(230px,20vw);max-height:52vh;object-fit:contain;background:#fff;padding:8px;border:3px solid var(--g1);border-radius:18px;box-shadow:0 12px 38px rgba(0,0,0,.55),0 0 0 1px rgba(0,0,0,.25);z-index:40"/>
@@ -679,7 +790,7 @@ const T = {
   }
 };
 
-const gradeWords = {A:"Perfect",B:"2dekans",B3:"3dekans",C:"Cleaning","D-rep":"Repair","D-def":"Defect"};
+const gradeWords = {A:"Perfect",B:"2dekans",B3:"3dekans",C:"Cleaning","D-rep":"Repair","D-def":"Outlet"};
 
 // Tijdelijke interne testcodes voor speciale tags
 const SPECIAL_TAG_TEST_PRODUCTS = {
@@ -814,7 +925,7 @@ function applyLang(){
 }
 
 // ── Modal flow ────────────────────────────────────────────
-const ALL_MODALS = ['m-lang','m-account','m-wachtwoord','m-nieuw-acc','m-sup','m-print-labels','m-printer','m-delivery','m-2950'];
+const ALL_MODALS = ['m-lang','m-account','m-wachtwoord','m-nieuw-acc','m-sup','m-print-labels','m-printer','m-delivery','m-2950','m-history','m-history-detail','m-hist-reden','m-hist-print'];
 function showModal(id){ ALL_MODALS.forEach(m=>{ const el=document.getElementById(m); if(el) el.style.display=m===id?'flex':'none'; }); }
 function hideAllModals(){ ALL_MODALS.forEach(m=>{ const el=document.getElementById(m); if(el) el.style.display='none'; }); }
 
@@ -1491,10 +1602,10 @@ function showGradePanel(){
     // Kleine tekst = productnaam + print knop of niet gevonden melding
     if(naam) {
       fbSub.innerHTML = `${naam} <button onclick="openBarcodePrintPanel()" style="margin-left:10px;padding:6px 16px;border:1px solid rgba(255,255,255,.35);border-radius:20px;background:rgba(255,255,255,.12);color:white;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;vertical-align:middle;letter-spacing:.3px">🖨 Product barcode (EAN) uitprinten</button>`;
+      fbSub.style.display = 'block';
     } else {
-      fbSub.textContent = activeLang === 'en' ? 'Product not yet in our system' : activeLang === 'ar' ? 'المنتج غير موجود في نظامنا' : 'Product staat nog niet in ons systeem';
+      fbSub.style.display = 'none';
     }
-    fbSub.style.display = 'block';
     fbSub.style.direction = activeLang==='ar'?'rtl':'ltr';
   }
   greenMsg.style.display = 'none';
@@ -1557,6 +1668,7 @@ function batchPanel(welke){
 function startBatch(){
   if(!pendingScan) return;
   batch = {
+    batchId: 'B' + Date.now().toString(36) + Math.floor(Math.random()*1e4).toString(36), // uniek per batch
     barcode: pendingScan.barcode,
     supplier: pendingScan.supplier_override || supplier,
     isGrading: pendingScan.isGrading,
@@ -1642,7 +1754,7 @@ function batchVoegRijToe(g, statusWord, extraInfo, fotos, aantal){
     Status_product_code: g,
     Status_product_word: statusWord,
     Info_reparatie: g==='D-rep' ? extraInfo : '',
-    Info_defect:    (g==='D-def' || is3) ? extraInfo : '',
+    Info_defect:    is3 ? wrap3deReden(extraInfo) : (g==='D-def' ? extraInfo : ''),
     mismatch: batch.mismatch ? 'Yes' : 'No',
     not_found: batch.notFound ? 'Yes' : 'No',
     leverancier_correct: batch.leverancier_correct || '',
@@ -1650,7 +1762,9 @@ function batchVoegRijToe(g, statusWord, extraInfo, fotos, aantal){
     time: nowTime(),
     scan_tijd: fmtKlokMs(batch.scanStart),
     grade_tijd: fmtKlokMs(Date.now()),
-    delivery_date: deliveryOutput()
+    delivery_date: deliveryOutput(),
+    batch: 'Yes',
+    batchId: batch.batchId
   };
   if (is3 && fotos && fotos.length) row.fotos = fotos;
   row.aantal = aantal;                 // N identieke items → N rijen + N labels, zelfde scan-ID
@@ -1927,7 +2041,9 @@ async function openCamera(scanData) {
   pending3deKansje = scanData;
   gemaakteFotos    = [];
   { const ca=document.getElementById('cam-aantal'); if(ca){ ca.value='1'; ca.max='999'; } }
-  document.getElementById('cam-beschrijving').value   = '';
+  // In History-correctie pas je altijd 1 item aan → "Aantal identiek" verbergen.
+  { const aw=document.getElementById('cam-aantal-wrap'); if(aw){ aw.style.display = (scanData && scanData.histMode) ? 'none' : 'flex'; } }
+  { const cb=document.getElementById('cam-beschrijving'); cb.value=''; cb.placeholder='Reden 3de kans (bv. lichte kras, vlekje)'; }
   document.getElementById('cam-fotos').innerHTML      = '';
   document.getElementById('cam-foto-teller').textContent = '0 / 3 foto\'s';
   document.getElementById('cam-bevestig-btn').disabled   = false;
@@ -1935,8 +2051,8 @@ async function openCamera(scanData) {
   document.getElementById('cam-hint').textContent        = "Foto's zijn optioneel (max 3)";
   document.getElementById('cam-stap2').style.display     = 'none';
   document.getElementById('cam-stap1-wrap').style.display = 'block';
-  document.getElementById('cam-fotos-toevoegen').disabled = true;
-  document.getElementById('cam-direct-opslaan').disabled  = true;
+  document.getElementById('cam-fotos-toevoegen').disabled = false;
+  document.getElementById('cam-direct-opslaan').disabled  = false;
   document.getElementById('m-camera').style.display      = 'flex';
   bInput.disabled = true;
   setTimeout(() => document.getElementById('cam-beschrijving').focus(), 300);
@@ -1947,6 +2063,12 @@ function sluitCamera() {
   document.getElementById('m-camera').style.display = 'none';
   bInput.disabled = false;
   pending3deKansje = null;
+  // Camera geannuleerd tijdens een History-correctie → terug naar het detailscherm.
+  if (typeof histB3Ctx !== 'undefined' && histB3Ctx) {
+    histB3Ctx = null;
+    document.getElementById('m-history-detail').style.display = 'flex';
+    renderDetail();
+  }
 }
 
 function maakFoto() {
@@ -2063,6 +2185,14 @@ document.getElementById('cam-bevestig-btn').addEventListener('click', async () =
 
   const aantal = Math.max(1, parseInt(document.getElementById('cam-aantal').value,10) || 1);
 
+  // History-correctie naar 3de kans → aparte afhandeling (geen nieuwe scan-rij)
+  if(histB3Ctx){
+    document.getElementById('cam-bevestig-btn').textContent = 'Opslaan...';
+    document.getElementById('cam-bevestig-btn').disabled = true;
+    await histB3Bevestig(beschrijving, gemaakteFotos);
+    return;
+  }
+
   if(batch && batch.fase==='B3'){
     await batchB3Bevestig(beschrijving, gemaakteFotos, aantal);
     return;
@@ -2075,6 +2205,13 @@ document.getElementById('cam-bevestig-btn').addEventListener('click', async () =
   sluitCamera();
 });
 
+// 3de-kans reden → volledige Picqer-omschrijving. De balk zelf blijft leeg;
+// pas bij het inschieten (naar Picqer/Sheet) komt de marketingtekst eromheen.
+function wrap3deReden(reden){
+  const r = String(reden||'').trim();
+  return r ? ('Let op! ' + r + '. Vandaar deze scherpe prijs!') : '';
+}
+
 function maak3deLeverancier(lev) {
   // Als begint met 1 of 2 → vervang door 3
   if (/^[12]/.test(lev)) return lev.replace(/^[12]/, '3');
@@ -2086,6 +2223,8 @@ function maak3deLeverancier(lev) {
 
 async function bevestig3deKansje(beschrijving, fotos, aantal) {
   if(!pending3deKansje) return;
+  // Vangnet: tijdens een History-correctie nooit een nieuwe scan-rij aanmaken.
+  if(typeof histB3Ctx !== 'undefined' && histB3Ctx){ await histB3Bevestig(beschrijving, fotos); return; }
   aantal = Math.max(1, Math.min(99, parseInt(aantal,10) || 1));
 
   const scanId = genScanId();
@@ -2104,7 +2243,7 @@ async function bevestig3deKansje(beschrijving, fotos, aantal) {
     Status_product_code: 'B3',
     Status_product_word: '3dekans',
     Info_reparatie: '',
-    Info_defect:    beschrijving,
+    Info_defect:    wrap3deReden(beschrijving),
     mismatch:  pending3deKansje.mismatch ? 'Yes' : 'No',
     not_found: pending3deKansje.notFound ? 'Yes' : 'No',
     leverancier_correct: pending3deKansje.leverancier_correct || '',
@@ -2115,6 +2254,7 @@ async function bevestig3deKansje(beschrijving, fotos, aantal) {
     grade_tijd: fmtKlokMs(Date.now()),
     duur_sec:   Math.round((Date.now() - (pending3deKansje.scanStart || Date.now()))/1000),
     delivery_date: deliveryOutput(),
+    batch: 'No',
     aantal: aantal                          // 1 Picqer-product, N rijen + N labels (zelfde scan-ID)
   };
 
@@ -2134,11 +2274,14 @@ async function bevestig3deKansje(beschrijving, fotos, aantal) {
 }
 // ── Printen via PrintNode (Apps Script-proxy; key staat server-side) ──
 let printNodePrinterId = localStorage.getItem('printNodePrinterId') || '';
+let printerUit = localStorage.getItem('printerUit') === '1'; // testmodus: niets printen
 
 // Centrale printfunctie — stuurt ZPL `copies` keer naar de PrintNode-printer.
 // Retourneert {ok:true} of {ok:false, reason:'noPrinter'|'error', error}.
 async function printZPL(zpl, copies = 1){
   copies = Math.max(1, Math.min(99, parseInt(copies) || 1));
+  // Printer uit (testen) → niets printen, maar de flow gaat gewoon door
+  if (printerUit){ console.log('Printer UIT — niet geprint:', copies + 'x'); return {ok:true}; }
   try {
     if (!printNodePrinterId) return {ok:false, reason:'noPrinter'};
     const url = `${SCANS_URL}?actie=print&printerId=${encodeURIComponent(printNodePrinterId)}`
@@ -2156,8 +2299,17 @@ let pmPrinters = [];           // gecachete printerlijst (via proxy)
 
 function openPrinterSettings(){
   toonHuidigePrinter();
+  updatePrinterUitKnop();
   showModal('m-printer');
   if (!pmPrinters.length) haalPrintersOp();
+}
+
+function updatePrinterUitKnop(){
+  const b = document.getElementById('pm-uit-toggle');
+  if (!b) return;
+  b.textContent = printerUit ? '🚫 Printer: UIT (testen)' : '🖨 Printer: aan';
+  b.style.background = printerUit ? 'rgba(232,76,61,.25)' : '';
+  b.style.color = printerUit ? '#fff' : '';
 }
 
 function toonHuidigePrinter(){
@@ -2214,6 +2366,11 @@ function renderPrinterLijst(){
 document.getElementById('printer-settings-btn').addEventListener('click', openPrinterSettings);
 document.getElementById('pm-sluit').addEventListener('click', hideAllModals);
 document.getElementById('pm-zoek').addEventListener('input', renderPrinterLijst);
+document.getElementById('pm-uit-toggle').addEventListener('click', () => {
+  printerUit = !printerUit;
+  localStorage.setItem('printerUit', printerUit ? '1' : '0');
+  updatePrinterUitKnop();
+});
 document.getElementById('pm-opslaan').addEventListener('click', () => {
   if (!printNodePrinterId){
     alert('Kies eerst een printer.');
@@ -2281,7 +2438,7 @@ async function printSticker(scanId, initialen, grade, copies = 1) {
   const zpl = `^XA^MMT^PW400^LL200^LS0^FO${x},10^BY2^BCN,60,Y,N,N,A^FD${scanId}^FS^FO0,150^FB400,1,0,C,0^A0N,28,28^FD${initialen} ${grade}^FS^XZ`.trim();
 
   const r = await printZPL(zpl, copies);
-  if (r.ok) console.log('Sticker geprint!');
+  if (r.ok) console.log(printerUit ? 'Sticker overgeslagen (printer uit)' : 'Sticker geprint!');
   else console.warn('Print fout:', r.reason, r.error || '');
 }
 
@@ -2408,6 +2565,7 @@ async function commitScan(statusCode, statusWord, extraInfo, aantal){
     grade_tijd: fmtKlokMs(gradeMoment),                     // tijd B
     duur_sec:   Math.round((gradeMoment - scanStart)/1000), // B − A in seconden
     delivery_date: deliveryOutput(),                        // leeg bij "geen zending"
+    batch: 'No',
     aantal: aantal                                          // N identieke items → N rijen, zelfde scan-ID
   };
 
@@ -2541,6 +2699,478 @@ function jsonpScanner(params) {
   });
 }
 
+// ═══════════════════════════════════════════════════════
+// SCAN HISTORY (frontend)
+// ═══════════════════════════════════════════════════════
+// Canonieke grade-opties (code → woord) voor het bewerk-dropdown.
+const HIST_GRADES = [
+  {code:'A',     word:'Perfect'},
+  {code:'B',     word:'2dekans'},
+  {code:'B3',    word:'3dekans'},
+  {code:'C',     word:'Schoonmaak'},
+  {code:'D-rep', word:'Reparatie'},
+  {code:'D-def', word:'Defect'}
+];
+function histGradeWord(code){ const g = HIST_GRADES.find(x=>x.code===code); return g ? g.word : ''; }
+
+let histLimit   = 5;
+let histRecords = [];
+let histTotal   = 0;
+let histCurrent = null;   // record dat in detail open staat
+
+function histEsc(str){ const d=document.createElement('div'); d.textContent=str==null?'':String(str); return d.innerHTML; }
+
+function openHistory(){
+  document.getElementById('m-history').style.display='flex';
+  document.getElementById('hist-search').value='';
+  histLimit = 5;
+  laadHistory();
+  setTimeout(()=>document.getElementById('hist-search').focus(),50);
+}
+function closeHistory(){
+  document.getElementById('m-history').style.display='none';
+  document.getElementById('m-history-detail').style.display='none';
+  focusInput();
+}
+
+async function laadHistory(){
+  const list = document.getElementById('hist-list');
+  const search = document.getElementById('hist-search').value.trim();
+  list.innerHTML = '<div class="hist-row head"><span>Scan ID</span><span>Barcode</span><span>Tijdstip</span><span>Changed</span></div>'
+                 + '<div class="hist-empty">Laden…</div>';
+  try {
+    const res = await jsonpScanner({ actie:'getScanHistory', rol:userRol, naam:userName, init:userInit, limit:histLimit, offset:0, search });
+    if (res.status !== 'ok') throw new Error(res.message||'fout');
+    histRecords = res.records || [];
+    histTotal   = res.total || 0;
+    renderHistoryList();
+  } catch(err){
+    list.innerHTML = '<div class="hist-row head"><span>Scan ID</span><span>Barcode</span><span>Tijdstip</span><span>Changed</span></div>'
+                   + '<div class="hist-empty">Kon geschiedenis niet laden</div>';
+  }
+}
+
+function renderHistoryList(){
+  const list = document.getElementById('hist-list');
+  let html = '<div class="hist-row head"><span>Scan ID</span><span>Barcode</span><span>Grade</span><span>Leverancier</span><span>Tijdstip</span><span>Changed</span><span></span></div>';
+  if (!histRecords.length){
+    html += '<div class="hist-empty">Geen scans gevonden</div>';
+  } else {
+    // Vat een lijst waarden samen: leeg → '—', 1 uniek → die waarde, meer → 'meerdere'
+    const vat = arr => { const u=[...new Set(arr.filter(Boolean))]; return u.length===0?'—':u.length===1?u[0]:'meerdere'; };
+    histRecords.forEach((rec,i)=>{
+      const tijd = (rec.tijd||'') + (rec.datum ? ' · '+rec.datum : '');
+      const changed = rec.changed==='Yes' ? '<span class="hist-changed">Yes</span>' : '—';
+      let scanIdKol, barcodeKol, grade, lev;
+      if (rec.type==='batch'){
+        scanIdKol = `<span class="mono">${histEsc(rec.scanId)} <span class="hist-badge batch">BATCH</span></span>`;
+        barcodeKol = `<span>${rec.itemCount} producten</span>`;
+        grade = vat(rec.products.map(p=>p.word));
+        lev   = vat(rec.products.map(p=>p.supplier));
+      } else {
+        scanIdKol = `<span class="mono">${histEsc(rec.scanId)}</span>`;
+        barcodeKol = `<span>${histEsc(rec.barcode)}</span>`;
+        grade = rec.word || '—';
+        lev   = rec.supplier || '—';
+      }
+      html += `<div class="hist-row" data-i="${i}">
+          ${scanIdKol}
+          ${barcodeKol}
+          <span>${histEsc(grade)}</span>
+          <span>${histEsc(lev)}</span>
+          <span>${histEsc(tijd)}</span>
+          <span>${changed}</span>
+          <span class="hist-row-acties">
+            <button class="hist-row-print" data-i="${i}" title="Label printen">🖨</button>
+            <button class="hist-row-pencil" data-i="${i}" title="Bewerken">✎</button>
+          </span></div>`;
+    });
+  }
+  list.innerHTML = html;
+  list.querySelectorAll('.hist-row-pencil').forEach(btn=>{
+    btn.addEventListener('click', e=>{ e.stopPropagation(); openDetail(histRecords[parseInt(btn.dataset.i,10)]); });
+  });
+  list.querySelectorAll('.hist-row-print').forEach(btn=>{
+    btn.addEventListener('click', e=>{ e.stopPropagation();
+      const rec = histRecords[parseInt(btn.dataset.i,10)];
+      if (rec.type==='batch'){ openDetail(rec); }       // batch → kies per product in detail
+      else openHistPrint(rec.scanId, rec.barcode, rec.word, rec.supplier);
+    });
+  });
+  const moreBtn = document.getElementById('hist-more');
+  const meer = histTotal > histRecords.length;
+  moreBtn.style.display = meer ? 'block' : 'none';
+  moreBtn.disabled = !meer;
+}
+
+document.getElementById('hist-more').addEventListener('click', ()=>{ histLimit += 5; laadHistory(); });
+let histSearchTimer = null;
+document.getElementById('hist-search').addEventListener('input', ()=>{
+  clearTimeout(histSearchTimer);
+  histSearchTimer = setTimeout(()=>{ histLimit = 5; laadHistory(); }, 300);
+});
+document.getElementById('history-btn').addEventListener('click', openHistory);
+document.getElementById('hist-close').addEventListener('click', closeHistory);
+document.getElementById('hist-back').addEventListener('click', ()=>{
+  document.getElementById('m-history-detail').style.display='none';
+  document.getElementById('m-history').style.display='flex';
+  histCurrent = null;
+});
+
+// ── Verwijderen (twee-klik-bevestiging) ──
+let histDeleteArmed = false;
+function resetDeleteBtn(){
+  const b = document.getElementById('hist-delete');
+  if (!b) return;
+  histDeleteArmed = false;
+  b.disabled = false;
+  b.classList.remove('confirm');
+  b.textContent = '🗑 Scan verwijderen';
+}
+function histAlleRijen(rec){
+  if (!rec) return [];
+  if (rec.type==='batch') return rec.products.reduce((a,p)=>a.concat(p.rowNums||[]),[]);
+  return rec.rowNums || [];
+}
+document.getElementById('hist-delete').addEventListener('click', async ()=>{
+  const b = document.getElementById('hist-delete');
+  if (!histDeleteArmed){
+    histDeleteArmed = true;
+    b.classList.add('confirm');
+    b.textContent = '⚠ Klik nogmaals om definitief te verwijderen';
+    return;
+  }
+  const rows = histAlleRijen(histCurrent);
+  if (!rows.length){ resetDeleteBtn(); return; }
+  b.disabled = true; b.textContent = 'Verwijderen…';
+  try {
+    const res = await jsonpScanner({ actie:'deleteScan', rol:userRol, rows:rows.join(',') });
+    if (res.status!=='ok') throw new Error(res.message||'fout');
+    histCurrent = null;
+    document.getElementById('m-history-detail').style.display='none';
+    document.getElementById('m-history').style.display='flex';
+    laadHistory();
+  } catch(err){
+    b.disabled=false; b.classList.remove('confirm');
+    b.textContent = '✕ Verwijderen mislukt — opnieuw';
+    histDeleteArmed = false;
+  }
+});
+
+// ── Detail ──
+function openDetail(rec){
+  histCurrent = rec;
+  document.getElementById('m-history').style.display='none';
+  document.getElementById('m-history-detail').style.display='flex';
+  renderDetail();
+}
+
+function renderDetail(){
+  const rec = histCurrent;
+  const title = document.getElementById('hist-detail-title');
+  const body  = document.getElementById('hist-detail-body');
+  resetDeleteBtn();
+  if (!rec){ body.innerHTML=''; return; }
+
+  if (rec.type==='batch'){
+    title.textContent = `Batch · ${rec.scanId} (${rec.itemCount} producten)`;
+    body.innerHTML = '';
+    rec.products.forEach((p,pi)=>{
+      const card = document.createElement('div');
+      card.className = 'hist-prod';
+      const top = document.createElement('div');
+      top.className = 'hist-prod-top';
+      top.innerHTML = `<span class="mono">${histEsc(p.scanId)}${p.rowNums.length>1?' · '+p.rowNums.length+'×':''}</span>`;
+      const right = document.createElement('span');
+      right.style.cssText = 'display:flex;align-items:center;gap:8px';
+      if (p.changed==='Yes') right.innerHTML = '<span class="hist-changed">Changed</span>';
+      right.appendChild(maakPrintKnop(p));
+      top.appendChild(right);
+      card.appendChild(top);
+      card.appendChild(maakVeld('barcode', 'Barcode', p.barcode, p.rowNums, p, card));
+      card.appendChild(maakVeld('grade',   'Grade',   p.word,    p.rowNums, p, card));
+      card.appendChild(maakVeld('supplier','Leverancier', p.supplier, p.rowNums, p, card));
+      body.appendChild(card);
+    });
+  } else {
+    title.textContent = `Scan · ${rec.scanId}${rec.rowNums.length>1?' · '+rec.rowNums.length+'×':''}`;
+    body.innerHTML = '';
+    const top = document.createElement('div');
+    top.className = 'hist-prod-top';
+    top.innerHTML = rec.changed==='Yes' ? '<span class="hist-changed">Changed</span>' : '<span></span>';
+    top.appendChild(maakPrintKnop(rec));
+    body.appendChild(top);
+    body.appendChild(maakVeld('barcode', 'Barcode', rec.barcode, rec.rowNums, rec, body));
+    body.appendChild(maakVeld('grade',   'Grade',   rec.word,    rec.rowNums, rec, body));
+    body.appendChild(maakVeld('supplier','Leverancier', rec.supplier, rec.rowNums, rec, body));
+  }
+}
+
+// Klein print-icoon dat de print-keuze opent voor deze scan/dit product.
+function maakPrintKnop(obj){
+  const b = document.createElement('button');
+  b.className = 'hist-print-btn'; b.textContent = '🖨'; b.title = 'Label printen';
+  b.addEventListener('click', e=>{ e.stopPropagation(); openHistPrint(obj.scanId, obj.barcode, obj.word, obj.supplier); });
+  return b;
+}
+
+// Bouw één bewerkbaar veld met potlood-icoon.
+function maakVeld(field, label, waarde, rowNums, target, container){
+  const wrap = document.createElement('div');
+  wrap.className = 'hist-field';
+  const tonen = field==='grade' ? (waarde || '—') : (waarde || '—');
+  wrap.innerHTML = `<span class="lbl">${label}</span><span class="val">${histEsc(tonen)}</span>`;
+  const pencil = document.createElement('button');
+  pencil.className = 'hist-pencil'; pencil.textContent = '✎'; pencil.title = 'Bewerken';
+  wrap.appendChild(pencil);
+  pencil.addEventListener('click', ()=> startEdit(wrap, field, label, waarde, rowNums, target));
+  return wrap;
+}
+
+function startEdit(wrap, field, label, oudeWaarde, rowNums, target){
+  wrap.innerHTML = '';
+  const edit = document.createElement('div');
+  edit.className = 'hist-edit';
+
+  let inputEl, getVal;
+  if (field==='grade'){
+    inputEl = document.createElement('select');
+    // Placeholder bovenaan blijft staan tot de gebruiker zelf een grade kiest
+    // → geen auto-invulling van de bovenste optie.
+    inputEl.innerHTML = `<option value="" selected disabled>— kies grade —</option>`
+      + HIST_GRADES.map(g=>`<option value="${g.code}">${histEsc(g.word)}</option>`).join('');
+    getVal = ()=>{ const code=inputEl.value; return {value:code, word:code?histGradeWord(code):'', toon:code?histGradeWord(code):''}; };
+  } else {
+    inputEl = document.createElement('input');
+    inputEl.type = 'text';
+    inputEl.value = oudeWaarde || '';
+    getVal = ()=>({value:inputEl.value.trim(), word:'', toon:inputEl.value.trim()});
+  }
+  edit.appendChild(inputEl);
+
+  const confirm = document.createElement('div');
+  confirm.className = 'hist-confirm';
+  edit.appendChild(confirm);
+
+  const btns = document.createElement('div');
+  btns.className = 'hist-edit-btns';
+  const save = document.createElement('button'); save.className='hist-save'; save.textContent='Bevestigen';
+  const cancel = document.createElement('button'); cancel.className='hist-cancel'; cancel.textContent='Annuleren';
+  btns.appendChild(cancel); btns.appendChild(save);
+  edit.appendChild(btns);
+  wrap.appendChild(edit);
+
+  function toonConfirm(){
+    const nw = getVal().toon;
+    // Grade nog niet gekozen → geen schijnbare wijziging tonen.
+    if (field==='grade' && !getVal().value){
+      confirm.innerHTML = `Huidig: <b>${histEsc(oudeWaarde||'(leeg)')}</b> — kies hierboven een grade`;
+      return;
+    }
+    confirm.innerHTML = `Wijziging:<br><span class="old">${histEsc(oudeWaarde||'(leeg)')}</span> → <b>${histEsc(nw||'(leeg)')}</b>`;
+  }
+  toonConfirm();
+  inputEl.addEventListener('input', toonConfirm);
+  inputEl.addEventListener('change', toonConfirm);
+  setTimeout(()=>inputEl.focus(),30);
+
+  cancel.addEventListener('click', ()=> renderDetail());   // herteken → geen wijziging
+  save.addEventListener('click', async ()=>{
+    const v = getVal();
+    if (field==='grade' && !v.value){ renderDetail(); return; }      // niets gekozen → geen wijziging
+    if (field!=='grade' && v.value===oudeWaarde){ renderDetail(); return; }  // niets gewijzigd
+    if (field==='grade' && v.word===oudeWaarde){ renderDetail(); return; }
+
+    // Grades die een reden/omschrijving vereisen → eerst extra menu, daarna opslaan.
+    if (field==='grade'){
+      if (v.value==='D-rep' || v.value==='D-def'){ openHistReden(target, rowNums, v.value, v.word); return; }
+      if (v.value==='B3'){ openHistB3(target, rowNums); return; }
+    }
+
+    save.disabled = true; save.textContent = 'Opslaan…';
+    const ok = await histCommitVeld(target, rowNums, field, v.value, v.word, '');
+    if (!ok){ save.disabled=false; save.textContent='Bevestigen';
+      confirm.innerHTML = '<span class="old">Opslaan mislukt — probeer opnieuw</span>'; }
+  });
+}
+
+// Schrijf een veld weg via de backend en werk de lokale state bij.
+async function histCommitVeld(target, rowNums, field, value, word, info){
+  try {
+    const params = { actie:'updateScan', rol:userRol, rows:rowNums.join(','), field, value };
+    if (field==='grade'){ params.word = word; params.info = info || ''; }
+    const res = await jsonpScanner(params);
+    if (res.status!=='ok') throw new Error(res.message||'fout');
+    if (field==='barcode')  target.barcode = value;
+    if (field==='supplier') target.supplier = value;
+    if (field==='grade'){ target.code = value; target.word = word; }
+    target.changed = 'Yes';
+    histCurrent.changed = 'Yes';
+    renderDetail();
+    renderHistoryList();   // lijst meteen bijwerken → "Changed" staat er na terug-gaan al
+    showSync('ok', '✓ Opgeslagen');
+    return true;
+  } catch(err){ return false; }
+}
+
+// ── Reden-keuze bij wijziging naar Reparatie/Defect (zelfde idee als batch) ──
+let histRedenCtx = null;     // {target, rowNums, code, word, gekozen:[]}
+async function openHistReden(target, rowNums, code, word){
+  histRedenCtx = { target, rowNums, code, word, gekozen:[] };
+  document.getElementById('hist-reden-title').textContent =
+    (code==='D-rep' ? t('repQ') : t('defQ'));
+  document.getElementById('hist-reden-add').placeholder = t('redenAdd');
+  document.getElementById('hist-reden-none').textContent = t('redenNone');
+  document.getElementById('hist-reden-ok').textContent   = t('redenConfirm');
+  document.getElementById('hist-reden-cancel').textContent = 'Annuleren';
+  document.getElementById('hist-reden-add').value = '';
+  document.getElementById('hist-reden-hint').style.display = 'none';
+  document.getElementById('m-history-detail').style.display='none';
+  document.getElementById('m-hist-reden').style.display='flex';
+  // Bekende redenen voor dit product uit Firebase ophalen (faalt stil → lege lijst).
+  histRedenCtx.lijst = [];
+  try {
+    const key = 'p_' + String(target.barcode).trim().replace(/[.#$[\]/]/g,'_');
+    const r = await fetch(`${FIREBASE_URL}/producten/${key}/redenen.json`).then(x=>x.json());
+    if (r && typeof r==='object'){
+      const l = (r[activeLang] && r[activeLang].length) ? r[activeLang] : (r.nl||[]);
+      histRedenCtx.lijst = (l||[]).map(s=>String(s).trim()).filter(Boolean);
+    }
+  } catch(e){}
+  renderHistReden();
+}
+function renderHistReden(){
+  const list = document.getElementById('hist-reden-list');
+  const none = document.getElementById('hist-reden-none');
+  list.innerHTML = '';
+  none.style.display = histRedenCtx.lijst.length ? 'none' : 'block';
+  list.style.direction = activeLang==='ar' ? 'rtl' : 'ltr';
+  histRedenCtx.lijst.forEach(reden=>{
+    const sel = histRedenCtx.gekozen.includes(reden);
+    const div = document.createElement('div');
+    div.className = 'reden-chip' + (sel ? ' sel' : '');
+    const box = document.createElement('span'); box.className='box'; box.textContent = sel?'✓':'';
+    const span = document.createElement('span'); span.textContent = reden;
+    div.appendChild(box); div.appendChild(span);
+    div.addEventListener('click',()=>{
+      const i = histRedenCtx.gekozen.indexOf(reden);
+      if(i>=0) histRedenCtx.gekozen.splice(i,1); else histRedenCtx.gekozen.push(reden);
+      document.getElementById('hist-reden-hint').style.display='none';
+      renderHistReden();
+    });
+    list.appendChild(div);
+  });
+}
+document.getElementById('hist-reden-add').addEventListener('keydown', e=>{
+  if(e.key!=='Enter') return;
+  const v = e.target.value.trim();
+  if(!v) return;
+  if(!histRedenCtx.lijst.includes(v)) histRedenCtx.lijst.push(v);
+  if(!histRedenCtx.gekozen.includes(v)) histRedenCtx.gekozen.push(v);
+  e.target.value='';
+  document.getElementById('hist-reden-hint').style.display='none';
+  renderHistReden();
+});
+document.getElementById('hist-reden-cancel').addEventListener('click', ()=>{
+  document.getElementById('m-hist-reden').style.display='none';
+  document.getElementById('m-history-detail').style.display='flex';
+  renderDetail();
+});
+document.getElementById('hist-reden-ok').addEventListener('click', async ()=>{
+  if(!histRedenCtx.gekozen.length){
+    const h=document.getElementById('hist-reden-hint');
+    h.textContent = t('redenRequired'); h.style.display='block'; return;
+  }
+  const sep = activeLang==='ar' ? '، ' : ', ';
+  const info = `${t('redenPrefix')} ${histRedenCtx.gekozen.join(sep)}`;
+  const ok = await histCommitVeld(histRedenCtx.target, histRedenCtx.rowNums, 'grade', histRedenCtx.code, histRedenCtx.word, info);
+  if(ok){
+    document.getElementById('m-hist-reden').style.display='none';
+    document.getElementById('m-history-detail').style.display='flex';
+  } else {
+    const h=document.getElementById('hist-reden-hint');
+    h.textContent = 'Opslaan mislukt — opnieuw'; h.style.display='block';
+  }
+});
+
+// ── Wijziging naar 3de kans: volledige camera/foto-flow + Picqer-product ──
+let histB3Ctx = null;        // {target, rowNums}
+function openHistB3(target, rowNums){
+  histB3Ctx = { target, rowNums };
+  document.getElementById('m-history-detail').style.display='none';
+  openCamera({
+    barcode:  target.barcode,
+    supplier: target.supplier,
+    histMode: true
+  });
+}
+// Bevestiging vanuit de camera in History-modus (aangeroepen door cam-bevestig-btn).
+async function histB3Bevestig(beschrijving, fotos){
+  if(!histB3Ctx) return;
+  const { target, rowNums } = histB3Ctx;
+  const supplier3de = maak3deLeverancier(target.supplier || '');
+  const omschr = wrap3deReden(beschrijving);
+  showSync('syncing', '⟳ Opslaan...');
+  // 1) Scan-rij(en) bijwerken: grade B3 + omschrijving + 3de-leverancier
+  await histCommitVeld(target, rowNums, 'grade', 'B3', '3dekans', omschr);
+  await histCommitVeld(target, rowNums, 'supplier', supplier3de, '', '');
+  // 2) Picqer 3de-kans-product aanmaken + foto's, met de bestaande scan-ID
+  try {
+    await fetch(SCANS_URL, {
+      method:'POST', mode:'no-cors', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({
+        actie:'picqerMaakProduct',
+        scanId: target.scanId,
+        barcode: target.barcode,
+        Info_defect: omschr,
+        supplier: supplier3de,
+        fotos: fotos || []
+      })
+    });
+    showSync('ok', t('syncOk'));
+  } catch(e){ showSync('err', t('syncErr')); }
+  histB3Ctx = null;
+  sluitCamera();
+  document.getElementById('m-history-detail').style.display='flex';
+  renderDetail();
+}
+
+// ── Label printen vanuit History (scan ID of barcode) ──
+let histPrintCtx = null;
+function openHistPrint(scanId, barcode, grade, supplier){
+  histPrintCtx = { scanId: scanId||'', barcode: barcode||'', grade: grade||'', supplier: supplier||'' };
+  document.getElementById('hist-print-scanid').textContent  = histPrintCtx.scanId || '—';
+  document.getElementById('hist-print-barcode').textContent = histPrintCtx.barcode || '—';
+  const a = document.getElementById('hist-print-aantal'); if(a) a.value='1';
+  document.getElementById('hist-print-scanid-btn').disabled  = !histPrintCtx.scanId;
+  document.getElementById('hist-print-barcode-btn').disabled = !histPrintCtx.barcode;
+  document.getElementById('m-hist-print').style.display='flex';
+}
+function histPrintAantal(){
+  let n = parseInt(document.getElementById('hist-print-aantal').value, 10) || 1;
+  return Math.max(1, Math.min(99, n));
+}
+async function histDoePrint(type){
+  if(!histPrintCtx) return;
+  const n = histPrintAantal();
+  document.getElementById('m-hist-print').style.display='none';
+  if(type==='scanid'){
+    // Zelfde format als de standaard scan-labels (scan-ID als code + initialen/grade).
+    await printSticker(histPrintCtx.scanId, userInit, histPrintCtx.grade || '', n);
+    showSync('ok', `✓ ${n}× geprint`);
+  } else {
+    // Barcode-label, zelfde format als bij de product-barcode (code + leverancier).
+    const safe = zplSafe(histPrintCtx.barcode), safeLev = zplSafe(histPrintCtx.supplier);
+    const x = centerX(safe, 2);
+    const zpl = `^XA^MMT^PW400^LL200^LS0^FO${x},10^BY2^BCN,60,Y,N,N,A^FD${safe}^FS^FO0,150^FB400,1,0,C,0^A0N,28,28^FD${safeLev}^FS^XZ`;
+    const r = await printZPL(zpl, n);
+    if(r.ok) showSync('ok', `✓ ${n}× geprint`); else showSync('err', 'Print mislukt');
+  }
+}
+document.getElementById('hist-print-scanid-btn').addEventListener('click', ()=> histDoePrint('scanid'));
+document.getElementById('hist-print-barcode-btn').addEventListener('click', ()=> histDoePrint('barcode'));
+document.getElementById('hist-print-cancel').addEventListener('click', ()=>{ document.getElementById('m-hist-print').style.display='none'; });
+
 async function toonProductFoto(found) {
   const el = document.getElementById('product-foto');
   if (!el) return;
@@ -2613,15 +3243,23 @@ async function handleScan(barcode){
   const code=barcode.trim();
   if(!code) return;
   if(code.length < 4) return;
-  if(code.length > 50) return; // te lang voor een barcode
   if(/\s/.test(code)) return;  // spaties = geen barcode
 
   // Een link is nooit een barcode — toon melding i.p.v. opslaan als 'niet gevonden'.
+  // Check vóór de lengte-check zodat lange URLs ook de link-melding krijgen.
   if(/^https?:\/\//i.test(code) || /^www\./i.test(code)){
     if(isScanning) return;
     toonOngeldigeScan(activeLang==='en' ? 'A link cannot be scanned'
       : activeLang==='ar' ? 'لا يمكن مسح الرابط'
       : 'Een link kan niet gescand worden');
+    return;
+  }
+
+  if(code.length > 50){
+    if(isScanning) return;
+    toonOngeldigeScan(activeLang==='en' ? 'Barcode too long'
+      : activeLang==='ar' ? 'الباركود طويل جدًا'
+      : 'Barcode te lang');
     return;
   }
 
